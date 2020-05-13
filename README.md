@@ -7,6 +7,10 @@ This repository proposes a python implementation for stabilized ICA decompositio
 We provide a jupyter notebook for an illustration with transcriptomic data:
 * [ICA decomposition with stabilized ICA](transcriptomic_ICA.ipynb)
 
+## Data
+
+The data set which goes with the jupyter notebook can be found in the .zip file [data.zip](data.zip). Please extract locally the data sets before running the notebook.
+
 ## Requirements
 
 To run this algorithm as well as the jupyter notebook, one will need the following python packages:

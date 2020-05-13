@@ -9,7 +9,7 @@ We provide a jupyter notebook for an illustration with transcriptomic data:
 
 ## Data
 
-The data set which goes with the jupyter notebook can be found in the .zip file [data.zip](data.zip). Please extract locally the data sets before running the notebook.
+The data set which goes with the jupyter notebook can be found in the .zip file [data.zip](data.zip). Please extract locally the data set before running the notebook.
 
 ## Requirements
 

@@ -42,10 +42,10 @@ def centrotype(X , S , cluster_labels):
         matrix of independent ICA components
         
     S : 2D array, shape (n_components , n_components)
-        similarity Matrix for ICA components (i.e rows of X)
+        similarity matrix for ICA components (i.e rows of X)
         
     cluster_labels : list of integers
-        indexes of a cluster of components (ex:[0 , 1 , 7] refers to the rows 0, 1 and 7 of X)
+        indexes of the cluster of components (ex:[0 , 1 , 7] refers to the rows 0, 1 and 7 of X)
 
     Returns
     -------
@@ -57,7 +57,7 @@ def centrotype(X , S , cluster_labels):
     return X[cluster_labels[temp] , :]
 
 def stability_index(S , cluster_labels):
-    """Compute the stability index for a cluster of ICA components.
+    """Compute the stability index for the cluster of ICA components defined by cluster_labels.
         
        Note: Please refer to https://bmcgenomics.biomedcentral.com/track/pdf/10.1186/s12864-017-4112-9
              (section "Method") for the exact formula of the stability index.
@@ -65,10 +65,10 @@ def stability_index(S , cluster_labels):
     Parameters
     ----------
     S : 2D array, shape (n_components , n_components)
-        similarity Matrix for ICA components 
+        similarity matrix for ICA components 
         
     cluster_labels : list of integers
-        indexes of a cluster of components (ex:[0 , 1 , 7] refers to the rows 0, 1 and 7 of X)
+        indexes of the cluster of components (ex:[0 , 1 , 7] refers to the rows 0, 1 and 7 of X)
 
     Returns
     -------
@@ -98,12 +98,11 @@ class StabilizedICA(object):
         self.clusters = None
     
     def fit(self, X ,  n_runs , plot = False):
-        """1. Compute the ICA components of X (n = self.n_components) n_runs times
+        """1. Compute the ICA components of X n_runs times
            2. Cluster all the components (N = self.n_components*n_runs) with agglomerative 
-              agglomerative hierarchical clustering (average linkage) into self.n_components 
-              clusters
+              hierarchical clustering (average linkage) into self.n_components clusters
            3. For each cluster compute its stability index and return its centrotype as the
-              final ICA components
+              final ICA component
               
            Note: Please refer to ICASSO method for more details about the process
                  (see https://www.cs.helsinki.fi/u/ahyvarin/papers/Himberg03.pdf)

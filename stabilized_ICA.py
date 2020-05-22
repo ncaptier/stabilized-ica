@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from sklearn.decomposition import FastICA
 from sklearn.cluster import AgglomerativeClustering
 from sklearn import manifold
-from tqdm import tqdm
+from tqdm.notebook import tqdm
 
 def ICA_decomposition(X , n_components, max_iter):
     """ Apply FastICA algorithm from sklearn.decompostion to the matrix X
@@ -229,6 +229,7 @@ def MSTD(X , m , M , step , n_runs , max_iter = 2000):
     fig, ax = plt.subplots(1 , 2 , figsize = (20 , 7))
     mean = []
     for i in tqdm(range(m , M+step , step)):
+    #for i in range(m , M+step , step): #uncomment if you don't want to use tqdm (and comment the line above !)
         s = StabilizedICA(i , max_iter)
         Index,*_ = s.fit(X , n_runs)
         mean.append(np.mean(Index))

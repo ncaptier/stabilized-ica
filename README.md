@@ -12,7 +12,7 @@ We provide two jupyter notebooks for an illustration with transcriptomic data:
 
 The data set which goes with the jupyter notebook ["ICA decomposition with stabilized ICA"](transcriptomic_ICA.ipynb) can be found in the .zip file [data.zip](data.zip). Please extract locally the data set before running the notebook.   
 
-For the jupyter notebook ["Stability of ICA components accross several NSCLC cohorts"](stability_study.ipynb) please note that you will have to load the data himself in order to run it.
+For the jupyter notebook ["Stability of ICA components accross several NSCLC cohorts"](stability_study.ipynb) please note that you will have to load the data yourself in order to run it (all the necessary links are reported on the notebook).
 
 ## Requirements
 

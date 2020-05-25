@@ -191,6 +191,29 @@ class StabilizedICA(object):
             ax.scatter(P[: , 0] , P[: , 1] , c=self.clusters , cmap = 'viridis')
         return
     
+    def metasamples(self, X , Centrotypes):
+        """Compute the meta-samples with the formula A = XS^{+} (where S^{+} is the pseudo-inverse
+           of the matrix of metagenes S)
+        
+        Parameters
+        ----------
+        X : 2D array, shape (n_samples , n_features)
+
+        Centrotypes : 2D array, shape (n_components, n_features)
+            final ICA components (i.e centrotypes of each cluster)
+
+        Returns
+        -------
+        2D array, shape (n_samples , n_components)
+            matrix of meta-samples (i.e A so that X = AS)
+
+        """
+        return np.dot(X , np.linalg.pinv(Centrotypes))
+    
+    def clear(self):
+        self.clusters , self.S = None , None
+        return 
+    
     
 def MSTD(X , m , M , step , n_runs , max_iter = 2000):
     """Plot "MSTD graphs" to help choosing an optimal dimension for ICA decomposition

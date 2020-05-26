@@ -1,6 +1,8 @@
 # Stabilized_ICA
 
-This repository proposes a python implementation for stabilized ICA decomposition algorithm. Most of the technical details can be found in the references [1], [2] and [3]
+This repository proposes a python implementation for stabilized ICA decomposition algorithm. Most of the technical details can be found in the references [1], [2] and [3].    
+   
+We also propose an implementation of the Mutual Nearest Neighbors method as well as a visualization tool to draw the associated network. This method is used to study the stability of the ICA components through different datasets.
 
 ## Experiments
 

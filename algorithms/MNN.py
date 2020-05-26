@@ -3,6 +3,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import scipy.stats as stats
 from scipy.spatial.distance import cdist
+import json
 
 """
 This python code provides an implementation for the Mutual Nearest Neighbors method as well as
@@ -211,6 +212,24 @@ class MNNgraph(object):
 
         """
         return nx.average_clustering(self.graph , weight= 'weight')
+    
+    def export_json(self , file_name):
+        """Save the graph in a json file adapted to cytoscape format
+        
+        Parameters
+        ----------
+        file_name : string
+            name of the json file.
+    
+        Returns
+        -------
+        None.
+    
+        """
+        dic = nx.readwrite.json_graph.cytoscape_data(self.graph)
+        with open(file_name + '.json', 'w') as fp:
+            json.dump(dic , fp )
+        return
     
         
 def pairs(items):

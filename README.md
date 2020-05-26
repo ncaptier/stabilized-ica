@@ -24,6 +24,7 @@ To run this algorithm as well as the jupyter notebook, one will need the followi
 * tdqm 
 * networkx
 * scipy
+* json
 
 ## References
 

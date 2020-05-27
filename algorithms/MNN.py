@@ -227,7 +227,7 @@ class MNNgraph(object):
     
         """
         dic = nx.readwrite.json_graph.cytoscape_data(self.graph)
-        with open(file_name + '.json', 'w') as fp:
+        with open(file_name , 'w') as fp:
             json.dump(dic , fp )
         return
     

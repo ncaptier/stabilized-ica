@@ -40,7 +40,7 @@ class MNN(object):
         if metric == 'pearson':
             return 1 - np.abs(np.corrcoef(X , Y , rowvar=True)[:X.shape[0] , X.shape[0]:])
         elif metric == 'spearman':
-            return 1 - np.abs(stats.spearmanr(a = X, b = Y , axis = 0)[:X.shape[0] , X.shape[0]:])
+            return 1 - np.abs((stats.spearmanr(a = X, b = Y , axis = 1)[0])[:X.shape[0] , X.shape[0]:])
         else:
             return cdist(X , Y , metric = metric)
     

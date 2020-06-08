@@ -8,17 +8,19 @@ import json
 """
 This python code provides an implementation for the Mutual Nearest Neighbors method as well as
 a Networkx tool to display the associated graph.
-
 """
 
 class MNN(object):
     
-    def __init__(self , X , Y , k , metric):
+    def __init__(self , X , Y , k , metric, D = None):
         self.X = X
         self.Y = Y
         self.k = k
-        self.metric = metric        
-        self.distance = self.compute_distance(self.X , self.Y , self.metric)
+        self.metric = metric 
+        if metric == "precomputed":
+            self.distance = D
+        else:
+            self.distance = self.compute_distance(self.X , self.Y , self.metric)
     
     @staticmethod
     def compute_distance(X , Y , metric):
@@ -59,7 +61,7 @@ class MNN(object):
         bool_mask = (self.distance <= np.sort(self.distance , axis = 1)[: , self.k-1].reshape(-1 , 1)) * \
                     (self.distance <= np.sort(self.distance , axis = 0)[self.k-1, :].reshape(1, - 1)) 
         
-        if (self.metric == 'pearson') or (self.metric == 'spearman'):           
+        if (self.metric == 'pearson') or (self.metric == 'spearman') or (self.metric == 'precomputed'):           
             return bool_mask*(1 - self.distance)
         else:
             return bool_mask*np.ones(bool_mask.shape)
@@ -67,20 +69,22 @@ class MNN(object):
         
 class MNNgraph(object):
     
-    def __init__(self, data_sets , labels , k , metric = 'pearson' , bipartite_graph = False):
+    def __init__(self, data_sets , labels , k , metric = 'pearson' , bipartite_graph = False , distance = None):
         self.data_sets = data_sets
         self.labels = labels
         self.n_sets = len(labels)
         self.bipartite_graph = bipartite_graph
-        self.graph = self.create_graph(self.data_sets , self.labels , k , metric , self.bipartite_graph)    
+        self.graph = self.create_graph(self.data_sets , self.labels , k , metric , self.bipartite_graph , distance = distance)    
     
     @staticmethod
-    def create_graph(data_sets , labels , k , metric , bipartite_graph):
+    def create_graph(data_sets , labels , k , metric , bipartite_graph , distance = None):
         """Create the MNN graph associated to the list of data sets. Two situations are 
            distinguished: one with only two data sets (bipartite graph) and another with more 
            than two data sets.
         
-           Note: If self.bipartie_graph = True, then data_sets should only contain two data sets
+           Note1 : If self.bipartie_graph = True, then data_sets should only contain two data sets
+           
+           Note2 : A precomputed distance matrix will only work with two data sets
                 
         Parameters
         ----------
@@ -102,7 +106,7 @@ class MNNgraph(object):
             #for each MNN link between the two data sets, add two nodes and an edge to the graph G
             #the pos attribute for each node will be useful for further drawing
 
-            h = MNN(data_sets[0], data_sets[1], k = k, metric = metric).adjacency_matrix()
+            h = MNN(data_sets[0], data_sets[1], k = k, metric = metric, D = distance).adjacency_matrix()
             count = 0
             for u in range(h.shape[0]):
                 for v in range(h.shape[1]):
@@ -119,7 +123,7 @@ class MNNgraph(object):
 
             P , L = pairs(data_sets) , pairs(labels)      
             for i in range(len(L)):
-                h = MNN(P[i][0], P[i][1], k = k, metric = metric).adjacency_matrix()
+                h = MNN(P[i][0], P[i][1], k = k, metric = metric, D = distance).adjacency_matrix()
                 for u in range(h.shape[0]):
                     for v in range(h.shape[1]):
                         if h[u , v] > 0:
@@ -235,7 +239,7 @@ class MNNgraph(object):
 def pairs(items):
     """Return a list with all the pairs formed by two different elements of a list "items"
     
-       Note: This function is a useful tool, used to build the MNN graph
+       Note : This function is a useful tool, used to build the MNN graph
     
     Parameters
     ----------

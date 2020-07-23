@@ -88,6 +88,30 @@ def stability_index(S , cluster_labels):
     return aics - aecs
 
 class StabilizedICA(object):
+    """ Implement a stabilized version of the Independent Component Analysis algorithm
+    
+    Parameters
+    ----------
+    n_components: int
+        number of ICA components
+    
+    max_iter: int
+        maximum number of iteration for the FastICA algorithm
+    
+    Attributes
+    ----------
+    S: numpy array, shape (n_runs*n_components , n_runs*n_components)
+        Similarity matrix between all ICA components (absolute values of Pearson correlations)
+        
+    clusters: numpy array, shape (n_runs*n_samples)
+        cluster labels for each ICA component
+        
+    Notes
+    ----------
+    
+    n_runs is the number of time we repeat the ICA decompostion; see fit method
+        
+    """
     
     def __init__(self , n_components , max_iter):
         

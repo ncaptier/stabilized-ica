@@ -128,7 +128,7 @@ class MNNgraph(object):
             
             #for each pair of data sets and for each MNN link between two data sets, add two nodes 
             #and an edge to the graph G 
-            P , L = pairs(data) , pairs(names)      
+            P , L = _pairs(data) , _pairs(names)      
             for i in range(len(L)):
                 h = MNN(X = P[i][0], Y = P[i][1], k = k, metric = metric).adjacency_matrix()
                 for u in range(h.shape[0]):
@@ -246,7 +246,7 @@ class MNNgraph(object):
         return
     
         
-def pairs(items):
+def _pairs(items):
     """Return a list with all the pairs formed by two different elements of a list "items"
     
        Note : This function is a useful tool, used to build the MNN graph

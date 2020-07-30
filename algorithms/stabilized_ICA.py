@@ -5,7 +5,7 @@ from sklearn.cluster import AgglomerativeClustering
 from sklearn import manifold
 from tqdm.notebook import tqdm
 
-def ICA_decomposition(X , n_components, max_iter):
+def _ICA_decomposition(X , n_components, max_iter):
     """ Apply FastICA algorithm from sklearn.decompostion to the matrix X
         
         Note: FastICA in sklearn works with a matrix of shape (n_features , n_samples)
@@ -31,7 +31,7 @@ def ICA_decomposition(X , n_components, max_iter):
     ica.fit(X.T)
     return ica.transform(X.T).T
 
-def centrotype(X , S , cluster_labels):
+def _centrotype(X , S , cluster_labels):
     """Compute the centrotype of the cluster of ICA components defined by cluster_labels
     
        centrotype: component of the cluster which is the most similar to the other components
@@ -56,7 +56,7 @@ def centrotype(X , S , cluster_labels):
     temp = np.argmax(np.sum(S[np.ix_(cluster_labels , cluster_labels)] , axis=0))
     return X[cluster_labels[temp] , :]
 
-def stability_index(S , cluster_labels):
+def _stability_index(S , cluster_labels):
     """Compute the stability index for the cluster of ICA components defined by cluster_labels.
         
        Note: Please refer to https://bmcgenomics.biomedcentral.com/track/pdf/10.1186/s12864-017-4112-9
@@ -159,7 +159,7 @@ class StabilizedICA(object):
         
         ## Compute the self.n_components*n_runs ICA components and store into array Components
         for i in range(n_runs):
-            Components[i*self.n_components : (i+1)*self.n_components , : ] = ICA_decomposition(X , self.n_components , self.max_iter)
+            Components[i*self.n_components : (i+1)*self.n_components , : ] = _ICA_decomposition(X , self.n_components , self.max_iter)
         
         ## Compute Similarity matrix between ICA components (Pearson correlation)
         self.S = np.abs(np.corrcoef(x=Components , rowvar=True))
@@ -172,8 +172,8 @@ class StabilizedICA(object):
         ## For each cluster compute the stability index and the centrotype
         for i in range(self.n_components):
             cluster_labels = list(np.argwhere(clustering.labels_ == i ).flatten())
-            Centrotypes[i , :] = centrotype(Components , self.S , cluster_labels)
-            Index[i] = stability_index(self.S , cluster_labels)
+            Centrotypes[i , :] = _centrotype(Components , self.S , cluster_labels)
+            Index[i] = _stability_index(self.S , cluster_labels)
         
         ## Sort the centrotypes (i.e final components) by stability index
         indices = np.argsort(-1*Index)
@@ -266,7 +266,7 @@ def MSTD(X , m , M , step , n_runs , max_iter = 2000):
         number of times we run the FastICA algorithm (see fit method of class Stabilized_ICA)
             
     max_iter : TYPE, optional
-        parameter for ICA_decomposition. The default is 2000.
+        parameter for _ICA_decomposition. The default is 2000.
 
     Returns
     -------

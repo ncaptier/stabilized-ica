@@ -19,14 +19,15 @@ For the jupyter notebook ["Stability of ICA components accross several NSCLC coh
 ## Requirements
 
 To run this algorithm as well as the jupyter notebook, one will need the following python packages:
-* numpy
+* joblib
+* json
 * matplotlib.pyplot
+* networkx
+* numpy
 * pandas
 * scikit-learn
-* tdqm 
-* networkx
 * scipy
-* json
+* tdqm 
 
 ## References
 

@@ -4,6 +4,7 @@ from sklearn.decomposition import FastICA
 from sklearn.cluster import AgglomerativeClustering
 from sklearn import manifold
 from tqdm.notebook import tqdm
+from joblib import Parallel, delayed
 
 def _ICA_decomposition(X , n_components, max_iter):
     """ Apply FastICA algorithm from sklearn.decompostion to the matrix X
@@ -98,6 +99,13 @@ class StabilizedICA(object):
     max_iter: int
         maximum number of iteration for the FastICA algorithm
     
+    n_jobs: int
+        number of jobs to run in parallel. -1 means using all processors.
+        See the joblib package documentation for more explanations. Default is 1.
+    
+    verbose: int
+        control the verbosity: the higher, the more messages. Default is 0.
+    
     Attributes
     ----------
     S: numpy array, shape (n_runs*n_components , n_runs*n_components)
@@ -113,10 +121,12 @@ class StabilizedICA(object):
         
     """
     
-    def __init__(self , n_components , max_iter):
+    def __init__(self , n_components , max_iter , n_jobs = 1 , verbose = 0):
         
         self.n_components = n_components
         self.max_iter = max_iter
+        self.n_jobs = n_jobs
+        self.verbose = verbose
         
         self.S = None  #Similarity matrix between all ICA components
         self.clusters = None
@@ -153,13 +163,14 @@ class StabilizedICA(object):
         """
         ## Initialisation
         n_samples , n_features = X.shape
-        Components = np.zeros((n_runs*self.n_components , n_features))
         Centrotypes = np.zeros((self.n_components , n_features))
         Index = np.zeros(self.n_components)
         
         ## Compute the self.n_components*n_runs ICA components and store into array Components
-        for i in range(n_runs):
-            Components[i*self.n_components : (i+1)*self.n_components , : ] = _ICA_decomposition(X , self.n_components , self.max_iter)
+        parallel = Parallel(n_jobs=self.n_jobs, verbose=self.verbose)        
+        decomposition = parallel(delayed(_ICA_decomposition)(X , self.n_components , self.max_iter)
+                                 for _ in range(n_runs))
+        Components = np.vstack(decomposition)
         
         ## Compute Similarity matrix between ICA components (Pearson correlation)
         self.S = np.abs(np.corrcoef(x=Components , rowvar=True))
@@ -239,7 +250,7 @@ class StabilizedICA(object):
         return 
     
     
-def MSTD(X , m , M , step , n_runs , max_iter = 2000):
+def MSTD(X , m , M , step , n_runs , max_iter = 2000 , n_jobs = -1):
     """Plot "MSTD graphs" to help choosing an optimal dimension for ICA decomposition
         
        Run stabilized ICA algorithm for several dimensions in [m , M] and compute the
@@ -267,6 +278,9 @@ def MSTD(X , m , M , step , n_runs , max_iter = 2000):
             
     max_iter : TYPE, optional
         parameter for _ICA_decomposition. The default is 2000.
+    
+    n_jobs : int
+        number of jobs to run in parallel for each stabilized ICA step. Default is -1
 
     Returns
     -------
@@ -277,7 +291,7 @@ def MSTD(X , m , M , step , n_runs , max_iter = 2000):
     mean = []
     for i in tqdm(range(m , M+step , step)):
     #for i in range(m , M+step , step): #uncomment if you don't want to use tqdm (and comment the line above !)
-        s = StabilizedICA(i , max_iter)
+        s = StabilizedICA(i , max_iter ,n_jobs)
         Index,*_ = s.fit(X , n_runs)
         mean.append(np.mean(Index))
         ax[0].plot(range(1 , len(Index)+1) , Index , 'k')

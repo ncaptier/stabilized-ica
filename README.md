@@ -29,6 +29,10 @@ To run this algorithm as well as the jupyter notebook, one will need the followi
 * scipy
 * tdqm 
 
+## Acknowledgements
+
+This package was created as a part of Master stage by Nicolas Captier in the [Computational Systems Biology of Cancer group|http://sysbio.curie.fr] of Institut Curie.
+
 ## References
 
 [1] "Determining the optimal number of independent components for reproducible transcriptomic data analysis" - Kairov et al. 2017   

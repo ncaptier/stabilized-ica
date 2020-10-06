@@ -202,7 +202,7 @@ class StabilizedICA(object):
         indices = np.argsort(-1*Index)
         Centrotypes , Index = Centrotypes[indices , :] , Index[indices]
         
-        # Re-oriente the stabilized ICA components towards positive heaviest tails
+        # Re-orient the stabilized ICA components towards positive heaviest tails
         if reorientation : 
             self.S_ = (np.where(stats.skew(Centrotypes , axis = 1) >= 0 , 1 , -1).reshape(-1 , 1))*Centrotypes
         else : 

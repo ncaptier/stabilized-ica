@@ -1,15 +1,17 @@
 import numpy as np
+import scipy.stats as stats
 import matplotlib.pyplot as plt
 from sklearn.decomposition import FastICA
 from sklearn.cluster import AgglomerativeClustering
 from sklearn import manifold
+import umap
 from tqdm.notebook import tqdm
 from joblib import Parallel, delayed
 
 def _ICA_decomposition(X , n_components, max_iter):
     """ Apply FastICA algorithm from sklearn.decompostion to the matrix X
         
-        Note: FastICA in sklearn works with a matrix of shape (n_features , n_samples)
+        Note : FastICA in sklearn works with a matrix of shape (n_features , n_samples)
               that is why we fit FastICA with X.T
               
     Parameters
@@ -32,17 +34,17 @@ def _ICA_decomposition(X , n_components, max_iter):
     ica.fit(X.T)
     return ica.transform(X.T).T
 
-def _centrotype(X , S , cluster_labels):
+def _centrotype(X , Sim , cluster_labels):
     """Compute the centrotype of the cluster of ICA components defined by cluster_labels
     
-       centrotype: component of the cluster which is the most similar to the other components
+       centrotype : component of the cluster which is the most similar to the other components
                    of the cluster
     Parameters
     ----------
     X : 2D array, shape (n_components , n_features)
         matrix of independent ICA components
         
-    S : 2D array, shape (n_components , n_components)
+    Sim : 2D array, shape (n_components , n_components)
         similarity matrix for ICA components (i.e rows of X)
         
     cluster_labels : list of integers
@@ -50,22 +52,22 @@ def _centrotype(X , S , cluster_labels):
 
     Returns
     -------
-    1D array, shape ( , n_features)
+    1D array, shape (n_features)
         centrotype of the cluster of ICA components defined by cluster_labels
 
     """
-    temp = np.argmax(np.sum(S[np.ix_(cluster_labels , cluster_labels)] , axis=0))
+    temp = np.argmax(np.sum(Sim[np.ix_(cluster_labels , cluster_labels)] , axis=0))
     return X[cluster_labels[temp] , :]
 
-def _stability_index(S , cluster_labels):
+def _stability_index(Sim , cluster_labels):
     """Compute the stability index for the cluster of ICA components defined by cluster_labels.
         
-       Note: Please refer to https://bmcgenomics.biomedcentral.com/track/pdf/10.1186/s12864-017-4112-9
+       Note : Please refer to https://bmcgenomics.biomedcentral.com/track/pdf/10.1186/s12864-017-4112-9
              (section "Method") for the exact formula of the stability index.
 
     Parameters
     ----------
-    S : 2D array, shape (n_components , n_components)
+    Sim : 2D array, shape (n_components , n_components)
         similarity matrix for ICA components 
         
     cluster_labels : list of integers
@@ -77,14 +79,14 @@ def _stability_index(S , cluster_labels):
         stability index for the cluster of ICA components defined by cluster_labels
 
     """
-    temp = S[np.ix_(cluster_labels , cluster_labels)]
-    ex_cluster = list(set(range(S.shape[1])) - set(cluster_labels))
+    temp = Sim[np.ix_(cluster_labels , cluster_labels)]
+    ex_cluster = list(set(range(Sim.shape[1])) - set(cluster_labels))
     
     #aics = average intra-cluster similarities
     aics = (1/len(cluster_labels)**2)*np.sum(temp)  
     
     #aecs = average extra-cluster similarities
-    aecs = (1/(len(ex_cluster)*len(cluster_labels)))*np.sum(S[np.ix_(cluster_labels , ex_cluster)]) 
+    aecs = (1/(len(ex_cluster)*len(cluster_labels)))*np.sum(Sim[np.ix_(cluster_labels , ex_cluster)]) 
     
     return aics - aecs
 
@@ -93,13 +95,13 @@ class StabilizedICA(object):
     
     Parameters
     ----------
-    n_components: int
+    n_components : int
         number of ICA components
     
-    max_iter: int
+    max_iter : int
         maximum number of iteration for the FastICA algorithm
     
-    n_jobs: int
+    n_jobs : int
         number of jobs to run in parallel. -1 means using all processors.
         See the joblib package documentation for more explanations. Default is 1.
     
@@ -108,11 +110,16 @@ class StabilizedICA(object):
     
     Attributes
     ----------
-    S: numpy array, shape (n_runs*n_components , n_runs*n_components)
-        Similarity matrix between all ICA components (absolute values of Pearson correlations)
+
+    S_: 2D array, shape (n_components , n_features)
+        array of sources/metagenes, each line corresponds to a stabilized ICA component (i.e the centrotype of
+        a cluster of components)   
         
-    clusters: numpy array, shape (n_runs*n_samples)
-        cluster labels for each ICA component
+    A_: 2D array, shape (n_samples , n_components)
+        pseudo-inverse of S_, each column corresponds to a metasample
+    
+    stability_indexes_ : 1D array, shape (n_components)
+        stability indexes for the stabilized ICA components
         
     Notes
     ----------
@@ -128,17 +135,18 @@ class StabilizedICA(object):
         self.n_jobs = n_jobs
         self.verbose = verbose
         
-        self.S = None  #Similarity matrix between all ICA components
-        self.clusters = None
-    
-    def fit(self, X ,  n_runs , plot = False):
+        self.S_ = None
+        self.A_ = None
+        self.stability_indexes_ = None 
+
+    def fit(self, X ,  n_runs , plot = False , normalize = True , reorientation = True):
         """1. Compute the ICA components of X n_runs times
            2. Cluster all the components (N = self.n_components*n_runs) with agglomerative 
               hierarchical clustering (average linkage) into self.n_components clusters
            3. For each cluster compute its stability index and return its centrotype as the
               final ICA component
               
-           Note: Please refer to ICASSO method for more details about the process
+           Note : Please refer to ICASSO method for more details about the process
                  (see https://www.cs.helsinki.fi/u/ahyvarin/papers/Himberg03.pdf)
                  
         Parameters
@@ -151,15 +159,19 @@ class StabilizedICA(object):
         plot : boolean, optional
             if True plot the stability indexes for each cluster in decreasing order. 
             The default is False.
-
-        Returns
-        -------
-        Index : 1D array, shape (n_components)
-            stability indexes for the n_components clusters
+        
+        normalize : boolean, optional
+            if True normalize the rows of S_ (i.e the stabilized ICA components) to unit standard deviation.
+            The default is True.
             
-        Centrotypes : 2D array, shape (n_components, n_features)
-            final ICA components (i.e centrotypes of each cluster)
-
+        reorientation : boolean,optional
+            if True re-oriente the rows of S_ towards positive heavy tail.
+            Ther default is True.
+            
+        Returns
+        -------        
+        None.
+        
         """
         ## Initialisation
         n_samples , n_features = X.shape
@@ -170,84 +182,96 @@ class StabilizedICA(object):
         parallel = Parallel(n_jobs=self.n_jobs, verbose=self.verbose)        
         decomposition = parallel(delayed(_ICA_decomposition)(X , self.n_components , self.max_iter)
                                  for _ in range(n_runs))
-        Components = np.vstack(decomposition)
+        self._Components = np.vstack(decomposition)
         
         ## Compute Similarity matrix between ICA components (Pearson correlation)
-        self.S = np.abs(np.corrcoef(x=Components , rowvar=True))
+        self._Sim = np.abs(np.corrcoef(x=self._Components , rowvar=True))
         
         ## Cluster the components with hierarchical clustering
         clustering = AgglomerativeClustering(n_clusters = self.n_components , affinity = "precomputed" 
-                            ,linkage = 'average' ).fit(1 - self.S)
-        self.clusters = clustering.labels_ 
+                            ,linkage = 'average' ).fit(1 - self._Sim)
+        self._clusters = clustering.labels_ 
         
         ## For each cluster compute the stability index and the centrotype
         for i in range(self.n_components):
             cluster_labels = list(np.argwhere(clustering.labels_ == i ).flatten())
-            Centrotypes[i , :] = _centrotype(Components , self.S , cluster_labels)
-            Index[i] = _stability_index(self.S , cluster_labels)
+            Centrotypes[i , :] = _centrotype(self._Components , self._Sim , cluster_labels)
+            Index[i] = _stability_index(self._Sim , cluster_labels)
         
         ## Sort the centrotypes (i.e final components) by stability index
         indices = np.argsort(-1*Index)
         Centrotypes , Index = Centrotypes[indices , :] , Index[indices]
         
+        # Re-oriente the stabilized ICA components towards positive heaviest tails
+        if reorientation : 
+            self.S_ = (np.where(stats.skew(Centrotypes , axis = 1) >= 0 , 1 , -1).reshape(-1 , 1))*Centrotypes
+        else : 
+            self.S_ = Centrotypes
+            
+        # Normalize the stabilized ICA components to unit variance 
+        if normalize :
+            self.S_ = self.S_/(np.std(self.S_ , axis = 1).reshape(-1 ,1))
+        
+        self.stability_indexes_ = Index
+        self.A_ = np.dot(X , np.linalg.pinv(self.S_))
+        
         if plot:
             plt.figure(figsize=(10 , 7))
-            plt.plot(range(1 , self.n_components + 1) , Index , linestyle='--', marker='o')
+            plt.plot(range(1 , self.n_components + 1) , self.stability_indexes_ , linestyle='--', marker='o')
             plt.title("Stability of ICA components")
             plt.xlabel("ICA components")
             plt.ylabel("Stability index")
             
-        return Index, Centrotypes
+        return 
     
-    def projection(self , ax = None):
+    def projection(self , method = "mds" , ax = None):
         """Plot the ICA components computed during fit() (N = self.n_components*n_runs) in 2D.
            Approximate the original dissimilarities between components by Euclidean distance.
            Each cluster is represented with a different color.
            
-           Note: We use the dissimilarity measure sqrt(1 - |rho_ij|) (rho the Pearson correlation)
+           Note : We use the dissimilarity measure sqrt(1 - |rho_ij|) (rho the Pearson correlation)
                  instead of 1 - |rho_ij| to reduce overlapping.
         
         Parameters
         ----------
         
-        ax : matplotlib.axes
+        method : string, optional
+            name of the dimensionality reduction method (e.g "tsne" , "mds" or "umap")
+            The default is "umap".
+            
+        ax : matplotlib.axes, optional
+            The default is None.
             
         Returns
         -------
         None.
+        
+        Note
+        -------
+        
+        Please note that multidimensional scaling (MDS) is more computationally demanding than t-SNE or UMAP.
+        However it takes into account the global structures of the data set while the others don't. For t-SNE or
+        UMAP one cannot really interpret the inter-cluster distances.
+        
+        For more details about the UMAP (Uniform Manifold Approximation and Projection), 
+        see https://pypi.org/project/umap-learn/
 
         """
-        embedding = manifold.MDS(n_components=2, dissimilarity= "precomputed", random_state=6)
-        P = embedding.fit_transform(np.sqrt(1 - self.S))
+        if method == "tsne":
+            embedding = manifold.TSNE(n_components = 2 , metric = "precomputed")
+        elif method == "mds" :
+            embedding = manifold.MDS(n_components=2, dissimilarity= "precomputed" , n_jobs = -1)
+        elif method == "umap" : 
+            embedding = umap.UMAP(n_components = 2 , metric = "precomputed" )       
+            
+        P = embedding.fit_transform(np.sqrt(1 - self._Sim))
+        
         if ax is None:
-            plt.scatter(P[: , 0] , P[: , 1] , c=self.clusters , cmap = 'viridis')
-            plt.title("")
+            plt.scatter(P[: , 0] , P[: , 1] , c=self._clusters , cmap = 'viridis')
         else:
-            ax.scatter(P[: , 0] , P[: , 1] , c=self.clusters , cmap = 'viridis')
+            ax.scatter(P[: , 0] , P[: , 1] , c=self._clusters , cmap = 'viridis')
         return
     
-    def metasamples(self, X , Centrotypes):
-        """Compute the meta-samples with the formula A = XS^{+} (where S^{+} is the pseudo-inverse
-           of the matrix of metagenes S)
-        
-        Parameters
-        ----------
-        X : 2D array, shape (n_samples , n_features)
-
-        Centrotypes : 2D array, shape (n_components, n_features)
-            final ICA components (i.e centrotypes of each cluster)
-
-        Returns
-        -------
-        2D array, shape (n_samples , n_components)
-            matrix of meta-samples (i.e A so that X = AS)
-
-        """
-        return np.dot(X , np.linalg.pinv(Centrotypes))
-    
-    def clear(self):
-        self.clusters , self.S = None , None
-        return 
     
     
 def MSTD(X , m , M , step , n_runs , max_iter = 2000 , n_jobs = -1):
@@ -256,7 +280,7 @@ def MSTD(X , m , M , step , n_runs , max_iter = 2000 , n_jobs = -1):
        Run stabilized ICA algorithm for several dimensions in [m , M] and compute the
        stability distribution of the components each time
        
-       Note: Please refer to https://bmcgenomics.biomedcentral.com/track/pdf/10.1186/s12864-017-4112-9
+       Note : Please refer to https://bmcgenomics.biomedcentral.com/track/pdf/10.1186/s12864-017-4112-9
              for more details.
 
     Parameters
@@ -292,9 +316,9 @@ def MSTD(X , m , M , step , n_runs , max_iter = 2000 , n_jobs = -1):
     for i in tqdm(range(m , M+step , step)):
     #for i in range(m , M+step , step): #uncomment if you don't want to use tqdm (and comment the line above !)
         s = StabilizedICA(i , max_iter ,n_jobs)
-        Index,*_ = s.fit(X , n_runs)
-        mean.append(np.mean(Index))
-        ax[0].plot(range(1 , len(Index)+1) , Index , 'k')
+        s.fit(X , n_runs)
+        mean.append(np.mean(s.stability_indexes_))
+        ax[0].plot(range(1 , len(s.stability_indexes_)+1) , s.stability_indexes_ , 'k')
         
     ax[1].plot(range(m , M+step , step) , mean) 
     

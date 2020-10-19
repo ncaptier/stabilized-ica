@@ -29,6 +29,21 @@ To run this algorithm as well as the jupyter notebook, one will need the followi
 * scipy
 * tdqm 
 
+## Examples 
+
+```python
+import pandas as pd
+from algorithms.stabilized_ICA import StabilizedICA
+
+df = pd.read_csv("data.csv" , index_col = 0)
+
+sICA = StabilizedICA(n_components = 45 , max_iter = 2000 , n_jobs = -1)
+sICA.fit(df.values , n_runs = 30 , plot = True , normalize = True)
+
+Metagenes = pd.DataFrame(sICA.S_ , columns = df.columns , index = ['metagene ' + str(i) for i in range(sICA.S_.shape[0])])
+Metagenes.head()
+```
+
 ## Acknowledgements
 
 This package was created as a part of Master internship by Nicolas Captier in the [Computational Systems Biology of Cancer group](http://sysbio.curie.fr) of Institut Curie.

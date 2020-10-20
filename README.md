@@ -31,6 +31,8 @@ To run this algorithm as well as the jupyter notebook, one will need the followi
 
 ## Examples 
 
+#### Stabilized ICA method
+
 ```python
 import pandas as pd
 from algorithms.stabilized_ICA import StabilizedICA
@@ -44,6 +46,16 @@ Metagenes = pd.DataFrame(sICA.S_ , columns = df.columns , index = ['metagene ' +
 Metagenes.head()
 ```
 
+#### Mutual Nearest Neighbors method
+
+```python
+from algorithms.MNN import MNNgraph
+
+cg = MNNgraph(data = [df1 , df2 , df3] , names=['dataframe1' , 'dataframe2' , 'dataframe3'] , k=1)
+cg.draw(colors = ['r', 'g' , 'b'] , spacing = 2)
+
+cg.export_json("example.json")
+```
 ## Acknowledgements
 
 This package was created as a part of Master internship by Nicolas Captier in the [Computational Systems Biology of Cancer group](http://sysbio.curie.fr) of Institut Curie.

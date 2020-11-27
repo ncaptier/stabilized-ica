@@ -42,7 +42,7 @@ df = pd.read_csv("data.csv" , index_col = 0).transpose()
 sICA = StabilizedICA(n_components = 45 , max_iter = 2000 , n_jobs = -1)
 sICA.fit(df.values , n_runs = 30 , plot = True , normalize = True)
 
-Metagenes = pd.DataFrame(sICA.S_ , columns = df.columns , index = ['metagene ' + str(i) for i in range(sICA.S_.shape[0])])
+Metagenes = pd.DataFrame(sICA.S_ , columns = df.index , index = ['metagene ' + str(i) for i in range(sICA.S_.shape[0])])
 Metagenes.head()
 ```
 

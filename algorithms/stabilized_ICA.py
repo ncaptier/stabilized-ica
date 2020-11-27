@@ -38,7 +38,7 @@ def _ICA_decomposition(X , fun , algorithm , max_iter):
                
     Parameters
     ----------
-    X : 2D array, shape (n_observations , n_components) 
+    X : 2D array-like, shape (n_observations , n_components) 
         Whitened matrix.
         
     fun : string or function.
@@ -167,7 +167,7 @@ class StabilizedICA(object):
         self.A_ = None
         self.stability_indexes_ = None 
 
-    def fit(self, X ,  n_runs , fun = 'logcosh' , algorithm = 'parallel' , plot = False , normalize = True , reorientation = True , whiten = True):
+    def fit(self, X ,  n_runs , fun = 'logcosh' , algorithm = 'parallel' , plot = False , normalize = True , reorientation = True , whiten = True , pca_solver = 'full'):
         """1. Compute the ICA components of X n_runs times
            2. Cluster all the components (N = self.n_components*n_runs) with agglomerative 
               hierarchical clustering (average linkage) into self.n_components clusters
@@ -179,7 +179,7 @@ class StabilizedICA(object):
                  
         Parameters
         ----------
-        X : 2D array, shape (n_observations , n_variables) or (n_observations , n_components) if whiten is False.
+        X : 2D array-like, shape (n_observations , n_variables) or (n_observations , n_components) if whiten is False.
             
         n_runs : int
             number of times we run the FastICA algorithm
@@ -212,6 +212,10 @@ class StabilizedICA(object):
             If False the input X matrix must be already whitened.
             The default is True.
             
+        pca_solver : str {‘auto’, ‘full’, ‘arpack’, ‘randomized’}
+            see sklearn.pca for more details.
+            The default is "full" (i.e SVD decomposition)
+            
         Returns
         -------        
         None.
@@ -228,9 +232,9 @@ class StabilizedICA(object):
         
         ## Pre-processing (whitening)
         if whiten :
-            pca = PCA(n_components = self.n_components , whiten=True)
+            pca = PCA(n_components = self.n_components , whiten=True , svd_solver = pca_solver)
             X_w = pca.fit_transform(X)
-            
+
         ## Compute the self.n_components*n_runs ICA components and store into array Components
         parallel = Parallel(n_jobs=self.n_jobs, verbose=self.verbose)        
         decomposition = parallel(delayed(_ICA_decomposition)(X_w , fun , algorithm , self.max_iter)

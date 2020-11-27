@@ -37,7 +37,7 @@ To run this algorithm as well as the jupyter notebook, one will need the followi
 import pandas as pd
 from algorithms.stabilized_ICA import StabilizedICA
 
-df = pd.read_csv("data.csv" , index_col = 0)
+df = pd.read_csv("data.csv" , index_col = 0).transpose()
 
 sICA = StabilizedICA(n_components = 45 , max_iter = 2000 , n_jobs = -1)
 sICA.fit(df.values , n_runs = 30 , plot = True , normalize = True)

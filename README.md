@@ -59,7 +59,7 @@ cg.export_json("example.json")
 
 #### Application to single-cell data
 
-'''python
+```python
 import scanpy
 from sica.singlecell import ica
 
@@ -67,7 +67,8 @@ adata = scanpy.read_h5ad('GSE90860_3.h5ad')
 adata.X -= adata.X.mean(axis =0)
 
 ica(adata , observations = 'genes' , n_components = 30 , n_runs = 100)
-'''
+```
+
 ## Acknowledgements
 
 This package was created as a part of Master internship by Nicolas Captier in the [Computational Systems Biology of Cancer group](http://sysbio.curie.fr) of Institut Curie.

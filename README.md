@@ -35,7 +35,7 @@ To run this algorithm as well as the jupyter notebook, one will need the followi
 
 ```python
 import pandas as pd
-from algorithms.stabilized_ICA import StabilizedICA
+from sica.base import StabilizedICA
 
 df = pd.read_csv("data.csv" , index_col = 0).transpose()
 
@@ -49,13 +49,25 @@ Metagenes.head()
 #### Mutual Nearest Neighbors method
 
 ```python
-from algorithms.MNN import MNNgraph
+from sica.mutualknn import MNNgraph
 
 cg = MNNgraph(data = [df1 , df2 , df3] , names=['dataframe1' , 'dataframe2' , 'dataframe3'] , k=1)
 cg.draw(colors = ['r', 'g' , 'b'] , spacing = 2)
 
 cg.export_json("example.json")
 ```
+
+#### Application to single-cell data
+
+'''python
+import scanpy
+from sica.singlecell import ica
+
+adata = scanpy.read_h5ad('GSE90860_3.h5ad')
+adata.X -= adata.X.mean(axis =0)
+
+ica(adata , observations = 'genes' , n_components = 30 , n_runs = 100)
+'''
 ## Acknowledgements
 
 This package was created as a part of Master internship by Nicolas Captier in the [Computational Systems Biology of Cancer group](http://sysbio.curie.fr) of Institut Curie.

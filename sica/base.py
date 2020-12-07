@@ -216,9 +216,22 @@ class StabilizedICA(object):
             If False the input X matrix must be already whitened.
             The default is True.
             
-        pca_solver : str {‘auto’, ‘full’, ‘arpack’, ‘randomized’}
-            see sklearn.pca for more details.
+        pca_solver : str {‘auto’, ‘full’, ‘arpack’, ‘randomized’ , 'lobpcg'}, optional
+            solver for the different PCA methods. Please note that some solvers may not be compatible with
+            some of the PCA methods. See _whitening.py for more details.
             The default is "full" (i.e SVD decomposition)
+        
+        chunked : boolean, optional
+            Parameter for the whitening step, see _whitening.py for more details.
+            The default is False.
+            
+        chunk_size : int, optional
+            Parameter for the whitening step, see _whitening.py for more details.
+            The default is None.
+            
+        zero_center : boolean, optional
+            Parameter for the whitening step, see _whitening.py for more details.
+            The default is True.
             
         Returns
         -------        

@@ -34,6 +34,9 @@ def ica(data, observations , n_components,  n_runs , return_info = False , copy 
         name of the dimensionality reduction method. If None, this projection is
         not computed.
         The default is None.
+        
+    ** See module base.py (fit method of StabilizedICA) for more details about
+    the remaining parameters.
     
     Returns
     -------

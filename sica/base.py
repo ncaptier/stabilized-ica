@@ -1,12 +1,15 @@
 import numpy as np
 import scipy.stats as stats
 import matplotlib.pyplot as plt
-from sklearn.decomposition import FastICA , PCA
+from sklearn.decomposition import FastICA  #, PCA
 from sklearn.cluster import AgglomerativeClustering
+from sklearn.utils import as_float_array
 from sklearn import manifold
 import umap
 from tqdm.notebook import tqdm
 from joblib import Parallel, delayed
+
+from ._whitening import whitening
 
 """
 Introduction
@@ -24,8 +27,8 @@ where the columns of S are independent.
 In signal processing the problem of blind source separation can be solved by ICA with and input
 matrix X (observations = times of registration x variables = initial signals).
 
-In gene expression study, we typically want to unravel independent biolgical sources. To do so,
-we can apply ICA on a matrix X (observations = genes x variables = biological samples).
+# In gene expression study, we typically want to unravel independent biolgical sources. To do so,
+# we can apply ICA on a matrix X (observations = genes x variables = biological samples).
 
 Important note
 --------------
@@ -167,7 +170,8 @@ class StabilizedICA(object):
         self.A_ = None
         self.stability_indexes_ = None 
 
-    def fit(self, X ,  n_runs , fun = 'logcosh' , algorithm = 'parallel' , plot = False , normalize = True , reorientation = True , whiten = True , pca_solver = 'full'):
+    def fit(self, X ,  n_runs , fun = 'logcosh' , algorithm = 'parallel' , plot = False , normalize = True , reorientation = True , whiten = True
+            , pca_solver = 'full' , chunked = False , chunk_size = None , zero_center = True):
         """1. Compute the ICA components of X n_runs times
            2. Cluster all the components (N = self.n_components*n_runs) with agglomerative 
               hierarchical clustering (average linkage) into self.n_components clusters
@@ -232,15 +236,32 @@ class StabilizedICA(object):
         
         ## Pre-processing (whitening)
         if whiten :
-            pca = PCA(n_components = self.n_components , whiten=True , svd_solver = pca_solver)
-            X_w = pca.fit_transform(X)
-
+            # pca = PCA(n_components = self.n_components , whiten=True , svd_solver = pca_solver)
+            # X_w = pca.fit_transform(X)
+            X_w = whitening(X , n_components = self.n_components , svd_solver = pca_solver , chunked = chunked , chunk_size = chunk_size
+                            , zero_center = zero_center)
+        else :
+            X_w = as_float_array(X, copy=False)  
+            
         ## Compute the self.n_components*n_runs ICA components and store into array Components
-        parallel = Parallel(n_jobs=self.n_jobs, verbose=self.verbose)        
-        decomposition = parallel(delayed(_ICA_decomposition)(X_w , fun , algorithm , self.max_iter)
-                                 for _ in range(n_runs))
-        self._Components = np.vstack(decomposition)
+        parallel = Parallel(n_jobs=self.n_jobs, verbose=self.verbose)
         
+        maxtrials = 10
+        for i in range(maxtrials):
+            try:
+                decomposition = parallel(delayed(_ICA_decomposition)(X_w , fun , algorithm , self.max_iter)
+                                     for _ in range(n_runs))
+            except ValueError:
+                if i < maxtrials - 1:
+                    print("FastICA from sklearn did not converge due to numerical instabilities - Retrying...")
+                    continue
+                else:
+                    print("Too many attempts : FastICA did not converge !")
+                    raise
+            break
+        
+        self._Components = np.vstack(decomposition)
+                
         ## Compute Similarity matrix between ICA components (Pearson correlation)
         self._Sim = np.abs(np.corrcoef(x=self._Components , rowvar=True))
         
@@ -270,7 +291,9 @@ class StabilizedICA(object):
             self.S_ = self.S_/(np.std(self.S_ , axis = 1).reshape(-1 ,1))
         
         self.stability_indexes_ = Index
-        self.A_ = np.dot(X.T , np.linalg.pinv(self.S_))
+        
+        self.A_ = (X.T).dot(np.linalg.pinv(self.S_))
+        #self.A_ = np.dot(X.T , np.linalg.pinv(self.S_))
         
         if plot:
             plt.figure(figsize=(10 , 7))
@@ -331,7 +354,7 @@ class StabilizedICA(object):
     
     
     
-def MSTD(X , m , M , step , n_runs , max_iter = 2000 , n_jobs = -1):
+def MSTD(X , m , M , step , n_runs , whiten = True , max_iter = 2000 , n_jobs = -1):
     """Plot "MSTD graphs" to help choosing an optimal dimension for ICA decomposition
         
        Run stabilized ICA algorithm for several dimensions in [m , M] and compute the
@@ -370,10 +393,14 @@ def MSTD(X , m , M , step , n_runs , max_iter = 2000 , n_jobs = -1):
     """
     fig, ax = plt.subplots(1 , 2 , figsize = (20 , 7))
     mean = []
+    
+    if whiten:
+        X_w = whitening(X , n_components = M , svd_solver = 'full' , chunked = False , chunk_size = None , zero_center = True)
+    
     for i in tqdm(range(m , M+step , step)):
     #for i in range(m , M+step , step): #uncomment if you don't want to use tqdm (and comment the line above !)
         s = StabilizedICA(i , max_iter ,n_jobs)
-        s.fit(X , n_runs)
+        s.fit(X_w[: , :m] , n_runs , whiten = False)
         mean.append(np.mean(s.stability_indexes_))
         ax[0].plot(range(1 , len(s.stability_indexes_)+1) , s.stability_indexes_ , 'k')
         

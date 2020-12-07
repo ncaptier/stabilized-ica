@@ -71,7 +71,7 @@ class MNN(object):
             common_features = set(X.columns) & set(Y.columns)
             X = X[common_features].values
             Y = Y[common_features].values
-        
+            
         if metric == 'pearson':
             return 1 - np.abs(np.corrcoef(X , Y , rowvar=True)[:X.shape[0] , X.shape[0]:])
         elif metric == 'spearman':

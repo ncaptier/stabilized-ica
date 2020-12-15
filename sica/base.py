@@ -413,7 +413,7 @@ def MSTD(X , m , M , step , n_runs , whiten = True , max_iter = 2000 , n_jobs = 
     for i in tqdm(range(m , M+step , step)):
     #for i in range(m , M+step , step): #uncomment if you don't want to use tqdm (and comment the line above !)
         s = StabilizedICA(i , max_iter ,n_jobs)
-        s.fit(X_w[: , :m] , n_runs , whiten = False)
+        s.fit(X_w[: , :i] , n_runs , whiten = False)
         mean.append(np.mean(s.stability_indexes_))
         ax[0].plot(range(1 , len(s.stability_indexes_)+1) , s.stability_indexes_ , 'k')
         

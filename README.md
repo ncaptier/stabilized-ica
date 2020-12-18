@@ -16,21 +16,6 @@ The data set which goes with the jupyter notebook ["ICA decomposition with stabi
 
 For the jupyter notebook ["Stability of ICA components accross several NSCLC cohorts"](stability_study.ipynb) please note that you will have to load the data yourself in order to run it (all the necessary links are reported on the notebook).
 
-## Requirements
-
-To run this algorithm as well as the jupyter notebook, one will need the following python packages:
-* anndata
-* joblib
-* json
-* matplotlib.pyplot
-* networkx
-* numpy
-* pandas
-* [picard](https://pierreablin.github.io/picard/) 
-* scikit-learn
-* scipy
-* tdqm 
-
 ## Examples 
 
 #### Stabilized ICA method

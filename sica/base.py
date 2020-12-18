@@ -8,7 +8,9 @@ from sklearn import manifold
 import umap
 from tqdm.notebook import tqdm
 from joblib import Parallel, delayed
+import warnings
 
+from picard import picard
 from ._whitening import whitening
 
 """
@@ -36,7 +38,45 @@ PLEASE NOTE THAT IN THE FOLLOWING THE MATRICES S AND A WILL BE GIVEN IN THEIR TR
 SIMPLY BY CONVENTION.
 """
 
-def _ICA_decomposition(X , fun , algorithm , max_iter):
+def _check_algorithm(algorithm , fun):
+    
+    all_algorithms = ['fastica_par' , 'fastica_def' , 'fastica_picard' , 'infomax' , 'infomax_ext' , 'infomax_orth']
+    if algorithm not in all_algorithms:
+        raise ValueError("Stabilized ICA supports only algorithms in %s, got"
+                         " %s." % (all_algorithms, algorithm))
+    
+    all_funs = ['exp' , 'cube' , 'logcosh' , 'tanh']
+    if (isinstance(fun , str)) and (fun not in all_funs):
+        raise ValueError("Stabilized ICA supports only string functions in %s, got"
+                         " %s. Please see sklearn.FastICA or picard for alternatives (customed functions)" % (all_algorithms, algorithm))
+    
+    if fun == 'tanh' and algorithm in ['fastica_par' , 'fastica_def']:
+        warnings.warn(" 'tanh' is not available for sklearn.FastICA. By default, we assumed 'logcosh' was the desired function")
+        fun = 'logcosh'
+        
+    if fun == 'logcosh' and algorithm in ['fastica_picard' , 'infomax' , 'infomax_ext' , 'infomax_orth']:
+        warnings.warn("'logcosh' is not available for picard. By default, we assumed 'tanh' was the desired function")
+        fun = 'tanh'
+        
+    if fun != 'tanh' and algorithm in ['fastica_picard' , 'infomax_ext'] :
+        warnings.warn("Using a different density than `'tanh'` may lead to erratic behavior of the picard algorithm" 
+                      "when extended=True (see picard package for more explanations)")
+        
+    if algorithm == 'fastica_par' :
+        return 'fastica' , {'algorithm' : 'parallel',  'fun' : fun}
+    elif algorithm == 'fastica_def' :
+        return 'fastica' , {'algorithm' : 'deflation',  'fun' : fun}  
+    elif algorithm == 'fastica_picard':
+        return 'picard' , {'ortho' : True , 'extended' : True , 'fun' : fun}
+    elif algorithm == 'infomax':
+        return 'picard' , {'ortho' : False , 'extended' : False , 'fun' : fun}
+    elif algorithm == 'infomax_ext' :
+        return 'picard' , {'ortho' : False , 'extended' : True , 'fun' : fun}    
+    elif algorithm == 'infomax_orth' :
+        return 'picard' , {'ortho' : True , 'extended' : False , 'fun' : fun}
+
+
+def _ICA_decomposition(X , dict_params , method , max_iter):
     """ Apply FastICA algorithm from sklearn.decompostion to the matrix X
                
     Parameters
@@ -61,8 +101,12 @@ def _ICA_decomposition(X , fun , algorithm , max_iter):
         components obtained from the ICA decomposition of X
 
     """
-    ica = FastICA(fun = fun , algorithm = algorithm , max_iter = max_iter , whiten = False)
-    return ica.fit_transform(X).T
+    if method == 'picard' :
+        _, _, S = picard(X.T , max_iter = max_iter , whiten = False , centering = False , **dict_params)
+    else :
+        ica = FastICA(max_iter = max_iter , whiten = False , **dict_params)
+        S = ica.fit_transform(X).T
+    return S
 
 
 def _centrotype(X , Sim , cluster_labels):
@@ -170,7 +214,7 @@ class StabilizedICA(object):
         self.A_ = None
         self.stability_indexes_ = None 
 
-    def fit(self, X ,  n_runs , fun = 'logcosh' , algorithm = 'parallel' , plot = False , normalize = True , reorientation = True , whiten = True
+    def fit(self, X ,  n_runs , fun = 'logcosh' , algorithm = 'fastica_par' , plot = False , normalize = True , reorientation = True , whiten = True
             , pca_solver = 'full' , chunked = False , chunk_size = None , zero_center = True):
         """1. Compute the ICA components of X n_runs times
            2. Cluster all the components (N = self.n_components*n_runs) with agglomerative 
@@ -188,15 +232,19 @@ class StabilizedICA(object):
         n_runs : int
             number of times we run the FastICA algorithm
         
-        fun : string or function, optional.
-            The functional form of the G function used in the approximation to neg-entropy. Could be either ‘logcosh’, ‘exp’
-            , or ‘cube’. You can also provide your own function. It should return a tuple containing the value of the function, 
-            and of its derivative, in the point.
+        fun : str {'cube' , 'exp' , 'logcosh' , 'tanh'} or function, optional.
+        
+            If algorithm is in {'fastica_par' , 'fastica_def'}, it represents the functional form of the G function used in 
+            the approximation to neg-entropy. Could be either ‘logcosh’, ‘exp’, or ‘cube’.
+            
+            If algorithm is in {'fastica_picard' , 'infomax' , 'infomax_ext' , 'infomax_orth'}, it is associated with the choice of
+            a density model for the sources. See supplementary explanations for more details.
+            
             The default is 'logcosh'.
             
-        algorithm : 'parallel' or 'deflation', optional.
-            Apply parallel or deflational algorithm for FastICA
-            The default is 'parallel'.
+        algorithm : str {'fastica_par' , 'fastica_def' , 'fastica_picard' , 'infomax' , 'infomax_ext' , 'infomax_orth'}, optional.
+            The algorithm applied for solving the ICA problem at each run. Please the supplementary explanations for more details.
+            The default is 'fastica_par', i.e FastICA from sklearn with parallel implementation.
             
         plot : boolean, optional
             if True plot the stability indexes for each cluster in decreasing order. 
@@ -247,6 +295,8 @@ class StabilizedICA(object):
         Centrotypes = np.zeros((self.n_components , n_observations))
         Index = np.zeros(self.n_components)
         
+        method , dict_params = _check_algorithm(algorithm, fun)
+
         ## Pre-processing (whitening)
         if whiten :
             # pca = PCA(n_components = self.n_components , whiten=True , svd_solver = pca_solver)
@@ -262,7 +312,8 @@ class StabilizedICA(object):
         maxtrials = 10
         for i in range(maxtrials):
             try:
-                decomposition = parallel(delayed(_ICA_decomposition)(X_w , fun , algorithm , self.max_iter)
+                decomposition = parallel(delayed(_ICA_decomposition)(X_w , dict_params = dict_params , 
+                                                                     method = method, max_iter = self.max_iter)
                                      for _ in range(n_runs))
             except ValueError:
                 if i < maxtrials - 1:
@@ -277,7 +328,7 @@ class StabilizedICA(object):
                 
         ## Compute Similarity matrix between ICA components (Pearson correlation)
         self._Sim = np.abs(np.corrcoef(x=self._Components , rowvar=True))
-        
+
         ## Cluster the components with hierarchical clustering
         clustering = AgglomerativeClustering(n_clusters = self.n_components , affinity = "precomputed" 
                             ,linkage = 'average' ).fit(1 - self._Sim)

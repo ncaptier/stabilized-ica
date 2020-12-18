@@ -2,7 +2,7 @@ from anndata import AnnData
 from .base import StabilizedICA
 import warnings
 
-def ica(data, observations , n_components,  n_runs , return_info = False , copy = False , plot_projection = None , fun = 'logcosh' , algorithm = 'parallel' 
+def ica(data, observations , n_components,  n_runs , return_info = False , copy = False , plot_projection = None , fun = 'logcosh' , algorithm = 'fastica_par' 
      , normalize = True , reorientation = True , whiten = True , pca_solver = 'full', chunked = False , chunk_size = None , zero_center = True):
     """ Compute stabilized ICA decomposition for AnnData formats. Use the implementation of stabilized ICA in
     the same package (see module base.py)
@@ -34,7 +34,7 @@ def ica(data, observations , n_components,  n_runs , return_info = False , copy 
         name of the dimensionality reduction method. If None, this projection is
         not computed.
         The default is None.
-        
+    
     ** See module base.py (fit method of StabilizedICA) for more details about
     the remaining parameters.
     

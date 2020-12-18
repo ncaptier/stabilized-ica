@@ -4,6 +4,12 @@ This repository proposes a python implementation for stabilized ICA decompositio
    
 We also propose an implementation of the Mutual Nearest Neighbors method as well as a visualization tool to draw the associated network. This method is used to study the stability of the ICA components through different datasets.
 
+## Installation
+
+```
+$ pip install git+https://github.com/ncaptier/Stabilized_ICA#egg=sica
+```
+
 ## Experiments
 
 We provide two jupyter notebooks for an illustration with transcriptomic data:

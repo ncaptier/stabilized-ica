@@ -1,8 +1,14 @@
 # Stabilized_ICA
 
 This repository proposes a python implementation for stabilized ICA decomposition algorithm. Most of the technical details can be found in the references [1], [2] and [3].    
+Our algorithm integrates two well-known method to solve the ICA problem :
+* FastICA (implemented in sickit-learn)
+* Infomax and extensions (implemented in [picard package](https://pierreablin.github.io/picard/))
+We propose a brief review of these two methods in [supplementary_material.pdf](supplementary_material.pdf) so that the user can knowingly decide which method he wants to use.   
    
-We also propose an implementation of the Mutual Nearest Neighbors method as well as a visualization tool to draw the associated network. This method is used to study the stability of the ICA components through different datasets.
+We also propose an implementation of the Mutual Nearest Neighbors method as well as a visualization tool to draw the associated network. This method is used to study the stability of the ICA components through different datasets.   
+
+Finally, we propose an adaptation of our method for the special case of [AnnData](https://anndata.readthedocs.io/en/latest/anndata.AnnData.html) format. In particular, our function is modeled after the [scanpy package](https://scanpy.readthedocs.io/en/stable/) that deals with single-cell gene expression data.
 
 ## Installation
 
@@ -12,7 +18,7 @@ $ pip install git+https://github.com/ncaptier/Stabilized_ICA#egg=sica
 
 ## Experiments
 
-We provide two jupyter notebooks for an illustration with transcriptomic data:
+We provide two jupyter notebooks for an illustration with transcriptomic data :
 * [ICA decomposition with stabilized ICA](transcriptomic_ICA.ipynb)
 * [Stability of ICA components accross several NSCLC cohorts](stability_study.ipynb)
 

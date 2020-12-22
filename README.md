@@ -1,9 +1,10 @@
 # Stabilized_ICA
 
 This repository proposes a python implementation for stabilized ICA decomposition algorithm. Most of the technical details can be found in the references [1], [2] and [3].    
+
 Our algorithm integrates two well-known method to solve the ICA problem :
 * FastICA (implemented in sickit-learn)
-* Infomax and extensions (implemented in [picard package](https://pierreablin.github.io/picard/))
+* Infomax and extensions (implemented in [picard package](https://pierreablin.github.io/picard/))     
 We propose a brief review of these two methods in [supplementary_material.pdf](supplementary_material.pdf) so that the user can knowingly decide which method he wants to use.   
    
 We also propose an implementation of the Mutual Nearest Neighbors method as well as a visualization tool to draw the associated network. This method is used to study the stability of the ICA components through different datasets.   

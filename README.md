@@ -2,15 +2,15 @@
 
 This repository proposes a python implementation for stabilized ICA decomposition algorithm. Most of the technical details can be found in the references [1], [2] and [3].    
 
-Our algorithm integrates two well-known method to solve the ICA problem :
-* FastICA (implemented in sickit-learn)
+Our algorithm integrates two well-known methods to solve the ICA problem :
+* FastICA (implemented in scikit-learn)
 * Infomax and extensions (implemented in [picard package](https://pierreablin.github.io/picard/))     
 
-We propose a brief review of these two methods in [supplementary_material.pdf](supplementary_material.pdf) so that the user can knowingly decide which method he wants to use.   
+We propose a brief review of these two methods in [supplementary_material.pdf](supplementary_material.pdf) so that the user can knowingly decide which of them is best suited for his problem.   
    
-We also propose an implementation of the Mutual Nearest Neighbors method as well as a visualization tool to draw the associated network. This method is used to study the stability of the ICA components through different datasets.   
+We also propose an implementation of the Mutual Nearest Neighbors method as well as a visualization tool to draw the associated network. It is used to study the stability of the ICA components through different datasets.   
 
-Finally, we propose an adaptation of our method for the special case of [AnnData](https://anndata.readthedocs.io/en/latest/anndata.AnnData.html) format. In particular, our function is modeled after the [scanpy package](https://scanpy.readthedocs.io/en/stable/) that deals with single-cell gene expression data.
+Finally, we propose an adaptation of our algorithm for the special case of [AnnData](https://anndata.readthedocs.io/en/latest/anndata.AnnData.html) format. Our module sica.singlecell is modeled after the [scanpy package](https://scanpy.readthedocs.io/en/stable/) that deals with single-cell gene expression data.
 
 ## Installation
 

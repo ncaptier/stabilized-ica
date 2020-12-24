@@ -77,20 +77,19 @@ def _check_algorithm(algorithm , fun):
 
 
 def _ICA_decomposition(X , dict_params , method , max_iter):
-    """ Apply FastICA algorithm from sklearn.decompostion to the matrix X
+    """ Apply FastICA or infomax (picard package) algorithm to the matrix X to solve the ICA problem.
                
     Parameters
     ----------
     X : 2D array-like, shape (n_observations , n_components) 
         Whitened matrix.
         
-    fun : string or function.
-        The functional form of the G function used in the approximation to neg-entropy. Could be either ‘logcosh’, ‘exp’
-        , or ‘cube’. You can also provide your own function. It should return a tuple containing the value of the function, 
-        and of its derivative, in the point.
+    dict_params : dict
+        dictionary of keyword arguments for the functions FastICA or picard. See _check algorithm.
         
-    algorithm : 'parallel' or 'deflation'
-        Apply parallel or deflational algorithm for FastICA
+    method : str {'picard' , 'fastica'}
+        python algorithm to solve the ICA problem. Either FastICA from scikit-learn or infomax and its extensions
+        from picard package. See _check_algorithm.
         
     max_iter : int
         see https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.FastICA.html
@@ -418,7 +417,7 @@ class StabilizedICA(object):
     
     
     
-def MSTD(X , m , M , step , n_runs , whiten = True , max_iter = 2000 , n_jobs = -1):
+def MSTD(X , m , M , step , n_runs , whiten = True , max_iter = 2000 , n_jobs = -1 , ax = None):
     """Plot "MSTD graphs" to help choosing an optimal dimension for ICA decomposition
         
        Run stabilized ICA algorithm for several dimensions in [m , M] and compute the
@@ -449,13 +448,23 @@ def MSTD(X , m , M , step , n_runs , whiten = True , max_iter = 2000 , n_jobs = 
     
     n_jobs : int
         number of jobs to run in parallel for each stabilized ICA step. Default is -1
-
+    
+    ax : array of matplotlib.axes objects, optional
+        The default is None.
+            
     Returns
     -------
     None.
 
     """
-    fig, ax = plt.subplots(1 , 2 , figsize = (20 , 7))
+    if ax is None :
+        fig, ax = plt.subplots(1 , 2 , figsize = (20 , 7))
+    else :
+        ax = ax.flatten()
+        if len(ax) < 2:
+            print("ax is not of the right shape. It should contain at least two matplotlib.axes objects. It was redefined by default.")
+            fig, ax = plt.subplots(1 , 2 , figsize = (20 , 7))
+            
     mean = []
     
     if whiten:

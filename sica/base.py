@@ -3,7 +3,8 @@ import scipy.stats as stats
 import matplotlib.pyplot as plt
 from sklearn.decomposition import FastICA  #, PCA
 from sklearn.cluster import AgglomerativeClustering
-from sklearn.utils import as_float_array
+from sklearn.utils import as_float_array , check_array
+from sklearn.utils.validation import FLOAT_DTYPES
 from sklearn import manifold
 import umap
 from tqdm.notebook import tqdm
@@ -295,7 +296,8 @@ class StabilizedICA(object):
         Index = np.zeros(self.n_components)
         
         method , dict_params = _check_algorithm(algorithm, fun)
-
+        X = check_array(X , dtype=FLOAT_DTYPES , accept_sparse=True , copy=whiten)
+        
         ## Pre-processing (whitening)
         if whiten :
             # pca = PCA(n_components = self.n_components , whiten=True , svd_solver = pca_solver)
@@ -308,20 +310,25 @@ class StabilizedICA(object):
         ## Compute the self.n_components*n_runs ICA components and store into array Components
         parallel = Parallel(n_jobs=self.n_jobs, verbose=self.verbose)
         
-        maxtrials = 10
-        for i in range(maxtrials):
-            try:
-                decomposition = parallel(delayed(_ICA_decomposition)(X_w , dict_params = dict_params , 
-                                                                     method = method, max_iter = self.max_iter)
-                                     for _ in range(n_runs))
-            except ValueError:
-                if i < maxtrials - 1:
-                    print("FastICA from sklearn did not converge due to numerical instabilities - Retrying...")
-                    continue
-                else:
-                    print("Too many attempts : FastICA did not converge !")
-                    raise
-            break
+        # We noticed some numerical instabilities with FastICA from sklearn. We deal with this with the following lines.
+        if algorithm in ['fastica_par' , 'fastica_def'] :
+            maxtrials = 10
+            for i in range(maxtrials):
+                try:
+                    decomposition = parallel(delayed(_ICA_decomposition)(X_w , dict_params = dict_params , 
+                                                                         method = method, max_iter = self.max_iter)
+                                         for _ in range(n_runs))
+                except ValueError:
+                    if i < maxtrials - 1:
+                        print("FastICA from sklearn did not converge due to numerical instabilities - Retrying...")
+                        continue
+                    else:
+                        print("Too many attempts : FastICA did not converge !")
+                        raise
+                break
+        else :
+           decomposition = parallel(delayed(_ICA_decomposition)(X_w , dict_params = dict_params , method = method, max_iter = self.max_iter)
+                                    for _ in range(n_runs)) 
         
         self._Components = np.vstack(decomposition)
                 

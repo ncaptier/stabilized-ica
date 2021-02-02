@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.stats as stats
 import matplotlib.pyplot as plt
+import matplotlib.axes
 from sklearn.decomposition import FastICA  #, PCA
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.utils import as_float_array , check_array
@@ -407,6 +408,13 @@ class StabilizedICA(object):
         see https://pypi.org/project/umap-learn/
 
         """
+        
+        if ax is None : 
+            fig , ax = plt.subplots(figsize = (10 , 6))
+        elif not isinstance(ax , matplotlib.axes.Axes) :
+            warnings.warn("ax should be a matplotlib.axes.Axes object. It was redefined by default.")
+            fig , ax = plt.subplots(figsize = (10 , 6))
+                
         if method == "tsne":
             embedding = manifold.TSNE(n_components = 2 , metric = "precomputed")
         elif method == "mds" :
@@ -416,10 +424,7 @@ class StabilizedICA(object):
             
         P = embedding.fit_transform(np.sqrt(1 - self._Sim))
         
-        if ax is None:
-            plt.scatter(P[: , 0] , P[: , 1] , c=self._clusters , cmap = 'viridis')
-        else:
-            ax.scatter(P[: , 0] , P[: , 1] , c=self._clusters , cmap = 'viridis')
+        ax.scatter(P[: , 0] , P[: , 1] , c=self._clusters , cmap = 'viridis')
         return
     
     
@@ -467,10 +472,15 @@ def MSTD(X , m , M , step , n_runs , whiten = True , max_iter = 2000 , n_jobs = 
     if ax is None :
         fig, ax = plt.subplots(1 , 2 , figsize = (20 , 7))
     else :
-        ax = ax.flatten()
-        if len(ax) < 2:
-            print("ax is not of the right shape. It should contain at least two matplotlib.axes objects. It was redefined by default.")
+        try :
+            ax = ax.flatten()
+        except AttributeError :
+            warnings.warn("ax should be a numpy array containing at least two matplotlib.axes.Axes objects. It was redefined by default.")
             fig, ax = plt.subplots(1 , 2 , figsize = (20 , 7))
+        else : 
+            if len(ax) < 2:
+                warnings.warn("ax is not of the right shape. It should contain at least two matplotlib.axes.Axes objects. It was redefined by default.")
+                fig, ax = plt.subplots(1 , 2 , figsize = (20 , 7))
             
     mean = []
     

@@ -15,7 +15,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires = [
         "anndata == 0.7.5",
-        "joblib == 0.16.0",
+        "joblib >= 0.17.0",
         "matplotlib >= 3.2.2",
         "networkx == 2.4",
         "numpy >= 1.18.5",

@@ -24,7 +24,7 @@ setuptools.setup(
         "tqdm == 4.47.0",
         "scikit-learn >= 0.23.1",
         "scipy >= 1.5.0",
-        "umap-learn == 0.4.6",        
+        "umap-learn >= 0.4.6",        
         ],
     classifiers=[
         "Programming Language :: Python :: 3",

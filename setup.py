@@ -21,9 +21,10 @@ setuptools.setup(
         "numpy >= 1.18.5",
         "pandas >= 1.0.5",
         "python-picard == 0.4",
-        "tqdm == 4.47.0",
+        "reactome2py == 3.0.0",
         "scikit-learn >= 0.23.1",
         "scipy >= 1.5.0",
+        "tqdm == 4.47.0",
         "umap-learn >= 0.4.6",        
         ],
     classifiers=[

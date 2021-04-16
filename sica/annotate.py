@@ -4,12 +4,19 @@ from reactome2py import analysis
 import scipy.stats as stats
 import webbrowser
 
-def _check_params(data , threshold , method , tail):
+def _check_data(data , pre_selected):
     
-    if isinstance(data , pd.Series):
-        data = pd.DataFrame(data).transpose()
-    elif not isinstance(data , pd.DataFrame):
-        raise ValueError("data parameter must be a pandas.Series of shape (n_genes) or a pandas.DataFrame of shape (n_metagenes , n_genes)")         
+    if pre_selected :
+       if not isinstance(data , pd.Series):
+        raise ValueError("When pre_selected is True, data parameter must be a pandas.Series of shape (n_metagenes) containing list of extreme expressed genes")    
+    else :
+        if isinstance(data , pd.Series):
+            data = pd.DataFrame(data).transpose()
+        elif not isinstance(data , pd.DataFrame):
+            raise ValueError("When pre_selected is False, data parameter must be a pandas.Series of shape (n_genes) or a pandas.DataFrame of shape (n_metagenes , n_genes)")         
+    return
+    
+def _check_threshold(threshold , method , tail):
     
     if isinstance(threshold, (int , float)) :
         threshold = np.array([threshold]*2)
@@ -22,7 +29,7 @@ def _check_params(data , threshold , method , tail):
     if not tail in ['left' , 'right' , 'both' , 'heaviest'] :
         raise ValueError("tail parameter value must be 'left', 'right', 'both' or 'heaviest'")
         
-    return data , threshold
+    return threshold
 
 def _get_top_genes(metagene , threshold , method , tail):
     """ Select the extreme expressed genes for a given metagene.
@@ -108,10 +115,19 @@ class ReactomeAnalysis(object):
     
     Parameters
     ----------
-    data : pandas.DataFrame , shape (n_metagenes , n_genes) or pandas.Series, shape (n_genes)
-        The column names (or the index names for a serie) should be valid gene symbols 
-        acceptedby the reactome analysis tool (e.g HUGO gene symbols, EntrezGene...).
-        See https://reactome.org/userguide/analysis for more details.
+    data : If pre_selected = False : 
+                pandas.DataFrame , shape (n_metagenes , n_genes) or pandas.Series, shape (n_genes)
+                The column names (or the index names for a serie) should be valid gene symbols 
+                accepted by the reactome analysis tool (e.g HUGO gene symbols, EntrezGene...).
+                See https://reactome.org/userguide/analysis for more details.
+           If pre_selected = True :
+                pandas.Series , shape (n_metagenes)
+                For each metagene the serie contains a list of the names of the extreme expressed
+                genes. The gene names should be valid gene symbols accepted by the reactome analysis tool.
+            
+    pre_selected : boolean , optional.
+        Indicate whether the extreme genes have already been selected (see above!).
+        The default is True.
         
     threshold : numeric or array-like of two numerics
         See _get_top_genes.
@@ -131,13 +147,17 @@ class ReactomeAnalysis(object):
         
     """
     
-    def __init__(self, data , threshold , method = 'quantile' , tail = 'heaviest'):
+    def __init__(self, data , pre_selected = False, threshold = 0.01, method = 'quantile' , tail = 'heaviest'):
         
-        data , threshold = _check_params(data ,threshold , method, tail)  
-         
-        self.data = data
+        _check_data(data , pre_selected)
+        
+        if pre_selected :
+            self.top_genes_ = data.copy()
+        else :
+            threshold = _check_threshold(threshold , method, tail)  
+            self.top_genes_ = data.apply(_get_top_genes , threshold = threshold , method = method , tail = tail , axis = 1)
+            
         self.tokens = {ind : None for ind in data.index}     
-        self.top_genes_ = self.data.apply(_get_top_genes , threshold = threshold , method = method , tail = tail , axis = 1)
         
     def open_full_analysis(self , metagene): 
         """ Browse the analysis for the given metagene in reactome web portal.
@@ -162,8 +182,8 @@ class ReactomeAnalysis(object):
         webbrowser.open(url)
         return 
     
-    def get_analysis(self , metagene , species='Homo sapiens', sort_by='Entities FDR' 
-                     , p_value=0.05 , min_entities=10, max_entities=500) :
+    def get_analysis(self , metagene , species='Homo sapiens', sort_by='Entities FDR', 
+                     ascending = True, p_value=0.05 , min_entities=10, max_entities=500) :
         """ Create a dataframe for the results of the reactome enrichment analysis of 
         a given metagene (i.e a row of self.data).
         
@@ -175,9 +195,12 @@ class ReactomeAnalysis(object):
         species : string or list of string, optional
             List of species to filter the result. The default is 'Homo sapiens'.
             
-        sort_by : {'#Entities found' , '#Entities total' , 'Entities ratio' , 'Entities pValue' , 'Entities FDR ' , '#Reactions found' , '#Reactions total' , 'Reactions ratio'}, optional
+        sort_by : {None , '#Entities found' , '#Entities total' , 'Entities ratio' , 'Entities pValue' , 'Entities FDR ' , '#Reactions found' , '#Reactions total' , 'Reactions ratio'}, optional
             How to sort the result. The default is 'Entities FDR'.
-            
+        
+        ascending : boolean, optional
+            Sort ascending vs. descending if sort_by is not None.The default is True.
+        
         p_value : float in (0 , 1), optional
             Only hit pathway with pValue equals or below p_value will be returned. The default is 0.05.
             
@@ -213,6 +236,6 @@ class ReactomeAnalysis(object):
             mask = mask & (df['#Entities total'] <= max_entities)
             
         if sort_by is not None :
-            return df[mask].sort_values(by = sort_by , ascending = True)
+            return df[mask].sort_values(by = sort_by , ascending = ascending)
         else : 
             return df[mask]

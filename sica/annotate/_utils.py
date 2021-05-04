@@ -62,13 +62,10 @@ def convert_to_entrez(genes_list , input_type):
     """
     
     df = _convert_geneID(genes_list , input_type = input_type , output_type = 'entrezgene')
-    if 'notfound' in df.columns : 
-        bool_mask = df['notfound'].fillna(value = False)
-        entrez = list(df[~bool_mask]['entrezgene'])
-        notfound = list(df[bool_mask].index)
-    else :
-        entrez = list(df['entrezgene'])
-        notfound = None
+
+    bool_mask = df['entrezgene'].isna()
+    entrez = list(df[~bool_mask]['entrezgene'])
+    notfound = list(df[bool_mask].index)
         
     return entrez , notfound , df
 

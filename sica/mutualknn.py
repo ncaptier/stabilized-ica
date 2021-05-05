@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 import networkx as nx
 import matplotlib.pyplot as plt
-import scipy.stats as stats
 from scipy.spatial.distance import cdist
 import json
 
@@ -69,13 +68,15 @@ class MNN(object):
         #Consider only the common columns of dataframes X and Y
         if isinstance(Y, pd.DataFrame) : 
             common_features = set(X.columns) & set(Y.columns)
-            X = X[common_features].values
-            Y = Y[common_features].values
+            X = X[common_features]
+            Y = Y[common_features]
+        else :
+            X = pd.DataFrame(X)
+            Y = pd.DataFrame(Y)
             
-        if metric == 'pearson':
-            return 1 - np.abs(np.corrcoef(X , Y , rowvar=True)[:X.shape[0] , X.shape[0]:])
-        elif metric == 'spearman':
-            return 1 - np.abs((stats.spearmanr(a = X, b = Y , axis = 1)[0])[:X.shape[0] , X.shape[0]:])
+        if metric in ['pearson' , 'spearman' , 'kendall'] :
+            corr = (pd.concat([X, Y], keys=['X', 'Y']).T).corr(method = metric)
+            return 1 - np.abs((corr.loc['X' , 'Y']).values)
         else:
             return cdist(X , Y , metric = metric)
     

@@ -15,7 +15,7 @@ Finally, we propose an adaptation of our algorithm for the special case of [AnnD
 ## Installation
 
 ```
-$ pip install git+https://github.com/ncaptier/stabilized-ica#egg=sica
+$ pip install git+https://github.com/ncaptier/stabilized-ica
 ```
 
 ## Experiments

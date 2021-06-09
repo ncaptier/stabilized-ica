@@ -5,13 +5,13 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="stabilized-ica",
-    version="0.0.1",
+    version="1.0.0-alpha",
     author="Nicolas Captier",
     author_email="nicolas.captier@curie.fr",
     description="Stabilized ICA algorithm and applications to single-cell data",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/ncaptier/Stabilized_ICA",
+    url="https://github.com/ncaptier/stabilized-ica",
     packages=setuptools.find_packages(),
     install_requires = [
         "anndata == 0.7.5",

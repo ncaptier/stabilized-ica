@@ -1,4 +1,4 @@
-# Stabilized_ICA
+# stabilized-ica
 
 This repository proposes a python implementation for stabilized ICA decomposition algorithm. Most of the technical details can be found in the references [1], [2] and [3].    
 

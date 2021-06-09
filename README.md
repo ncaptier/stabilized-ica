@@ -21,14 +21,14 @@ $ pip install git+https://github.com/ncaptier/stabilized-ica
 ## Experiments
 
 We provide two jupyter notebooks for an illustration with transcriptomic data :
-* [ICA decomposition with stabilized ICA](examples/transcriptomic_ICA.ipynb)
-* [Stability of ICA components accross several NSCLC cohorts](examples/stability_study.ipynb)
+* [ICA decomposition with stabilized ICA](https://github.com/ncaptier/stabilized-ica/blob/master/examples/transcriptomic_ICA.ipynb)
+* [Stability of ICA components accross several NSCLC cohorts](https://github.com/ncaptier/stabilized-ica/blob/master/examples/stability_study.ipynb)
 
 ## Data
 
-The data set which goes with the jupyter notebook ["ICA decomposition with stabilized ICA"](transcriptomic_ICA.ipynb) can be found in the .zip file [examples/data.zip](data.zip). Please extract locally the data set before running the notebook.   
+The data set which goes with the jupyter notebook ["ICA decomposition with stabilized ICA"](https://github.com/ncaptier/stabilized-ica/blob/master/examples/transcriptomic_ICA.ipynb) can be found in the .zip file [data.zip](https://github.com/ncaptier/stabilized-ica/blob/master/examples/data.zip). Please extract locally the data set before running the notebook.   
 
-For the jupyter notebook ["Stability of ICA components accross several NSCLC cohorts"](examples/stability_study.ipynb) please note that you will have to load the data yourself in order to run it (all the necessary links are reported on the notebook).
+For the jupyter notebook ["Stability of ICA components accross several NSCLC cohorts"](https://github.com/ncaptier/stabilized-ica/blob/master/examples/stability_study.ipynb) please note that you will have to load the data yourself in order to run it (all the necessary links are reported on the notebook).
 
 ## Examples 
 

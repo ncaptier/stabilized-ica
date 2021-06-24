@@ -12,10 +12,16 @@ We also propose an implementation of the Mutual Nearest Neighbors method as well
 
 Finally, we propose an adaptation of our algorithm for the special case of [AnnData](https://anndata.readthedocs.io/en/latest/anndata.AnnData.html) format. Our module sica.singlecell is modeled after the [scanpy package](https://scanpy.readthedocs.io/en/stable/) that deals with single-cell gene expression data.
 
-## Installation
+**Note :** This project was originally developped to provide a reproducible an biologically meaningful python algorithm for the deconvolution of "omics" data. Several modules like sica.singlecell or sica.annotate are specifically dedicated to this task. However, the sica.base module which contains the main computations for the stabilization of ICA or the sica.mutualknn module which draws a mutual k-nearest neighbors graph to assess the reproducibility of the ICA components could work perfectly with any other data type.
 
+### Install the latest stable version with PyPi
 ```
-$ pip install git+https://github.com/ncaptier/stabilized-ica
+pip install stabilized-ica
+```
+
+### Install from source
+```
+pip install git+https://github.com/ncaptier/stabilized-ica
 ```
 
 ## Experiments

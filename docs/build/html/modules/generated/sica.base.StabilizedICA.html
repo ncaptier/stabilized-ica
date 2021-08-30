@@ -1,0 +1,454 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  
+  <title>sica.base.StabilizedICA &mdash; stabilized-ica 1.0.1 documentation</title>
+  
+  <link rel="canonical" href="http://scikit-learn.org/stable/modules/generated/sica.base.StabilizedICA.html" />
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/vendor/bootstrap.min.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+<script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+<script src="../../_static/jquery.js"></script> 
+</head>
+<body>
+<nav id="navbar" class="sk-docs-navbar navbar navbar-expand-md navbar-light bg-light py-0">
+  <div class="container-fluid sk-docs-container px-0">
+      <a class="navbar-brand py-0" href="../../index.html">
+        <img
+          class="sk-brand-img"
+          src="../../_static/stabilized-ica-logo_1.png"
+          alt="logo"/>
+      </a>
+    <button
+      id="sk-navbar-toggler"
+      class="navbar-toggler"
+      type="button"
+      data-toggle="collapse"
+      data-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="sk-navbar-collapse collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="sk-nav-link nav-link" href="../../Install.html">Install</a>
+        </li>
+        <li class="nav-item">
+          <a class="sk-nav-link nav-link" href="../../user_guide.html">User Guide</a>
+        </li>
+        <li class="nav-item">
+          <a class="sk-nav-link nav-link" href="../classes.html">API</a>
+        </li>
+        <li class="nav-item">
+          <a class="sk-nav-link nav-link" href="../../Examples.html">Examples</a>
+        </li>
+        <li class="nav-item">
+          <a class="sk-nav-link nav-link nav-more-item-mobile-items" href="../../Release%20Notes.html">Release Notes</a>
+        </li>
+        <li class="nav-item">
+          <a class="sk-nav-link nav-link nav-more-item-mobile-items" href="../../about.html">About us</a>
+        </li>
+        <li class="nav-item">
+          <a class="sk-nav-link nav-link nav-more-item-mobile-items" href="https://github.com/ncaptier/stabilized-ica">GitHub</a>
+        </li>
+        <li class="nav-item">
+          <a class="sk-nav-link nav-link nav-more-item-mobile-items" href="https://pypi.org/project/stabilized-ica/">PyPI</a>
+        </li>
+        <li class="nav-item dropdown nav-more-item-dropdown">
+          <a class="sk-nav-link nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">More</a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <a class="sk-nav-dropdown-item dropdown-item" href="../../Release%20Notes.html">Release Notes</a>
+              <a class="sk-nav-dropdown-item dropdown-item" href="../../about.html">About us</a>
+              <a class="sk-nav-dropdown-item dropdown-item" href="https://github.com/ncaptier/stabilized-ica">GitHub</a>
+              <a class="sk-nav-dropdown-item dropdown-item" href="https://pypi.org/project/stabilized-ica/">PyPI</a>
+          </div>
+        </li>
+      </ul>
+      <div id="searchbox" role="search">
+          <div class="searchformwrapper">
+          <form class="search" action="../../search.html" method="get">
+            <input class="sk-search-text-input" type="text" name="q" aria-labelledby="searchlabel" />
+            <input class="sk-search-text-btn" type="submit" value="Go" />
+          </form>
+          </div>
+      </div>
+    </div>
+  </div>
+</nav>
+<div class="d-flex" id="sk-doc-wrapper">
+    <input type="checkbox" name="sk-toggle-checkbox" id="sk-toggle-checkbox">
+    <label id="sk-sidemenu-toggle" class="sk-btn-toggle-toc btn sk-btn-primary" for="sk-toggle-checkbox">Toggle Menu</label>
+    <div id="sk-sidebar-wrapper" class="border-right">
+      <div class="sk-sidebar-toc-wrapper">
+        <div class="sk-sidebar-toc-logo">
+          <a href="../../index.html">
+            <img
+              class="sk-brand-img"
+              src="../../_static/stabilized-ica-logo_1.png"
+              alt="logo"/>
+          </a>
+        </div>
+        <div class="btn-group w-100 mb-2" role="group" aria-label="rellinks">
+            <a href="#" role="button" class="btn sk-btn-rellink py-1 disabled"">Prev</a>
+            <a href="#" role="button" class="btn sk-btn-rellink disabled py-1">Up</a>
+            <a href="#" role="button" class="btn sk-btn-rellink py-1 disabled"">Next</a>
+        </div>
+        <div class="alert alert-danger p-1 mb-2" role="alert">
+          <p class="text-center mb-0">
+          <strong>stabilized-ica 1.0.1</strong><br/>
+          <a href="../../Release%20Notes.html">Release Notes</a>
+          </p>
+        </div>
+        <div class="alert alert-warning p-1 mb-2" role="alert">
+          <p class="text-center mb-0">
+            Please <a class="font-weight-bold" href="../../about.html#citing-stabilized-ica"><string>cite us</string></a> if you use the software.
+          </p>
+        </div>
+            <div class="sk-sidebar-toc">
+              <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sica.base</span></code>.StabilizedICA</a></li>
+</ul>
+
+            </div>
+      </div>
+    </div>
+    <div id="sk-page-content-wrapper">
+      <div class="sk-page-content container-fluid body px-md-3" role="main">
+        
+  <section id="sica-base-stabilizedica">
+<h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">sica.base</span></code>.StabilizedICA<a class="headerlink" href="#sica-base-stabilizedica" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="sica.base.StabilizedICA">
+<em class="property">class </em><code class="sig-prename descclassname">sica.base.</code><code class="sig-name descname">StabilizedICA</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n_components</span></em>, <em class="sig-param"><span class="n">max_iter</span></em>, <em class="sig-param"><span class="n">n_jobs</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/ncaptier/stabilized-ica/blob/master/sica/base.py#L169-L434"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sica.base.StabilizedICA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implement a stabilized version of the Independent Component Analysis algorithm</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>n_components</strong><span class="classifier">int</span></dt><dd><p>Number of ICA components.</p>
+</dd>
+<dt><strong>max_iter</strong><span class="classifier">int</span></dt><dd><p>Maximum number of iteration for the FastICA algorithm.</p>
+</dd>
+<dt><strong>n_jobs</strong><span class="classifier">int</span></dt><dd><p>Number of jobs to run in parallel. -1 means using all processors.
+See the joblib package documentation for more explanations. Default is 1.</p>
+</dd>
+<dt><strong>verbose: int</strong></dt><dd><p>Control the verbosity: the higher, the more messages. Default is 0.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Attributes</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>S_: 2D array, shape (n_components , n_observations)</strong></dt><dd><p>Array of sources/metagenes, each line corresponds to a stabilized ICA component (i.e the centrotype of
+a cluster of components).</p>
+</dd>
+<dt><strong>A_: 2D array, shape (n_variables , n_components)</strong></dt><dd><p>Pseudo-inverse of <code class="docutils literal notranslate"><span class="pre">S_</span></code>, each column corresponds to a metasample.</p>
+</dd>
+<dt><strong>stability_indexes_</strong><span class="classifier">1D array, shape (n_components)</span></dt><dd><p>Stability indexes for the stabilized ICA components.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<dl class="simple">
+<dt>ICASSO method :</dt><dd><p>J. Himberg and A. Hyvarinen, “Icasso: software for investigating the reliability of ICA estimates by clustering and visualization,” 
+2003 IEEE XIII Workshop on Neural Networks for Signal Processing (IEEE Cat. No.03TH8718), 2003, pp. 259-268, doi: 10.1109/NNSP.2003.1318025
+(see <a class="reference external" href="https://www.cs.helsinki.fi/u/ahyvarin/papers/Himberg03.pdf">https://www.cs.helsinki.fi/u/ahyvarin/papers/Himberg03.pdf</a>).</p>
+</dd>
+</dl>
+<p>UMAP :
+For more details about the UMAP (Uniform Manifold Approximation and Projection), see <a class="reference external" href="https://pypi.org/project/umap-learn/">https://pypi.org/project/umap-learn/</a>.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sica.base</span> <span class="kn">import</span> <span class="n">StabilizedICA</span>   
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;data.csv&quot;</span> <span class="p">,</span> <span class="n">index_col</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>  
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sICA</span> <span class="o">=</span> <span class="n">StabilizedICA</span><span class="p">(</span><span class="n">n_components</span> <span class="o">=</span> <span class="mi">45</span> <span class="p">,</span> <span class="n">max_iter</span> <span class="o">=</span> <span class="mi">2000</span> <span class="p">,</span> <span class="n">n_jobs</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sICA</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">df</span> <span class="p">,</span> <span class="n">n_runs</span> <span class="o">=</span> <span class="mi">30</span> <span class="p">,</span> <span class="n">plot</span> <span class="o">=</span> <span class="kc">True</span> <span class="p">,</span> <span class="n">normalize</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>    
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Metagenes</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">sICA</span><span class="o">.</span><span class="n">S_</span> <span class="p">,</span> <span class="n">columns</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="p">,</span> <span class="n">index</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;metagene &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">sICA</span><span class="o">.</span><span class="n">S_</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Metagenes</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#sica.base.StabilizedICA.fit" title="sica.base.StabilizedICA.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a>(X, n_runs[, fun, algorithm, plot, …])</p></td>
+<td><p><ol class="arabic simple">
+<li><p>Compute the ICA components of X <code class="docutils literal notranslate"><span class="pre">n_runs</span></code> times.</p></li>
+</ol>
+</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#sica.base.StabilizedICA.projection" title="sica.base.StabilizedICA.projection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">projection</span></code></a>([method, ax])</p></td>
+<td><p>Plot the <code class="docutils literal notranslate"><span class="pre">n_components*n_runs</span></code> ICA components computed during fit() in 2D.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt id="sica.base.StabilizedICA.fit">
+<code class="sig-name descname">fit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">n_runs</span></em>, <em class="sig-param"><span class="n">fun</span><span class="o">=</span><span class="default_value">'logcosh'</span></em>, <em class="sig-param"><span class="n">algorithm</span><span class="o">=</span><span class="default_value">'fastica_par'</span></em>, <em class="sig-param"><span class="n">plot</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">normalize</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">reorientation</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">whiten</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">pca_solver</span><span class="o">=</span><span class="default_value">'full'</span></em>, <em class="sig-param"><span class="n">chunked</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">chunk_size</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">zero_center</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/ncaptier/stabilized-ica/blob/master/sica/base.py#L232-L390"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sica.base.StabilizedICA.fit" title="Permalink to this definition">¶</a></dt>
+<dd><ol class="arabic simple">
+<li><p>Compute the ICA components of X <code class="docutils literal notranslate"><span class="pre">n_runs</span></code> times.</p></li>
+<li><p>Cluster all the <code class="docutils literal notranslate"><span class="pre">n_components*n_runs</span></code> components with agglomerative 
+hierarchical clustering (average linkage) into <code class="docutils literal notranslate"><span class="pre">n_components</span></code> clusters.</p></li>
+<li><p>For each cluster compute its stability index and return its centrotype as the
+final ICA component.</p></li>
+</ol>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>X</strong><span class="classifier">2D array-like, shape (n_observations , n_variables) or (n_observations , n_components) if whiten is False.</span></dt><dd><p>Training data</p>
+</dd>
+<dt><strong>n_runs</strong><span class="classifier">int</span></dt><dd><p>Number of times we run the FastICA algorithm</p>
+</dd>
+<dt><strong>fun</strong><span class="classifier">str {‘cube’ , ‘exp’ , ‘logcosh’ , ‘tanh’} or function, optional.</span></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">algorithm</span></code> is in {‘fastica_par’ , ‘fastica_def’}, it represents the functional form of the G function used in 
+the approximation to neg-entropy. Could be either ‘logcosh’, ‘exp’, or ‘cube’.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">algorithm</span></code> is in {‘fastica_picard’ , ‘infomax’ , ‘infomax_ext’ , ‘infomax_orth’}, it is associated with the choice of
+a density model for the sources. See supplementary explanations for more details.</p>
+<p>The default is ‘logcosh’.</p>
+</dd>
+<dt><strong>algorithm</strong><span class="classifier">str {‘fastica_par’ , ‘fastica_def’ , ‘fastica_picard’ , ‘infomax’ , ‘infomax_ext’ , ‘infomax_orth’}, optional.</span></dt><dd><p>The algorithm applied for solving the ICA problem at each run. Please the supplementary explanations for more details.
+The default is ‘fastica_par’, i.e FastICA from sklearn with parallel implementation.</p>
+</dd>
+<dt><strong>plot</strong><span class="classifier">boolean, optional</span></dt><dd><p>If True plot the stability indexes for each cluster in decreasing order. 
+The default is False.</p>
+</dd>
+<dt><strong>normalize</strong><span class="classifier">boolean, optional</span></dt><dd><p>If True normalize the rows of <code class="docutils literal notranslate"><span class="pre">S_</span></code> (i.e the stabilized ICA components) to unit standard deviation.
+The default is True.</p>
+</dd>
+<dt><strong>reorientation</strong><span class="classifier">boolean,optional</span></dt><dd><p>If True re-oriente the rows of <code class="docutils literal notranslate"><span class="pre">S_</span></code> towards positive heavy tail.
+The default is True.</p>
+</dd>
+<dt><strong>whiten</strong><span class="classifier">boolean, optional</span></dt><dd><p>If True the matrix X is whitened, i.e centered then projected in the space defined by its 
+first <code class="docutils literal notranslate"><span class="pre">n_components</span></code> PCA components and reduced to unit variance along each of these axis.</p>
+<p>If False the input X matrix must be already whitened (the columns must be centered, scaled to unit 
+variance and uncorrelated.)</p>
+<p>The default is True.</p>
+</dd>
+<dt><strong>pca_solver</strong><span class="classifier">str {‘auto’, ‘full’, ‘arpack’, ‘randomized’ , ‘lobpcg’}, optional</span></dt><dd><p>Solver for the different PCA methods. Please note that some solvers may not be compatible with
+some of the PCA methods. See _whitening.py for more details.
+The default is “full” (i.e SVD decomposition)</p>
+</dd>
+<dt><strong>chunked</strong><span class="classifier">boolean, optional</span></dt><dd><p>Parameter for the whitening step, see _whitening.py for more details.
+The default is False.</p>
+</dd>
+<dt><strong>chunk_size</strong><span class="classifier">int, optional</span></dt><dd><p>Parameter for the whitening step, see _whitening.py for more details.
+The default is None.</p>
+</dd>
+<dt><strong>zero_center</strong><span class="classifier">boolean, optional</span></dt><dd><p>Parameter for the whitening step, see _whitening.py for more details.
+The default is True.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>None.</dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="sica.base.StabilizedICA.projection">
+<code class="sig-name descname">projection</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">method</span><span class="o">=</span><span class="default_value">'mds'</span></em>, <em class="sig-param"><span class="n">ax</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/ncaptier/stabilized-ica/blob/master/sica/base.py#L392-L434"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sica.base.StabilizedICA.projection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the <code class="docutils literal notranslate"><span class="pre">n_components*n_runs</span></code> ICA components computed during fit() in 2D.
+Approximate the original dissimilarities between components by Euclidean distance.
+Each cluster is represented with a different color.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>method</strong><span class="classifier">string, optional</span></dt><dd><p>Name of the dimensionality reduction method (e.g “tsne” , “mds” or “umap”)
+The default is “umap”.</p>
+</dd>
+<dt><strong>ax</strong><span class="classifier">matplotlib.axes, optional</span></dt><dd><p>The default is None.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>None.</dt><dd></dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>We use the dissimilarity measure <code class="docutils literal notranslate"><span class="pre">sqrt(1</span> <span class="pre">-</span> <span class="pre">|rho_ij|)</span></code> (rho the Pearson correlation) instead of <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">-</span> <span class="pre">|rho_ij|</span></code> to reduce overlapping.</p></li>
+<li><p>Please note that multidimensional scaling (MDS) is more computationally demanding than t-SNE or UMAP. However it takes into account the global structures of the data set while the others don’t. For t-SNE or UMAP one cannot really interpret the inter-cluster distances.</p></li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+<div class="clearer"></div></section>
+
+
+      </div>
+    <div class="container">
+      <footer class="sk-content-footer">
+            &copy; 2007-2021 The scikit-learn developers (BSD License).
+          <a href="../../_sources/modules/generated/sica.base.StabilizedICA.rst.txt" rel="nofollow">Show this page source</a>
+      </footer>
+    </div>
+  </div>
+</div>
+<script src="../../_static/js/vendor/bootstrap.min.js"></script>
+
+<script>
+    window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+    ga('create', 'UA-22606712-2', 'auto');
+    ga('set', 'anonymizeIp', true);
+    ga('send', 'pageview');
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+<script>
+$(document).ready(function() {
+    /* Add a [>>>] button on the top-right corner of code samples to hide
+     * the >>> and ... prompts and the output and thus make the code
+     * copyable. */
+    var div = $('.highlight-python .highlight,' +
+                '.highlight-python3 .highlight,' +
+                '.highlight-pycon .highlight,' +
+		'.highlight-default .highlight')
+    var pre = div.find('pre');
+
+    // get the styles from the current theme
+    pre.parent().parent().css('position', 'relative');
+    var hide_text = 'Hide prompts and outputs';
+    var show_text = 'Show prompts and outputs';
+
+    // create and add the button to all the code blocks that contain >>>
+    div.each(function(index) {
+        var jthis = $(this);
+        if (jthis.find('.gp').length > 0) {
+            var button = $('<span class="copybutton">&gt;&gt;&gt;</span>');
+            button.attr('title', hide_text);
+            button.data('hidden', 'false');
+            jthis.prepend(button);
+        }
+        // tracebacks (.gt) contain bare text elements that need to be
+        // wrapped in a span to work with .nextUntil() (see later)
+        jthis.find('pre:has(.gt)').contents().filter(function() {
+            return ((this.nodeType == 3) && (this.data.trim().length > 0));
+        }).wrap('<span>');
+    });
+
+    // define the behavior of the button when it's clicked
+    $('.copybutton').click(function(e){
+        e.preventDefault();
+        var button = $(this);
+        if (button.data('hidden') === 'false') {
+            // hide the code output
+            button.parent().find('.go, .gp, .gt').hide();
+            button.next('pre').find('.gt').nextUntil('.gp, .go').css('visibility', 'hidden');
+            button.css('text-decoration', 'line-through');
+            button.attr('title', show_text);
+            button.data('hidden', 'true');
+        } else {
+            // show the code output
+            button.parent().find('.go, .gp, .gt').show();
+            button.next('pre').find('.gt').nextUntil('.gp, .go').css('visibility', 'visible');
+            button.css('text-decoration', 'none');
+            button.attr('title', hide_text);
+            button.data('hidden', 'false');
+        }
+    });
+
+	/*** Add permalink buttons next to glossary terms ***/
+	$('dl.glossary > dt[id]').append(function() {
+		return ('<a class="headerlink" href="#' +
+			    this.getAttribute('id') +
+			    '" title="Permalink to this term">¶</a>');
+	});
+  /*** Hide navbar when scrolling down ***/
+  // Returns true when headerlink target matches hash in url
+  (function() {
+    hashTargetOnTop = function() {
+        var hash = window.location.hash;
+        if ( hash.length < 2 ) { return false; }
+
+        var target = document.getElementById( hash.slice(1) );
+        if ( target === null ) { return false; }
+
+        var top = target.getBoundingClientRect().top;
+        return (top < 2) && (top > -2);
+    };
+
+    // Hide navbar on load if hash target is on top
+    var navBar = document.getElementById("navbar");
+    var navBarToggler = document.getElementById("sk-navbar-toggler");
+    var navBarHeightHidden = "-" + navBar.getBoundingClientRect().height + "px";
+    var $window = $(window);
+
+    hideNavBar = function() {
+        navBar.style.top = navBarHeightHidden;
+    };
+
+    showNavBar = function() {
+        navBar.style.top = "0";
+    }
+
+    if (hashTargetOnTop()) {
+        hideNavBar()
+    }
+
+    var prevScrollpos = window.pageYOffset;
+    hideOnScroll = function(lastScrollTop) {
+        if (($window.width() < 768) && (navBarToggler.getAttribute("aria-expanded") === 'true')) {
+            return;
+        }
+        if (lastScrollTop > 2 && (prevScrollpos <= lastScrollTop) || hashTargetOnTop()){
+            hideNavBar()
+        } else {
+            showNavBar()
+        }
+        prevScrollpos = lastScrollTop;
+    };
+
+    /*** high performance scroll event listener***/
+    var raf = window.requestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.msRequestAnimationFrame ||
+        window.oRequestAnimationFrame;
+    var lastScrollTop = $window.scrollTop();
+
+    if (raf) {
+        loop();
+    }
+
+    function loop() {
+        var scrollTop = $window.scrollTop();
+        if (lastScrollTop === scrollTop) {
+            raf(loop);
+            return;
+        } else {
+            lastScrollTop = scrollTop;
+            hideOnScroll(lastScrollTop);
+            raf(loop);
+        }
+    }
+  })();
+});
+
+</script>
+    
+</body>
+</html>

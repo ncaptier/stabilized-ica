@@ -138,8 +138,8 @@ def _centrotype(X , Sim , cluster_labels):
 def _stability_index(Sim , cluster_labels):
     """Compute the stability index for the cluster of ICA components defined by cluster_labels.
         
-       Note : Please refer to https://bmcgenomics.biomedcentral.com/track/pdf/10.1186/s12864-017-4112-9
-             (section "Method") for the exact formula of the stability index.
+    Please refer to https://bmcgenomics.biomedcentral.com/track/pdf/10.1186/s12864-017-4112-9
+    (section "Method") for the exact formula of the stability index.
 
     Parameters
     ----------
@@ -172,36 +172,50 @@ class StabilizedICA(object):
     Parameters
     ----------
     n_components : int
-        number of ICA components
+        Number of ICA components.
     
     max_iter : int
-        maximum number of iteration for the FastICA algorithm
+        Maximum number of iteration for the FastICA algorithm.
     
     n_jobs : int
-        number of jobs to run in parallel. -1 means using all processors.
+        Number of jobs to run in parallel. -1 means using all processors.
         See the joblib package documentation for more explanations. Default is 1.
     
     verbose: int
-        control the verbosity: the higher, the more messages. Default is 0.
+        Control the verbosity: the higher, the more messages. Default is 0.
     
     Attributes
     ----------
-
     S_: 2D array, shape (n_components , n_observations)
-        array of sources/metagenes, each line corresponds to a stabilized ICA component (i.e the centrotype of
-        a cluster of components)   
+        Array of sources/metagenes, each line corresponds to a stabilized ICA component (i.e the centrotype of
+        a cluster of components).  
         
     A_: 2D array, shape (n_variables , n_components)
-        pseudo-inverse of S_, each column corresponds to a metasample
+        Pseudo-inverse of ``S_``, each column corresponds to a metasample.
     
     stability_indexes_ : 1D array, shape (n_components)
-        stability indexes for the stabilized ICA components
+        Stability indexes for the stabilized ICA components.
         
-    Notes
+    References
     ----------
+    ICASSO method :
+        J. Himberg and A. Hyvarinen, "Icasso: software for investigating the reliability of ICA estimates by clustering and visualization," 
+        2003 IEEE XIII Workshop on Neural Networks for Signal Processing (IEEE Cat. No.03TH8718), 2003, pp. 259-268, doi: 10.1109/NNSP.2003.1318025
+        (see https://www.cs.helsinki.fi/u/ahyvarin/papers/Himberg03.pdf). 
     
-    n_runs is the number of time we repeat the ICA decompostion; see fit method
-        
+    UMAP :
+    For more details about the UMAP (Uniform Manifold Approximation and Projection), see https://pypi.org/project/umap-learn/.
+    
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> from sica.base import StabilizedICA   
+    >>> df = pd.read_csv("data.csv" , index_col = 0).transpose()  
+    >>> sICA = StabilizedICA(n_components = 45 , max_iter = 2000 , n_jobs = -1)
+    >>> sICA.fit(df , n_runs = 30 , plot = True , normalize = True)    
+    >>> Metagenes = pd.DataFrame(sICA.S_ , columns = df.index , index = ['metagene ' + str(i) for i in range(sICA.S_.shape[0])])
+    >>> Metagenes.head()
+                
     """
     
     def __init__(self , n_components , max_iter , n_jobs = 1 , verbose = 0):
@@ -217,28 +231,28 @@ class StabilizedICA(object):
 
     def fit(self, X ,  n_runs , fun = 'logcosh' , algorithm = 'fastica_par' , plot = False , normalize = True , reorientation = True , whiten = True
             , pca_solver = 'full' , chunked = False , chunk_size = None , zero_center = True):
-        """1. Compute the ICA components of X n_runs times
-           2. Cluster all the components (N = self.n_components*n_runs) with agglomerative 
-              hierarchical clustering (average linkage) into self.n_components clusters
-           3. For each cluster compute its stability index and return its centrotype as the
-              final ICA component
-              
-           Note : Please refer to ICASSO method for more details about the process
-                 (see https://www.cs.helsinki.fi/u/ahyvarin/papers/Himberg03.pdf)
+        """1. Compute the ICA components of X ``n_runs`` times.
+        
+        2. Cluster all the ``n_components*n_runs`` components with agglomerative 
+           hierarchical clustering (average linkage) into ``n_components`` clusters.
+           
+        3. For each cluster compute its stability index and return its centrotype as the
+           final ICA component.              
                  
         Parameters
         ----------
         X : 2D array-like, shape (n_observations , n_variables) or (n_observations , n_components) if whiten is False.
+            Training data 
             
         n_runs : int
-            number of times we run the FastICA algorithm
+            Number of times we run the FastICA algorithm
         
         fun : str {'cube' , 'exp' , 'logcosh' , 'tanh'} or function, optional.
         
-            If algorithm is in {'fastica_par' , 'fastica_def'}, it represents the functional form of the G function used in 
+            If ``algorithm`` is in {'fastica_par' , 'fastica_def'}, it represents the functional form of the G function used in 
             the approximation to neg-entropy. Could be either ‘logcosh’, ‘exp’, or ‘cube’.
             
-            If algorithm is in {'fastica_picard' , 'infomax' , 'infomax_ext' , 'infomax_orth'}, it is associated with the choice of
+            If ``algorithm`` is in {'fastica_picard' , 'infomax' , 'infomax_ext' , 'infomax_orth'}, it is associated with the choice of
             a density model for the sources. See supplementary explanations for more details.
             
             The default is 'logcosh'.
@@ -248,25 +262,29 @@ class StabilizedICA(object):
             The default is 'fastica_par', i.e FastICA from sklearn with parallel implementation.
             
         plot : boolean, optional
-            if True plot the stability indexes for each cluster in decreasing order. 
+            If True plot the stability indexes for each cluster in decreasing order. 
             The default is False.
         
         normalize : boolean, optional
-            if True normalize the rows of S_ (i.e the stabilized ICA components) to unit standard deviation.
+            If True normalize the rows of ``S_`` (i.e the stabilized ICA components) to unit standard deviation.
             The default is True.
             
         reorientation : boolean,optional
-            if True re-oriente the rows of S_ towards positive heavy tail.
+            If True re-oriente the rows of ``S_`` towards positive heavy tail.
             The default is True.
         
         whiten : boolean, optional
-            if True the matrix X is whitened, i.e centered then projected in the space defined by its 
-            first self.n_components PCA components and reduced to unit variance along each of these axis. 
-            If False the input X matrix must be already whitened.
+        
+            If True the matrix X is whitened, i.e centered then projected in the space defined by its 
+            first ``n_components`` PCA components and reduced to unit variance along each of these axis. 
+            
+            If False the input X matrix must be already whitened (the columns must be centered, scaled to unit 
+            variance and uncorrelated.)
+            
             The default is True.
             
         pca_solver : str {‘auto’, ‘full’, ‘arpack’, ‘randomized’ , 'lobpcg'}, optional
-            solver for the different PCA methods. Please note that some solvers may not be compatible with
+            Solver for the different PCA methods. Please note that some solvers may not be compatible with
             some of the PCA methods. See _whitening.py for more details.
             The default is "full" (i.e SVD decomposition)
         
@@ -286,10 +304,6 @@ class StabilizedICA(object):
         -------        
         None.
         
-        Note
-        ------        
-        If whiten is False, we suppose that X results from a whitening pre-processing step. The columns must be
-        centered, scaled to unit variance and uncorrelated.
         """
         ## Initialisation
         n_observations , n_variables = X.shape
@@ -376,18 +390,14 @@ class StabilizedICA(object):
         return 
     
     def projection(self , method = "mds" , ax = None):
-        """Plot the ICA components computed during fit() (N = self.n_components*n_runs) in 2D.
-           Approximate the original dissimilarities between components by Euclidean distance.
-           Each cluster is represented with a different color.
+        """Plot the ``n_components*n_runs`` ICA components computed during fit() in 2D.
+        Approximate the original dissimilarities between components by Euclidean distance.
+        Each cluster is represented with a different color.
            
-           Note : We use the dissimilarity measure sqrt(1 - |rho_ij|) (rho the Pearson correlation)
-                 instead of 1 - |rho_ij| to reduce overlapping.
-        
         Parameters
-        ----------
-        
+        ----------        
         method : string, optional
-            name of the dimensionality reduction method (e.g "tsne" , "mds" or "umap")
+            Name of the dimensionality reduction method (e.g "tsne" , "mds" or "umap")
             The default is "umap".
             
         ax : matplotlib.axes, optional
@@ -397,15 +407,11 @@ class StabilizedICA(object):
         -------
         None.
         
-        Note
-        -------
+        Notes
+        -----
+        - We use the dissimilarity measure ``sqrt(1 - |rho_ij|)`` (rho the Pearson correlation) instead of ``1 - |rho_ij|`` to reduce overlapping.
         
-        Please note that multidimensional scaling (MDS) is more computationally demanding than t-SNE or UMAP.
-        However it takes into account the global structures of the data set while the others don't. For t-SNE or
-        UMAP one cannot really interpret the inter-cluster distances.
-        
-        For more details about the UMAP (Uniform Manifold Approximation and Projection), 
-        see https://pypi.org/project/umap-learn/
+        - Please note that multidimensional scaling (MDS) is more computationally demanding than t-SNE or UMAP. However it takes into account the global structures of the data set while the others don't. For t-SNE or UMAP one cannot really interpret the inter-cluster distances.
 
         """
         
@@ -430,36 +436,34 @@ class StabilizedICA(object):
     
     
 def MSTD(X , m , M , step , n_runs , whiten = True , max_iter = 2000 , n_jobs = -1 , ax = None):
-    """Plot "MSTD graphs" to help choosing an optimal dimension for ICA decomposition
+    """Plot "MSTD graphs" to help choosing an optimal dimension for ICA decomposition.
         
-       Run stabilized ICA algorithm for several dimensions in [m , M] and compute the
-       stability distribution of the components each time
+    Run stabilized ICA algorithm for several dimensions in [m , M] and compute the
+    stability distribution of the components each time.
        
-       Note : Please refer to https://bmcgenomics.biomedcentral.com/track/pdf/10.1186/s12864-017-4112-9
-             for more details.
-
     Parameters
     ----------
-    X : 2D array, shape (n_observations , n_variables)
-    
+    X : 2D array, shape (n_observations , n_variables) 
+        Training data
+        
     m : int
-        minimal dimension for ICA decomposition
+        Minimal dimension for ICA decomposition.
         
     M : int > m
-        maximal dimension for ICA decomposition
+        Maximal dimension for ICA decomposition.
         
     step : int > 0
-        step between two dimensions (ex: if step = 2 the function will test the dimensions
-        m, m+2, m+4, ... , M)
+        Step between two dimensions (ex: if ``step = 2`` the function will test the dimensions
+        m, m+2, m+4, ... , M).
         
     n_runs : int
-        number of times we run the FastICA algorithm (see fit method of class Stabilized_ICA)
+        Number of times we run the FastICA algorithm (see fit method of class Stabilized_ICA)
             
-    max_iter : TYPE, optional
-        parameter for _ICA_decomposition. The default is 2000.
+    max_iter : int, optional
+        Parameter for _ICA_decomposition. The default is 2000.
     
     n_jobs : int
-        number of jobs to run in parallel for each stabilized ICA step. Default is -1
+        Number of jobs to run in parallel for each stabilized ICA step. Default is -1
     
     ax : array of matplotlib.axes objects, optional
         The default is None.
@@ -467,6 +471,18 @@ def MSTD(X , m , M , step , n_runs , whiten = True , max_iter = 2000 , n_jobs = 
     Returns
     -------
     None.
+    
+    References
+    ----------
+    Kairov U, Cantini L, Greco A, Molkenov A, Czerwinska U, Barillot E, Zinovyev A. Determining the optimal number of independent components for reproducible transcriptomic data analysis.
+    BMC Genomics. 2017 Sep 11;18(1):712. doi: 10.1186/s12864-017-4112-9. PMID: 28893186; PMCID: PMC5594474.
+    (see https://bmcgenomics.biomedcentral.com/track/pdf/10.1186/s12864-017-4112-9 ).
+    
+    Examples
+    --------
+    >>> from sica.base import MSTD
+    >>> df = pd.read_csv("data.csv" , index_col = 0).transpose()  
+    >>> MSTD(df.values , m = 5 , M = 100 , step = 2 , n_runs = 20 , max_iter = 2000)
 
     """
     if ax is None :

@@ -10,41 +10,53 @@ class ReactomeAnalysis(object):
     
     Parameters
     ----------
-    data : If pre_selected = False : 
-                pandas.DataFrame , shape (n_metagenes , n_genes) or pandas.Series, shape (n_genes)
+    data : 
+        If ``pre_selected = False`` : pandas.DataFrame , shape (n_metagenes , n_genes) or pandas.Series, shape (n_genes)
                 The column names (or the index keys for a serie) should be valid gene IDs.
-           If pre_selected = True :
-                pandas.Series , shape (n_metagenes)
+        If ``pre_selected = True`` : pandas.Series , shape (n_metagenes)
                 For each metagene the serie contains a list of the IDs of the extreme expressed
                 genes.
                 
     input_type : string, optional.
         Type of input gene IDs. Common types are 'entrezgene' , 'symbol' , 'uniprot' , 'ensembl.gene' , 'refseq'...
-        For the complete list of available types, see https://docs.mygene.info/en/latest/doc/query_service.html#available_fields 
-        If input_type is None, conversion will not be possible and inputs IDs will be assumed to be valid inputs for the reactome
+        For the complete list of available types, see https://docs.mygene.info/en/latest/doc/query_service.html#available_fields .
+        
+        If ``input_type is None``, conversion will not be possible and inputs IDs will be assumed to be valid inputs for the reactome
         analysis tools.
+        
         The default is None.
        
     pre_selected : boolean , optional.
-        Indicate whether the extreme genes have already been selected (see above!).
+        Indicate whether the extreme genes have already been selected (see above).
         The default is False.
         
     threshold : numeric or array-like of two numerics , optional
-        See get_top_genes. The default is 3.
+        See sica.annotate._utils.get_top_genes. The default is 3.
         
     method : {'quantile' , 'std'} , optional
-        See get_top_genes. The default is 'std'.
+        See sica.annotate._utils.get_top_genes. The default is 'std'.
         
     tail : {'left' , 'right' , 'both' , 'heaviest'} , optional
-        See get_top_genes. The default is 'heaviest'.
+        See sica.annotate._utils.get_top_genes. The default is 'heaviest'.
     
     Attributes
-    --------
-    
+    ----------    
     top_genes_ : pandas.DataFrame, shape (n_metagenes , 3)
         For each metagene the 'inputs' column contains a list of the IDs of the extreme expressed
         genes.
         
+    References
+    ----------
+    Please refer to the package reactome2py for more details (see https://github.com/reactome/reactome2py) .
+    
+    If you want to better understand how reactome works, please see https://reactome.org/userguide .
+    
+    Examples
+    --------
+    >>> from sica.annotate import reactome
+    >>> annotations = reactome.ReactomeAnalysis(data = Metagenes)
+    >>> metagene7_annot = annotations.get_analysis(metagene = 'metagene 7')
+    >>> metagene7_annot.head()
     """
     
     def __init__(self, data , input_type = None , pre_selected = False, threshold = 3 , method = 'std' , tail = 'heaviest'):
@@ -69,13 +81,15 @@ class ReactomeAnalysis(object):
         self.tokens = {ind : None for ind in data.index}     
      
     def convert_metagenes(self , idx):
-        """ Convert the IDs of the most expressed genes contained in self.top_genes_.
+        """ Convert the IDs of the most expressed genes contained in ``top_genes_``.
         
         Parameters
         ----------
         idx : {"all" , object , list of objects}
-            If idx = "all" all the metagenes will be converted. Otherwise, only the metagenes
-            associated with idx will be converted. In that case, idx must correspond to valid 
+        
+            If ``idx = "all"`` all the metagenes will be converted. 
+            
+            Otherwise, only the metagenes associated with ``idx`` will be converted. In that case, ``idx`` must correspond to valid 
             indexes of the input data.
 
         Returns
@@ -117,10 +131,10 @@ class ReactomeAnalysis(object):
         Parameters
         ----------
         metagene : object
-            It must corresponds to a valid index of the input data.
+            It must correspond to a valid index of the input data.
         
         use_inputs : boolean, optional
-            This only acts when self.input_type is not None.
+            This only acts when ``input_type is not None``.
             If True, inputs are used for the analysis. Otherwise, entrezgene are used. 
             The default is False.
             
@@ -153,7 +167,7 @@ class ReactomeAnalysis(object):
             It must correspond to a valid index of the input data.
         
         use_inputs : boolean, optional
-            This only acts when self.input_type is not None.
+            This only acts when ``input_type is not None``.
             If True, inputs are used for the analysis. Otherwise, entrezgene are used. 
             The default is False.
             
@@ -164,10 +178,10 @@ class ReactomeAnalysis(object):
             How to sort the result. The default is 'Entities FDR'.
         
         ascending : boolean, optional
-            Sort ascending vs. descending if sort_by is not None.The default is True.
+            Sort ascending vs. descending if ``sort_by is not None``.The default is True.
         
         p_value : float in (0 , 1), optional
-            Only hit pathway with pValue equals or below p_value will be returned. The default is 0.05.
+            Only hit pathway with pValue equals or below ``p_value`` will be returned. The default is 0.05.
             
         min_entities : int >= 0, optional
              Minimum number of contained entities per pathway. The default is 10.

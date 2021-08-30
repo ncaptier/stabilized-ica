@@ -16,26 +16,23 @@ class MNN(object):
     
     Parameters
     ----------
-    X : 2D array, shape (n_components_1 , n_features_1)
-        2D array, shape (n_components_1 , n_components_2) if metric == "precomputed"
+    X : 2D array of shape (n_components_1 , n_features_1), 2D array of shape (n_components_1 , n_components_2) if metric = "precomputed".
     
-    Y : 2D array, shape (n_components_2 , n_features_2), optional
-        Default is None.
+    Y : 2D array of shape (n_components_2 , n_features_2), optional
+        The default is None.
         
     k : int > 0
-        parameter for the Mutual Nearest Neighbor method (number of neighbors that we consider)
+        Parameter for the Mutual Nearest Neighbor method (i.e number of neighbors that we consider).
         
     metric : string
-        metric for the computation of the adjacency matrix (e.g "pearson" , "spearman" 
-        or the metrics accepted by scipy.spatial.distance.cdsit)
+        Metric for the computation of the adjacency matrix (e.g "pearson" , "spearman" 
+        or the metrics accepted by ``scipy.spatial.distance.cdsit``).
         
-    Note
-    ----------    
-    In the case where de distance matrix is not precomputed, we compute the distance between
-    each rows of X and Y.
+    Notes
+    -----  
+    - In the case where the distance matrix is not precomputed, we compute the distance between each rows of X and Y.
     
-    In the case X and Y are dataframes, we consider only the common columns of X and Y. Otherwise,
-    we assume that the columns are the same for X and Y (n_features_1 = n_features_2)
+    - In the case X and Y are dataframes, we consider only the common columns of X and Y. Otherwise, we assume that the columns are the same for X and Y (i.e ``n_features_1 = n_features_2``)
     
     """
     def __init__(self , k , metric , X , Y = None):
@@ -54,15 +51,15 @@ class MNN(object):
         
         Parameters
         ----------
-        X : 2D array, shape (n_components_1 , n_features_1)
+        X : 2D array of shape (n_components_1 , n_features_1)
 
-        Y : 2D array, shape (n_components_2 , n_features_2)
+        Y : 2D array of shape (n_components_2 , n_features_2)
 
         metric : string
 
         Returns
         -------
-        2D array, shape (n_components_1 , n_components_2)
+        2D array of shape (n_components_1 , n_components_2)
 
         """
         #Consider only the common columns of dataframes X and Y
@@ -81,17 +78,16 @@ class MNN(object):
             return cdist(X , Y , metric = metric)
     
     def adjacency_matrix(self , weighted):
-        """Compute the undirected adjacency matrix with the Mutual Nearest Neighbors method (k = self.k)
+        """Compute the undirected adjacency matrix with the Mutual Nearest Neighbors method (``k`` neighbors)
 
         Parameters
-        ----------
-        
+        ----------        
         weighted : boolean
-            If True each edge/coefficient of the adjacency matrix is weighted by 1 - distance, otherwise the coefficient are 0 or 1. 
+            If True each coefficient of the adjacency matrix is weighted by ``1 - distance``, otherwise the coefficient are 0 or 1. 
 
         Returns
         -------
-        2D array, shape (n_components_1 , n_components_2)
+        2D array of shape (n_components_1 , n_components_2)
 
         """
         bool_mask = (self.distance <= np.sort(self.distance , axis = 1)[: , self.k-1].reshape(-1 , 1)) * \
@@ -107,7 +103,7 @@ class MNN(object):
 def _pairs(items):
     """Return a list with all the pairs formed by two different elements of a list "items"
     
-       Note : This function is a useful tool for the building of the MNN graph.
+    Note : This function is a useful tool for the building of the MNN graph.
     
     Parameters
     ----------
@@ -116,7 +112,7 @@ def _pairs(items):
     Returns
     -------
     list
-        list of pairs formed by two different elements of the items
+        List of pairs formed by two different elements of the items
 
     """
     return [(items[i],items[j]) for i in range(len(items)) for j in range(i+1, len(items))]
@@ -126,35 +122,38 @@ class MNNgraph(object):
     """ Given a list of data sets, draws the MNN graph with a networkx object (compatible with the software Cytoscape)
     
     Parameters
-    ----------
-    
+    ----------   
     data : list of 2D data sets of shape (n_components_i , n_features_i)
         
     names : list of strings
-        names of the data sets
+        Names of the data sets.
     
     k : int > 0
-        parameter for the Mutual Nearest Neighbors method
+        Parameter for the Mutual Nearest Neighbors method.
     
     metric : string, optional
-        metric for the computation of the adjacency matrices.
-        Default is "pearson".
+        Metric for the computation of the adjacency matrices.
+        The default is "pearson".
         
     weighted : boolean, optional
-        if True each edge is associated with a weight 1 - distance (cf. adjacency_matrix())
-        Default is True.
+        If True each edge is associated with a weight ``1 - distance`` (cf. adjacency_matrix())
+        The default is True.
         
     Attributes
-    ----------
-    
+    ----------   
     graph_ : networkx object
     
     Note
-    ----------
+    ----   
+    If the elements of data are not dataframes, we assume that they all share the same features.
     
-    If the elements of data are not dataframes, we assume that they all share the same
-    features.
-    
+    Examples
+    --------
+    >>> from sica.mutualknn import MNNgraph
+    >>> cg = MNNgraph(data = [df1 , df2 , df3] , names=['dataframe1' , 'dataframe2' , 'dataframe3'] , k=1)
+    >>> cg.draw(colors = ['r', 'g' , 'b'] , spacing = 2)    
+    >>> cg.export_json("example.json")
+   
     """
     def __init__(self, data , names , k , metric = 'pearson' , weighted = True):
         self.data = data
@@ -169,25 +168,24 @@ class MNNgraph(object):
                 
         Parameters
         ----------
-
-        data : list of 2D arrays with shape (n_components_i , n_features_i) 
+        data : list of 2D arrays of shape (n_components_i , n_features_i) 
             
         names : list of strings
-            names of the data sets
+            Names of the data sets.
         
         k : integer >= 1
-            parameter for the Mutual Nearest Neighbors Method
+            Parameter for the Mutual Nearest Neighbors Method.
         
         metric : string
-            metric for the computation of the adjacency matrices
+            Metric for the computation of the adjacency matrices.
         
         weighted : boolean
-            if True each edge is associated with a weight 1 - distance.
+            If True each edge is associated with a weight ``1 - distance``.
 
         Returns
         -------
         G : graph (networkx object)
-            MNN graph for the data sets contained in the list "data"
+            MNN graph for the data sets contained in the list "data".
 
         """        
         G = nx.Graph()
@@ -229,19 +227,18 @@ class MNNgraph(object):
         """Draw the MNN graph.
         
         Parameters
-        ----------
-        
+        ----------        
         bipartite_graph : boolean, optional
-            if True a custom bipartite layout is used (only with two data sets). The default is False
+            If True a custom bipartite layout is used (only with two data sets). The default is False
             
         ax : matplotlib.axes, optional
             The default is None.
             
         colors : list of matplotlib.colors, optional
-            list of colors you want each data set to be associated with. The default is None.
+            List of colors you want each data set to be associated with. The default is None.
             
         spacing : float >= 1, optional
-            deal with the space between nodes. Increase this value to move nodes farther apart.
+            Deal with the space between nodes. Increase this value to move nodes farther apart.
 
         Returns
         -------
@@ -307,7 +304,7 @@ class MNNgraph(object):
         Parameters
         ----------
         file_name : string
-            name of the json file.
+            Name of the json file.
     
         Returns
         -------

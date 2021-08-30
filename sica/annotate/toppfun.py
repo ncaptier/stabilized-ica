@@ -10,40 +10,50 @@ class ToppFunAnalysis(object):
     
     Parameters
     ----------
-    data : If pre_selected = False : 
-                pandas.DataFrame , shape (n_metagenes , n_genes) or pandas.Series, shape (n_genes)
+    data : 
+        If ``pre_selected = False`` : pandas.DataFrame , shape (n_metagenes , n_genes) or pandas.Series, shape (n_genes)
                 The column names (or the index keys for a serie) should be valid gene IDs.
-           If pre_selected = True :
-                pandas.Series , shape (n_metagenes)
+        If ``pre_selected = True`` : pandas.Series , shape (n_metagenes)
                 For each metagene the serie contains a list of the IDs of the extreme expressed
                 genes.
                 
     input_type : string, optional.
         Type of input gene IDs. Common types are 'entrezgene' , 'symbol' , 'uniprot' , 'ensembl.gene' , 'refseq'...
-        For the complete list of available types, see https://docs.mygene.info/en/latest/doc/query_service.html#available_fields 
-        If input_type is None, conversion will not be possible and input IDs will be assumed to be Entrez IDs.
+        For the complete list of available types, see https://docs.mygene.info/en/latest/doc/query_service.html#available_fields .
+        
+        If ``input_type is None``, conversion will not be possible and input IDs will be assumed to be Entrez IDs.
+        
         The default is None.
         
     pre_selected : boolean , optional.
-        Indicate whether the extreme genes have already been selected (see above!).
+        Indicate whether the extreme genes have already been selected (see above).
         The default is False.
         
     threshold : numeric or array-like of two numerics , optional
-        See get_top_genes. The default is 3.
+        See sica.annotate._utils.get_top_genes. The default is 3.
         
     method : {'quantile' , 'std'} , optional
-        See get_top_genes. The default is 'std'.
+        See sica.annotate._utils.get_top_genes. The default is 'std'.
         
     tail : {'left' , 'right' , 'both' , 'heaviest'} , optional
-        See get_top_genes. The default is 'heaviest'.
+        See sica.annotate._utils.get_top_genes. The default is 'heaviest'.
     
     Attributes
-    --------
-    
+    ----------    
     top_genes_ : pandas.DataFrame, shape (n_metagenes , 3)
         For each metagene the 'inputs' column contains a list of the IDs of the extreme expressed
         genes.
-        
+    
+    References
+    ----------
+    For more details, please refer to the ToppGene API (see https://toppgene.cchmc.org/API/enrich. ).
+    
+    Examples
+    --------
+    >>> from sica.annotate import toppfun
+    >>> annotations = toppfun.ToppFunAnalysis(data = Metagenes)
+    >>> metagene7_annot = annotations.get_analysis(metagene = 'metagene 7')
+    >>> metagene7_annot.head()
     """
     
     def __init__(self , data , input_type = None , pre_selected = False, threshold = 3 , method = 'std' , tail = 'heaviest'):
@@ -65,13 +75,15 @@ class ToppFunAnalysis(object):
         
             
     def convert_metagenes(self , idx):
-        """ Convert the IDs of the most expressed genes contained in self.top_genes_.
+        """ Convert the IDs of the most expressed genes contained in ``top_genes_``.
         
         Parameters
         ----------
         idx : {"all" , string , list of strings}
-            If idx = "all" all the metagenes will be converted. Otherwise, only the metagenes
-            associated with idx will be converted. In that case, idx must correspond to valid 
+        
+            If ``idx = "all"`` all the metagenes will be converted. 
+            
+            Otherwise, only the metagenes associated with ``idx`` will be converted. In that case, ``idx`` must correspond to valid 
             indexes of the input data.
  
         Returns
@@ -118,7 +130,7 @@ class ToppFunAnalysis(object):
             
         type_list: list of strings, optional
             List of features to perform enrichment tests. If None, all the available features
-            will be used (see _get_analysis). The default is None.
+            will be used (see sica.annotate.toppfun._get_analysis). The default is None.
         
         p_value: float in (0 , 1), optional
             P-value maximal threshold to accept enrichments. The default is 0.05

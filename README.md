@@ -1,5 +1,7 @@
 # stabilized-ica
 [![PyPI version](https://badge.fury.io/py/stabilized-ica.svg)](https://badge.fury.io/py/stabilized-ica)   
+[![Documentation Status](https://readthedocs.org/projects/stabilized-ica/badge/?version=latest)](https://stabilized-ica.readthedocs.io/en/latest/?badge=latest)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 This repository proposes a python implementation for stabilized ICA decomposition algorithm. Most of the technical details can be found in the references [1], [2] and [3].    
 
@@ -13,7 +15,11 @@ We also propose an implementation of the Mutual Nearest Neighbors method as well
 
 Finally, we propose an adaptation of our algorithm for the special case of [AnnData](https://anndata.readthedocs.io/en/latest/anndata.AnnData.html) format. Our module sica.singlecell is modeled after the [scanpy package](https://scanpy.readthedocs.io/en/stable/) that deals with single-cell gene expression data.
 
-**Note :** This project was originally developped to provide a reproducible an biologically meaningful python algorithm for the deconvolution of "omics" data. Several modules like sica.singlecell or sica.annotate are specifically dedicated to this task. However, the sica.base module which contains the main computations for the stabilization of ICA or the sica.mutualknn module which draws a mutual k-nearest neighbors graph to assess the reproducibility of the ICA components could work perfectly with any other data type.
+**Note :** This project was originally developped to provide a reproducible an biologically meaningful python algorithm for the deconvolution of "omics" data. Several modules like sica.singlecell or sica.annotate are specifically dedicated to this task. However, the sica.base module which contains the main computations for the stabilization of ICA or the sica.mutualknn module which draws a mutual k-nearest neighbors graph to assess the reproducibility of the ICA components could work perfectly with any other data type.   
+
+### Documentation (work in progress)
+
+<https://stabilized-ica.readthedocs.io/en/latest/>
 
 ### Install the latest stable version with PyPi
 ```

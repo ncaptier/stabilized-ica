@@ -16,6 +16,14 @@ which was developped by J. Himberg and A. Hyvarinen in 2003 [1]. There are three
 
 Two ICA solvers: FastICA and Infomax
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+To define ICA, we use a statistical "latent variables" model (cf. section 2 [2]). We assume that we observe n linear mixtures :math: 'x_1, ... , x_n' of latent sources :math: 's_1,...,s_n' :
+
+..math::
+    x_j = a_{j1}s_1 + a_{j2}s_2 + ... + a_{jn}s_n \quad \text{for all j}
+
+It is convenient to use a vector-matrix notation introducing the observed random vector :math: '\boldsymbol{x}  \, \in \, \mathbb{R}^{n}', the latent random vector :math: '\boldsymbol{s}  \, \in \, \mathbb{R}^{n}' and the unknown mixing matrix :math: '\boldsymbol{A} \, \in \, \mathbb{R}^{n \times n}' :
+..math::
+    \boldsymbol{x} = \boldsymbol{A} \boldsymbol{s}
 
 
 Assess the reproductibility via Mutual Nearest Neighbors

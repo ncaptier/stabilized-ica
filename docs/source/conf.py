@@ -52,6 +52,7 @@ extensions = ['sphinx.ext.autodoc' ,
               'sphinx.ext.autosectionlabel',
               'nbsphinx',
               'sphinx_gallery.load_style']
+
 #'sphinx_gallery.gen_gallery'
 #'sphinx.ext.napoleon' (similar to numpydoc)
 autosectionlabel_prefix_document = True

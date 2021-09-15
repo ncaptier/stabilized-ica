@@ -51,23 +51,14 @@ extensions = ['sphinx.ext.autodoc' ,
               'sphinx.ext.linkcode',
               'sphinx.ext.autosectionlabel',
               'nbsphinx',
-              'sphinx_gallery.load_style']
+              'sphinx_gallery.load_style',
+              'sphinx.ext.mathjax']
 
 #'sphinx_gallery.gen_gallery'
 #'sphinx.ext.napoleon' (similar to numpydoc)
 autosectionlabel_prefix_document = True
 
 numpydoc_class_members_toctree = False
-
-# For maths, use mathjax by default and svg if NO_MATHJAX env variable is set
-# (useful for viewing the doc offline)
-if os.environ.get("NO_MATHJAX"):
-    extensions.append("sphinx.ext.imgmath")
-    imgmath_image_format = "svg"
-    mathjax_path = ""
-else:
-    extensions.append("sphinx.ext.mathjax")
-    mathjax_path = "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
 
 autodoc_default_options = {"members": True, "inherited-members": True}
 

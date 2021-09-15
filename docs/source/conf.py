@@ -23,7 +23,7 @@ sys.path.insert(0, os.path.abspath("sphinxext"))
 # -- Project information -----------------------------------------------------
 
 project = 'stabilized-ica'
-copyright = '2007-2021 The scikit-learn developers (BSD License)'
+copyright = 'Copyright 2021, Nicolas Captier (built with a theme provided by the scikit-learn developers (BSD License))'
 author = 'Nicolas Captier'
 
 # The full version, including alpha/beta/rc tags

@@ -2,7 +2,7 @@ from anndata import AnnData
 from .base import StabilizedICA
 import warnings
 
-def ica(data, observations , n_components,  n_runs , return_info = False , copy = False , plot_projection = None , fun = 'logcosh' , algorithm = 'fastica_par' 
+def ica(data, observations , n_components,  n_runs , resampling = None , return_info = False , copy = False , plot_projection = None , fun = 'logcosh' , algorithm = 'fastica_par' 
      , normalize = True , reorientation = True , whiten = True , pca_solver = 'full', chunked = False , chunk_size = None , zero_center = True):
     """ Compute stabilized ICA decomposition for AnnData formats. Use the implementation of stabilized ICA in
     the same package (see module sica.base.py)
@@ -16,17 +16,23 @@ def ica(data, observations , n_components,  n_runs , return_info = False , copy 
         This parameter allows the user to choose which of the metagenes or the metasamples he wants to consider as ICA independent
         sources.
         
-        If ``observations = 'genes'`` the independent sources will be of shape (n_genes). The metagenes will correspond to the indepent ICA
-        sources while the metasamples will correspond to the linear mixing.
-        
-        If ``observations = 'cells'`` the independent sources will be of shape (n_cells). The metasamples will correspond to the indepent ICA
-        sources while the metagenes will correspond to the linear mixing.
+        - If ``observations = 'genes'`` the independent sources will be of shape (n_genes). The metagenes will correspond to the independent ICA sources while the metasamples will correspond to the linear mixing.
+        - If ``observations = 'cells'`` the independent sources will be of shape (n_cells). The metasamples will correspond to the independent ICA sources while the metagenes will correspond to the linear mixing.
         
     n_components : int
         Number of stabilized ICA components.
         
     n_runs : int
         Number of times we repeat the FastICA algorithm.
+    
+    resampling : str {None , 'bootstrap' , 'fast_bootstrap'}, optional
+        Method for resampling the data before each run of the ICA solver.
+        
+        - If None, no resampling is applied.
+        - If 'bootstrap' the classical bootstrap method is applied to the original data matrix, the resampled matrix is whitened (using the whitening hyperparameters set for the fit method) and the ICA components are extracted.
+        - If 'fast_boostrap' a fast bootstrap algorithm is applied to the original data matrix and the whitening operation is performed simultaneously with SVD decomposition and then the ICA components are extracted (see References).
+        
+        Resampling could lead to quite heavy computations (whitening at each iteration), depending on the size of the input data. It should be considered with care. The default is None.
         
     return_info : bool, optionnal
         See results. The default is false.
@@ -80,6 +86,8 @@ def ica(data, observations , n_components,  n_runs , return_info = False , copy 
 
     """
     
+    #### 0. Initialisation
+    
     data_is_AnnData = isinstance(data, AnnData)
     if data_is_AnnData:
         adata = data.copy() if copy else data
@@ -87,17 +95,21 @@ def ica(data, observations , n_components,  n_runs , return_info = False , copy 
         adata = AnnData(data)
 
     X = adata.X
-    sica = StabilizedICA(n_components = n_components ,  max_iter = 2000 , n_jobs = -1)
-
+    sica = StabilizedICA(n_components = n_components ,  max_iter = 2000 , resampling = resampling , n_jobs = -1)
+    
+    #### 1. Apply stabilized ICA
+    
     # Apply stabilized ICA to discover independent metagenes
     if observations == 'genes':
 
         sica.fit(X.T , n_runs = n_runs , fun = fun , algorithm = algorithm , normalize = normalize , reorientation = reorientation , whiten = whiten
-                 ,pca_solver = pca_solver , chunked = chunked , chunk_size = chunk_size , zero_center = zero_center )
+                 ,pca_solver = pca_solver , chunked = chunked , chunk_size = chunk_size , zero_center = zero_center)
         
     # Apply stabilized ICA to discover independent metasamples
     elif observations == 'cells' :
-        if whiten and 'X_pca' in adata.obsm:
+        
+        # If no resampling is needed and 'X_pca' is already computed, we try to use it 
+        if (resampling is None) and whiten and 'X_pca' in adata.obsm:
             
             n_pcs = adata.obsm['X_pca'].shape[1]
             
@@ -115,9 +127,12 @@ def ica(data, observations , n_components,  n_runs , return_info = False , copy 
             sica.fit(X , n_runs = n_runs , fun = fun , algorithm = algorithm , normalize = normalize , reorientation = reorientation , whiten = whiten
                  ,pca_solver = pca_solver , chunked = chunked , chunk_size = chunk_size , zero_center = zero_center )           
     
-    # Plot 2D projection
+    #### 2. Plot 2D projection (optional)
+    
     if plot_projection is not None:        
       sica.projection(method = plot_projection)  
+    
+    #### 3. Return data 
     
     if observations == 'genes' :
         Metasamples = sica.A_
@@ -127,7 +142,6 @@ def ica(data, observations , n_components,  n_runs , return_info = False , copy 
         Metagenes = sica.A_.T   
     stability_indexes = sica.stability_indexes_
     
-    # Return data
     if data_is_AnnData:
         
         adata.obsm['sica_metasamples'] = Metasamples

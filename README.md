@@ -17,7 +17,7 @@ Finally, we propose an adaptation of our algorithm for the special case of [AnnD
 
 **Note :** This project was originally developped to provide a reproducible an biologically meaningful python algorithm for the deconvolution of "omics" data. Several modules like sica.singlecell or sica.annotate are specifically dedicated to this task. However, the sica.base module which contains the main computations for the stabilization of ICA or the sica.mutualknn module which draws a mutual k-nearest neighbors graph to assess the reproducibility of the ICA components could work perfectly with any other data type.   
 
-### Documentation (work in progress)
+### Documentation
 
 <https://stabilized-ica.readthedocs.io/en/latest/>
 
@@ -33,15 +33,16 @@ pip install git+https://github.com/ncaptier/stabilized-ica
 
 ## Experiments
 
-We provide two jupyter notebooks for an illustration with transcriptomic data :
+We provide three jupyter notebooks for an illustration with transcriptomic data :
 * [ICA decomposition with stabilized ICA](https://github.com/ncaptier/stabilized-ica/blob/master/examples/transcriptomic_ICA.ipynb)
 * [Stability of ICA components accross several NSCLC cohorts](https://github.com/ncaptier/stabilized-ica/blob/master/examples/stability_study.ipynb)
+* [Stabilized ICA for single-cell expression data (cell cycle)](https://github.com/ncaptier/stabilized-ica/blob/master/examples/cell_cycle_ICA.ipynb)
 
 ## Data
 
 The data set which goes with the jupyter notebook ["ICA decomposition with stabilized ICA"](https://github.com/ncaptier/stabilized-ica/blob/master/examples/transcriptomic_ICA.ipynb) can be found in the .zip file [data.zip](https://github.com/ncaptier/stabilized-ica/blob/master/examples/data.zip). Please extract locally the data set before running the notebook.   
 
-For the jupyter notebook ["Stability of ICA components accross several NSCLC cohorts"](https://github.com/ncaptier/stabilized-ica/blob/master/examples/stability_study.ipynb) please note that you will have to load the data yourself in order to run it (all the necessary links are reported on the notebook).
+For the jupyter notebooks ["Stability of ICA components accross several NSCLC cohorts"](https://github.com/ncaptier/stabilized-ica/blob/master/examples/stability_study.ipynb) and ["Stabilized ICA for single-cell expression data (cell cycle)"](https://github.com/ncaptier/stabilized-ica/blob/master/examples/cell_cycle_ICA.ipynb) please note that you will have to load the data yourself in order to run them (all the necessary links are reported on the notebooks).   
 
 ## Examples 
 

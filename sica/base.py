@@ -1,11 +1,13 @@
 import numpy as np
 import scipy.stats as stats
+from scipy import linalg
 import matplotlib.pyplot as plt
 import matplotlib.axes
-from sklearn.decomposition import FastICA  #, PCA
 from sklearn.cluster import AgglomerativeClustering
+from sklearn.decomposition import FastICA
 from sklearn.utils import as_float_array , check_array
 from sklearn.utils.validation import FLOAT_DTYPES
+from sklearn.utils.extmath import svd_flip
 from sklearn import manifold
 import umap
 from tqdm.notebook import tqdm
@@ -15,30 +17,6 @@ import warnings
 from picard import picard
 from ._whitening import whitening
 
-"""
-Introduction
-------------
-
-Given an input matrix X (n_observations x n_variables) the ICA algorithm decomposes X into :
-    X = S*A  with S (n_observations x n_variables) and A (n_variables x n_variables)
-where the columns of S are independent.
-
-In practice, we are often interested in dimension reduction and we can thus set a reduced number 
-of components such that :
-    X ~ S*A with S (n_observations x n_components) and A (n_components x n_variables)
-where the columns of S are independent.
-
-In signal processing the problem of blind source separation can be solved by ICA with and input
-matrix X (observations = times of registration x variables = initial signals).
-
-# In gene expression study, we typically want to unravel independent biolgical sources. To do so,
-# we can apply ICA on a matrix X (observations = genes x variables = biological samples).
-
-Important note
---------------
-PLEASE NOTE THAT IN THE FOLLOWING THE MATRICES S AND A WILL BE GIVEN IN THEIR TRANSPOSED SHAPE
-SIMPLY BY CONVENTION.
-"""
 
 def _check_algorithm(algorithm , fun):
     
@@ -77,39 +55,6 @@ def _check_algorithm(algorithm , fun):
     elif algorithm == 'infomax_orth' :
         return 'picard' , {'ortho' : True , 'extended' : False , 'fun' : fun}
 
-
-def _ICA_decomposition(X , dict_params , method , max_iter):
-    """ Apply FastICA or infomax (picard package) algorithm to the matrix X to solve the ICA problem.
-               
-    Parameters
-    ----------
-    X : 2D array-like, shape (n_observations , n_components) 
-        Whitened matrix.
-        
-    dict_params : dict
-        dictionary of keyword arguments for the functions FastICA or picard. See _check algorithm.
-        
-    method : str {'picard' , 'fastica'}
-        python algorithm to solve the ICA problem. Either FastICA from scikit-learn or infomax and its extensions
-        from picard package. See _check_algorithm.
-        
-    max_iter : int
-        see https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.FastICA.html
-
-    Returns
-    -------
-    2D array , shape (n_components , n_observations)
-        components obtained from the ICA decomposition of X
-
-    """
-    if method == 'picard' :
-        _, _, S = picard(X.T , max_iter = max_iter , whiten = False , centering = False , **dict_params)
-    else :
-        ica = FastICA(max_iter = max_iter , whiten = False , **dict_params)
-        S = ica.fit_transform(X).T
-    return S
-
-
 def _centrotype(X , Sim , cluster_labels):
     """Compute the centrotype of the cluster of ICA components defined by cluster_labels
     
@@ -147,7 +92,7 @@ def _stability_index(Sim , cluster_labels):
         similarity matrix for ICA components 
         
     cluster_labels : list of integers
-        indexes of the cluster of components (ex:[0 , 1 , 7] refers to the rows 0, 1 and 7 of X)
+        indexes of the cluster of components (ex: [0 , 1 , 7] refers to the rows 0, 1 and 7 of X)
 
     Returns
     -------
@@ -166,6 +111,8 @@ def _stability_index(Sim , cluster_labels):
     
     return aics - aecs
 
+ 
+   
 class StabilizedICA(object):
     """ Implement a stabilized version of the Independent Component Analysis algorithm
     
@@ -177,12 +124,21 @@ class StabilizedICA(object):
     max_iter : int
         Maximum number of iteration for the FastICA algorithm.
     
-    n_jobs : int
+    resampling : str {None , 'bootstrap' , 'fast_bootstrap'}, optional
+        Method for resampling the data before each run of the ICA solver.
+        
+        - If None, no resampling is applied.
+        - If 'bootstrap' the classical bootstrap method is applied to the original data matrix, the resampled matrix is whitened (using the whitening hyperparameters set for the fit method) and the ICA components are extracted.
+        - If 'fast_boostrap' a fast bootstrap algorithm is applied to the original data matrix and the whitening operation is performed simultaneously with SVD decomposition and then the ICA components are extracted (see References).
+        
+        Resampling could lead to quite heavy computations (whitening at each iteration), depending on the size of the input data. It should be considered with care. The default is None.
+        
+    n_jobs : int, optional
         Number of jobs to run in parallel. -1 means using all processors.
-        See the joblib package documentation for more explanations. Default is 1.
+        See the joblib package documentation for more explanations. The default is 1.
     
-    verbose: int
-        Control the verbosity: the higher, the more messages. Default is 0.
+    verbose: int, optional
+        Control the verbosity: the higher, the more messages. The default is 0.
     
     Attributes
     ----------
@@ -190,21 +146,36 @@ class StabilizedICA(object):
         Array of sources/metagenes, each line corresponds to a stabilized ICA component (i.e the centrotype of
         a cluster of components).  
         
-    A_: 2D array, shape (n_variables , n_components)
+    A_: 2D array, shape (n_mixtures , n_components)
         Pseudo-inverse of ``S_``, each column corresponds to a metasample.
     
     stability_indexes_ : 1D array, shape (n_components)
         Stability indexes for the stabilized ICA components.
-        
+    
+    Notes
+    -----
+    Here `n_components` corresponds to the number of ICA sources, `n_mixtures` corresponds to the number of linear mixtures (i.e linear mixtures of ICA sources) that we observe,
+    and `n_observations` corresponds to the number of observations collected for these mixtures.
+    Each time, the user needs to carefully determine which dimension in his data set should correspond to the linear mixtures of ICA sources and which dimension should correspond to the observations. 
+    The user should keep in mind that, at the end, he will obtain `n_components` vectors of dimension `n_observations`, independent form each other (as finite samples of latent independent distributions).
+    The user guide and the definition of the ICA framework should be helpful.
+    
+    - For a data set of discretized sound signals registered by 10 microphones at 100 time points, if we want to retrieve 5 ICA sources we need to set `n_mixtures = 10`, `n_observations = 100` and `n_components = 5`.
+    - For a gene expression data set with 100 samples and 10000 genes, if we want to retrieve 10 ICA sources **in the gene space** we need to set `n_mixtures = 100`, `n_observations = 10000` and `n_components = 10`.
+    
     References
     ----------
+    Fast bootstrap algorithm :
+        Fisher A, Caffo B, Schwartz B, Zipunnikov V. Fast, Exact Bootstrap Principal Component Analysis for p > 1 million.
+        J Am Stat Assoc. 2016;111(514):846-860. doi: 10.1080/01621459.2015.1062383. Epub 2016 Aug 18. PMID: 27616801; PMCID: PMC5014451.
+        
     ICASSO method :
         J. Himberg and A. Hyvarinen, "Icasso: software for investigating the reliability of ICA estimates by clustering and visualization," 
         2003 IEEE XIII Workshop on Neural Networks for Signal Processing (IEEE Cat. No.03TH8718), 2003, pp. 259-268, doi: 10.1109/NNSP.2003.1318025
         (see https://www.cs.helsinki.fi/u/ahyvarin/papers/Himberg03.pdf). 
     
     UMAP :
-    For more details about the UMAP (Uniform Manifold Approximation and Projection), see https://pypi.org/project/umap-learn/.
+        For more details about the UMAP (Uniform Manifold Approximation and Projection), see https://pypi.org/project/umap-learn/.
     
     Examples
     --------
@@ -213,15 +184,15 @@ class StabilizedICA(object):
     >>> df = pd.read_csv("data.csv" , index_col = 0).transpose()  
     >>> sICA = StabilizedICA(n_components = 45 , max_iter = 2000 , n_jobs = -1)
     >>> sICA.fit(df , n_runs = 30 , plot = True , normalize = True)    
-    >>> Metagenes = pd.DataFrame(sICA.S_ , columns = df.index , index = ['metagene ' + str(i) for i in range(sICA.S_.shape[0])])
-    >>> Metagenes.head()
-                
+    >>> Sources = pd.DataFrame(sICA.S_ , columns = df.index , index = ['source ' + str(i) for i in range(sICA.S_.shape[0])])
+    >>> Sources.head()                
     """
     
-    def __init__(self , n_components , max_iter , n_jobs = 1 , verbose = 0):
+    def __init__(self , n_components , max_iter , resampling = None , n_jobs = 1 , verbose = 0):
         
         self.n_components = n_components
         self.max_iter = max_iter
+        self.resampling = resampling
         self.n_jobs = n_jobs
         self.verbose = verbose
         
@@ -231,7 +202,9 @@ class StabilizedICA(object):
 
     def fit(self, X ,  n_runs , fun = 'logcosh' , algorithm = 'fastica_par' , plot = False , normalize = True , reorientation = True , whiten = True
             , pca_solver = 'full' , chunked = False , chunk_size = None , zero_center = True):
-        """1. Compute the ICA components of X ``n_runs`` times.
+        """ Fit the ICA model with X (use stabilization).
+        
+        1. Compute the ICA components of X ``n_runs`` times.
         
         2. Cluster all the ``n_components*n_runs`` components with agglomerative 
            hierarchical clustering (average linkage) into ``n_components`` clusters.
@@ -241,7 +214,7 @@ class StabilizedICA(object):
                  
         Parameters
         ----------
-        X : 2D array-like, shape (n_observations , n_variables) or (n_observations , n_components) if whiten is False.
+        X : 2D array-like, shape (n_observations , n_mixtures) or (n_observations , n_components) if whiten is False.
             Training data 
             
         n_runs : int
@@ -260,7 +233,7 @@ class StabilizedICA(object):
         algorithm : str {'fastica_par' , 'fastica_def' , 'fastica_picard' , 'infomax' , 'infomax_ext' , 'infomax_orth'}, optional.
             The algorithm applied for solving the ICA problem at each run. Please the supplementary explanations for more details.
             The default is 'fastica_par', i.e FastICA from sklearn with parallel implementation.
-            
+              
         plot : boolean, optional
             If True plot the stability indexes for each cluster in decreasing order. 
             The default is False.
@@ -302,66 +275,82 @@ class StabilizedICA(object):
             
         Returns
         -------        
-        None.
-        
+        None.      
         """
-        ## Initialisation
-        n_observations , n_variables = X.shape
+        #### 0. Initialisation
+        
+        n_observations , n_mixtures = X.shape
         Centrotypes = np.zeros((self.n_components , n_observations))
         Index = np.zeros(self.n_components)
         
-        method , dict_params = _check_algorithm(algorithm, fun)
+        self._method , self._solver_params = _check_algorithm(algorithm, fun)
         X = check_array(X , dtype=FLOAT_DTYPES , accept_sparse=True , copy=whiten)
         
-        ## Pre-processing (whitening)
-        if whiten :
-            # pca = PCA(n_components = self.n_components , whiten=True , svd_solver = pca_solver)
-            # X_w = pca.fit_transform(X)
-            X_w = whitening(X , n_components = self.n_components , svd_solver = pca_solver , chunked = chunked , chunk_size = chunk_size
-                            , zero_center = zero_center)
-        else :
-            X_w = as_float_array(X, copy=False)  
-            
-        ## Compute the self.n_components*n_runs ICA components and store into array Components
         parallel = Parallel(n_jobs=self.n_jobs, verbose=self.verbose)
         
-        # We noticed some numerical instabilities with FastICA from sklearn. We deal with this with the following lines.
-        if algorithm in ['fastica_par' , 'fastica_def'] :
-            maxtrials = 10
-            for i in range(maxtrials):
-                try:
-                    decomposition = parallel(delayed(_ICA_decomposition)(X_w , dict_params = dict_params , 
-                                                                         method = method, max_iter = self.max_iter)
-                                         for _ in range(n_runs))
-                except ValueError:
-                    if i < maxtrials - 1:
-                        print("FastICA from sklearn did not converge due to numerical instabilities - Retrying...")
-                        continue
-                    else:
-                        print("Too many attempts : FastICA did not converge !")
-                        raise
-                break
-        else :
-           decomposition = parallel(delayed(_ICA_decomposition)(X_w , dict_params = dict_params , method = method, max_iter = self.max_iter)
-                                    for _ in range(n_runs)) 
+        #### 1. Compute the n_components*n_runs ICA components depending on the resampling strategy
         
-        self._Components = np.vstack(decomposition)
+        if self.resampling is None :
+            
+            # Pre-processing (whitening)
+            if whiten :
+                X_w = whitening(X , n_components = self.n_components , svd_solver = pca_solver , chunked = chunked , chunk_size = chunk_size
+                                , zero_center = zero_center)
+            else :
+                X_w = as_float_array(X, copy=False) 
                 
-        ## Compute Similarity matrix between ICA components (Pearson correlation)
+            # Compute the n_components*n_runs ICA components
+            decomposition = self._parallel_decomposition(parallel = parallel , func = self._ICA_decomposition , kwargs={'X_w' : X_w} ,
+                                                          algorithm = algorithm , n_runs = n_runs)
+            
+        elif self.resampling == 'bootstrap' :
+            
+            if not whiten :
+                raise ValueError("The matrix X should not be pre-whitened when resampling = 'bootstrap'. The whitening step is performed consecutively to each resampling (using the whitening hyperparameters set by the user).")
+            
+            # Pre-processing (save whitening parameters)
+            whitening_params = {'svd_solver' : pca_solver , 'chunked' : chunked , 'chunk_size' : chunk_size , 'zero_center' : zero_center}         
+            
+            # Compute the n_components*n_runs ICA components
+            decomposition = self._parallel_decomposition(parallel = parallel , func = self._ICA_decomposition_bootstrap , kwargs={'X' : X , 'whitening_params' : whitening_params} ,
+                                                          algorithm = algorithm , n_runs = n_runs)
+        
+        elif self.resampling == 'fast_bootstrap' :
+            
+            if not whiten :
+                raise ValueError("The matrix X should not be pre-whitened when resampling = 'fast_bootstrap'. The whitening step is performed consecutively to each resampling (with SVD decomposition).")
+            
+            # Pre-processing (initial svd decomposition)
+            U, S, Vt = linalg.svd(X - np.mean(X, axis=0), full_matrices=False)
+            SVt = np.dot(np.diag(S) , Vt)
+            
+            # Compute the n_components*n_runs ICA components
+            decomposition = self._parallel_decomposition(parallel = parallel , func = self._ICA_decomposition_fast_bootstrap , kwargs={'U' : U , 'SVt' : SVt} ,
+                                                          algorithm = algorithm , n_runs = n_runs)
+
+        else :    
+            raise ValueError("Unrecognized resampling method. Please choose among None, 'bootstrap' or 'fast_bootstrap'")
+
+        self._Components = np.vstack(decomposition)
+        
+        #### 2. Cluster the n_components*n_runs ICA components with hierarchical clustering
+        
+        # Compute Similarity matrix between ICA components (Pearson correlation)
         self._Sim = np.abs(np.corrcoef(x=self._Components , rowvar=True))
 
-        ## Cluster the components with hierarchical clustering
+        # Cluster the components with hierarchical clustering
         clustering = AgglomerativeClustering(n_clusters = self.n_components , affinity = "precomputed" 
                             ,linkage = 'average' ).fit(1 - self._Sim)
         self._clusters = clustering.labels_ 
         
-        ## For each cluster compute the stability index and the centrotype
+        #### 3. For each cluster compute the stability index and the centrotype
+        
         for i in range(self.n_components):
             cluster_labels = list(np.argwhere(clustering.labels_ == i ).flatten())
             Centrotypes[i , :] = _centrotype(self._Components , self._Sim , cluster_labels)
             Index[i] = _stability_index(self._Sim , cluster_labels)
         
-        ## Sort the centrotypes (i.e final components) by stability index
+        # Sort the centrotypes (i.e final components) by stability index
         indices = np.argsort(-1*Index)
         Centrotypes , Index = Centrotypes[indices , :] , Index[indices]
         
@@ -380,6 +369,8 @@ class StabilizedICA(object):
         self.A_ = (X.T).dot(np.linalg.pinv(self.S_))
         #self.A_ = np.dot(X.T , np.linalg.pinv(self.S_))
         
+        #### 4. Plot the stability indexes of each final ICA components (optional)
+        
         if plot:
             plt.figure(figsize=(10 , 7))
             plt.plot(range(1 , self.n_components + 1) , self.stability_indexes_ , linestyle='--', marker='o')
@@ -389,6 +380,137 @@ class StabilizedICA(object):
             
         return 
     
+    def _parallel_decomposition(self , parallel , func , kwargs , algorithm , n_runs):
+        """ Compute in parallel the n_runs runs of the ICA solver. If the solver comes from sklearn.FastICA, some potential convergence errors ar handled through 
+        multiple retryings.
+        
+        Parameters
+        ----------
+        parallel : joblib.Parallel object 
+            Object to use workers to compute in parallel the n_runs application of the function func to solve the ICA problem.
+            
+        func : callable
+            Function to perform the ICA decomposition for a single run. It should return an array of ICA components of shape (n_components , n_observations)
+            
+        kwargs : dict
+            A dictionnary of arguments to pass to the function func.
+            
+        algorithm : algorithm : str {'fastica_par' , 'fastica_def' , 'fastica_picard' , 'infomax' , 'infomax_ext' , 'infomax_orth'}
+            See fit method.
+            
+        n_runs : int
+            Number of times we run the FastICA algorithm (see fit method).
+
+        Returns
+        -------
+        decomposition : list of arrays of shape (n_components , n_observations), length n_runs
+            List of ICA sources obtained at each run.
+        """
+        
+        if algorithm in ['fastica_par' , 'fastica_def'] :
+            maxtrials = 10
+            for i in range(maxtrials):
+                try:
+                    decomposition = parallel(delayed(func)(**kwargs) for _ in range(n_runs))
+                except ValueError:
+                    if i < maxtrials - 1:
+                        print("FastICA from sklearn did not converge due to numerical instabilities - Retrying...")
+                        continue
+                    else :
+                        print("Too many attempts : FastICA did not converge !")
+                        raise
+                break
+        else :
+           decomposition = parallel(delayed(func)(**kwargs) for _ in range(n_runs))
+           
+        return decomposition
+    
+    def _ICA_decomposition(self , X_w):
+        """ Apply FastICA or infomax (picard package) algorithm to the whitened matrix X_w to solve the ICA problem.
+        
+        Parameters
+        ----------
+        X_w : 2D array, shape (n_observations , n_components)
+            Whitened data matrix.
+
+        Returns
+        -------
+        S : 2D array, shape (n_components , n_observations)
+            Array of sources obtained from a single run of an ICA solver. Each line corresponds to an ICA component.
+        """
+        
+        if self._method == 'picard' :
+            _, _, S = picard(X_w.T , max_iter = self.max_iter , whiten = False , centering = False , **self._solver_params)
+        else :
+            ica = FastICA(max_iter = self.max_iter , whiten = False , **self._solver_params)
+            S = ica.fit_transform(X_w).T           
+        return S
+        
+    def _ICA_decomposition_bootstrap(self , X , whitening_params):
+        """ Draw a bootstrap sample from the original data matrix X, whiten it and apply FastICA or infomax (picard package) algorithm 
+        to solve the ICA problem.
+        
+        Parameters
+        ----------
+        X : 2D array, shape (n_observations , n_mixtures)
+            Original data matrix.
+            
+        whitening_params : dict
+            A dictionnary containing the arguments to pass to the whitening function to whiten the bootstrap matrix.
+
+        Returns
+        -------
+        S : 2D array, shape (n_components , n_observations)
+            Array of sources obtained from a single run of an ICA solver and a bootstrap sample of the original matrix X.
+            Each line corresponds to an ICA component.
+        """  
+
+        n_mixtures = X.shape[1]
+        Xb = X[: , np.random.choice(range(n_mixtures) , size = n_mixtures)]
+        Xb_w = whitening(Xb , n_components = self.n_components , **whitening_params)
+        
+        if self._method == 'picard' :
+            _, _, S = picard(Xb_w.T , max_iter = self.max_iter , whiten = False , centering = False , **self._solver_params)
+        else :
+            ica = FastICA(max_iter = self.max_iter , whiten = False , **self._solver_params)
+            S = ica.fit_transform(Xb_w).T
+        return S
+        
+    def _ICA_decomposition_fast_bootstrap(self , U , SVt):
+        """ Draw a boostrap whitened sample from the original matrix X (svd decomposition of X = USVt) [1], and apply FastICA or infomax (picard package) algorithm 
+        to solve the ICA problem.
+        
+        Parameters
+        ----------
+        U : 2D array, shape (n_observations , n_mixtures)
+            
+        SVt : 2D array, shape (n_mixtures , n_mixtures)
+
+        Returns
+        -------
+        S : 2D array, shape (n_components , n_observations)
+            Array of sources obtained from a single run of an ICA solver and a bootstrap sample of the original matrix X.
+            Each line corresponds to an ICA component.
+            
+        References
+        ----------
+        [1] : Fisher A, Caffo B, Schwartz B, Zipunnikov V. Fast, Exact Bootstrap Principal Component Analysis for p > 1 million.
+        J Am Stat Assoc. 2016;111(514):846-860. doi: 10.1080/01621459.2015.1062383. Epub 2016 Aug 18. PMID: 27616801; PMCID: PMC5014451.
+        """
+
+        n , p = SVt.shape[1] , U.shape[0]    
+        Ab , Sb , Rbt = linalg.svd(SVt[: , np.random.choice(range(n) , size = n)])  
+        Ub = np.dot(U , Ab)
+        Ub , Rbt = svd_flip(Ub , Rbt)   
+        Xb_w = Ub[: ,  : self.n_components]*np.sqrt(p - 1)
+        
+        if self._method == 'picard' :
+            _, _, S = picard(Xb_w.T , max_iter = self.max_iter , whiten = False , centering = False , **self._solver_params)
+        else :
+            ica = FastICA(max_iter = self.max_iter , whiten = False , **self._solver_params)
+            S = ica.fit_transform(Xb_w).T
+        return S
+        
     def projection(self , method = "mds" , ax = None):
         """Plot the ``n_components*n_runs`` ICA components computed during fit() in 2D.
         Approximate the original dissimilarities between components by Euclidean distance.
@@ -412,7 +534,6 @@ class StabilizedICA(object):
         - We use the dissimilarity measure ``sqrt(1 - |rho_ij|)`` (rho the Pearson correlation) instead of ``1 - |rho_ij|`` to reduce overlapping.
         
         - Please note that multidimensional scaling (MDS) is more computationally demanding than t-SNE or UMAP. However it takes into account the global structures of the data set while the others don't. For t-SNE or UMAP one cannot really interpret the inter-cluster distances.
-
         """
         
         if ax is None : 
@@ -443,7 +564,7 @@ def MSTD(X , m , M , step , n_runs , whiten = True , max_iter = 2000 , n_jobs = 
        
     Parameters
     ----------
-    X : 2D array, shape (n_observations , n_variables) 
+    X : 2D array, shape (n_observations , n_mixtures) 
         Training data
         
     m : int
@@ -483,7 +604,6 @@ def MSTD(X , m , M , step , n_runs , whiten = True , max_iter = 2000 , n_jobs = 
     >>> from sica.base import MSTD
     >>> df = pd.read_csv("data.csv" , index_col = 0).transpose()  
     >>> MSTD(df.values , m = 5 , M = 100 , step = 2 , n_runs = 20 , max_iter = 2000)
-
     """
     if ax is None :
         fig, ax = plt.subplots(1 , 2 , figsize = (20 , 7))

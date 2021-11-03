@@ -9,7 +9,7 @@ SysBio group
 of `Institut Curie <https://curie.fr/>`_, working together on answering major questions of cancer biology. 
 
 One of our objectives is to developp computational methods to deal with omics data and unravel relevant biological insights. The team has worked on the application of Independent Component Analysis 
-to omics data for many years. The *stabilized-ica* project enriches the set of tools that have already been developped and will make the integration of ICA in our python projects more straightforward.  
+to omics data for many years. The **stabilized-ica** project enriches the set of tools that have already been developped and will make the integration of ICA in our python projects more straightforward.  
 
 .. _contributors:
 

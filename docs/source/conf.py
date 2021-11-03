@@ -52,13 +52,27 @@ extensions = ['sphinx.ext.autodoc' ,
               'sphinx.ext.autosectionlabel',
               'nbsphinx',
               'sphinx_gallery.load_style',
-              'sphinx.ext.mathjax']
+              'add_toctree_functions']
+
+
 
 #'sphinx_gallery.gen_gallery'
 #'sphinx.ext.napoleon' (similar to numpydoc)
+    
 autosectionlabel_prefix_document = True
 
 numpydoc_class_members_toctree = False
+
+# For maths, use mathjax by default and svg if NO_MATHJAX env variable is set
+# (useful for viewing the doc offline)
+if os.environ.get("NO_MATHJAX"):
+    extensions.append("sphinx.ext.imgmath")
+    imgmath_image_format = "svg"
+    mathjax_path = ""
+else:
+    extensions.append("sphinx.ext.mathjax")
+    mathjax_path = "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
+    
 
 autodoc_default_options = {"members": True, "inherited-members": True}
 
@@ -106,14 +120,14 @@ html_theme = "scikit-learn-modern"
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-html_theme_options = {"google_analytics": True}
+html_theme_options = {"google_analytics": True, "mathjax_path": mathjax_path}
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 html_short_title = "stabilized-ica"
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = "logos/stabilized-ica-logo_1.png"
+html_logo = "logos/stabilized-ica-logo_2.png"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -130,6 +144,11 @@ html_copy_source = True
 #               "stabilized-ica/blob/master/"
 #               "{package}/{path}#L{lineno}"
 #  
+# If nonempty, this is the file name suffix for HTML files (e.g. ".xhtml").
+# html_file_suffix = ''
+
+# Output file base name for HTML help builder.
+htmlhelp_basename = "stabilized-icadoc"
 
 import sica
                                      
@@ -154,3 +173,4 @@ def linkcode_resolve(domain, info):
     except Exception:
         filename = info['module'].replace('.', '/') + '.py'
     return "https://github.com/ncaptier/stabilized-ica/blob/master/%s" % filename
+

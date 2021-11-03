@@ -143,7 +143,7 @@ $(document).ready(function() {
 
 </script>
 {%- if pagename != 'index' and pagename != 'documentation' %}
-    {% if theme_mathjax_path %}
-<script id="MathJax-script" async src="{{ theme_mathjax_path }}"></script>
-    {% endif %}
+  {% if theme_mathjax_path %}
+<script type = "text/javascript" id="MathJax-script" async src="{{ theme_mathjax_path }}"></script>
+     {% endif %}
 {%- endif %}

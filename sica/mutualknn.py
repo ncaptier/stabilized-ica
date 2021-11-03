@@ -286,7 +286,7 @@ class MNNgraph(object):
         if bipartite_graph:
             nx.draw_networkx_edge_labels(self.graph_ , pos,
                                          edge_labels=nx.get_edge_attributes(self.graph_ , 'label') , 
-                                         fontsize=16 , label_pos=0.3 , ax=ax)
+                                         font_size=16 , label_pos=0.3 , ax=ax)
             
         #3) Add a legend (for the colors of the nodes) and a title
             

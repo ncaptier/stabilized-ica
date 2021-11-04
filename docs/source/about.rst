@@ -17,7 +17,7 @@ Contributors
 ------------
 
 * **Nicolas Captier**
-* Andrei Zynoviev
+* Andrei Zinovyev
 * Aziz Fouché
 * Nicolas Sompairac
 

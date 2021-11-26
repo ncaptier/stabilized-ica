@@ -67,7 +67,7 @@ With all these assumptions, the FastICA approaches links the ICA problem to the 
 Approximation of the negentropy
 _______________________________
 
-To compute the negentropy of a random variable :math:`y`, we need its probability density function (pdf). For ICA, knowing the pdfs of each :math:`y_i` would mean that we have access to the probability distributions of the latent sources :math:`s_i , ... , s_n`. Unfortunatly, this is usually not the case. We thus need to build a simple and accurate estimator of negentropy (this is not an easy task at all !).
+To compute the negentropy of a random variable :math:`y`, we need its probability density function (pdf). For ICA, knowing the pdfs of each :math:`y_i` would mean that we have access to the probability distributions of the latent sources :math:`s_i , ... , s_n`. Unfortunately, this is usually not the case. We thus need to build a simple and accurate estimator of negentropy (this is not an easy task at all !).
 
 In [4]_, Hyvärinen adressed this challenge and improved the classical estimation methods that were using higher-order moments and thus were sensible to outliers and mainly considering the tails of the distributions. 
 
@@ -77,7 +77,7 @@ The idea is to assume that we actually have access to some information about the
 
 **Note :** In practice the term :math:`\mathbb{E} \left[ G(y) \right] = \mathbb{E} \left[ G(\boldsymbol{w}^T \boldsymbol{x}) \right]` will be computed with an empirical mean over the different observations :math:`\boldsymbol{X} = \left[ \boldsymbol{x}^1 , ... , \boldsymbol{x}^p \right]` we will have access to.
 
-In a nutshell, this approximation :math:`J_G` gives a us a new optimization problem (replacing :math:`J(y_i)` by :math:`J_G(y_i)` in the previous section) which the FasICA approach will try to deal with to solve ICA. 
+In a nutshell, this approximation :math:`J_G` gives a us a new optimization problem (replacing :math:`J(y_i)` by :math:`J_G(y_i)` in the previous section) which the FastICA approach will try to deal with to solve ICA. 
 
 Practical choice for the measuring function G
 _____________________________________________
@@ -93,7 +93,7 @@ The second criteria is the most difficult to satisfy. It requires the user to ha
     * `fun = 'exp'` is associated with a differentiable version of :math:`G(u) = |u|^{\alpha}` (with :math:`\alpha << 1`). It is recommended when independent sources are assumed to be **highly super-Gaussian** or when robustness to outliers is very important.
     * `fun = 'cube'` is associated with :math:`G(u) = \frac{1}{4} u^4` (this is a bit misleading). This choice does not satisfy all the optimal criteria for the choice of :math:`G` (in particular it grows too fast when :math:`|y|` grows). It can still be used for estimating **sub-Gaussian** sources and when there is no outliers.
 
-**Note** : The user can also provides its own measuring function :math:`G` if he has any prior knowledge or intiution about the shape of the distribution of the sources. In that case, he could use :math:`G(u) = - \log f_{prior}(u)`. He would still have to pay attention to the criteria that Hyvärinen defined for the choice of :math:`G`. Please refer to the documentation of `sklearn.decomposition.FastICA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.FastICA.html>`_ for more details.
+**Note** : The user can also provides its own measuring function :math:`G` if he has any prior knowledge or intuition about the shape of the distribution of the sources. In that case, he could use :math:`G(u) = - \log f_{prior}(u)`. He would still have to pay attention to the criteria that Hyvärinen defined for the choice of :math:`G`. Please refer to the documentation of `sklearn.decomposition.FastICA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.FastICA.html>`_ for more details.
 
 A fixed-point algorithm
 _______________________

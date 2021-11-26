@@ -8,7 +8,7 @@ setuptools.setup(
     version="1.0.1",
     author="Nicolas Captier",
     author_email="nicolas.captier@curie.fr",
-    description="Stabilized ICA algorithm and applications to single-cell data",
+    description="Stabilized ICA algorithm",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/ncaptier/stabilized-ica",

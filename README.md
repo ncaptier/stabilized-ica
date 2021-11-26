@@ -3,13 +3,13 @@
 [![Documentation Status](https://readthedocs.org/projects/stabilized-ica/badge/?version=latest)](https://stabilized-ica.readthedocs.io/en/latest/?badge=latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+![full_logo](docs/source/images/full_logo.png){width=50%}
+
 This repository proposes a python implementation for stabilized ICA decomposition algorithm. Most of the technical details can be found in the references [1], [2] and [3].    
 
 Our algorithm integrates two well-known methods to solve the ICA problem :
 * FastICA (implemented in scikit-learn)
 * Infomax and extensions (implemented in [picard package](https://pierreablin.github.io/picard/))     
-
-We propose a brief review of these two methods in [supplementary_material.pdf](documentation/supplementary_material.pdf) so that the user can knowingly decide which of them is best suited for his problem.   
    
 We also propose an implementation of the Mutual Nearest Neighbors method as well as a visualization tool to draw the associated network. It is used to study the stability of the ICA components through different datasets.   
 
@@ -36,7 +36,10 @@ pip install git+https://github.com/ncaptier/stabilized-ica
 We provide three jupyter notebooks for an illustration with transcriptomic data :
 * [ICA decomposition with stabilized ICA](https://github.com/ncaptier/stabilized-ica/blob/master/examples/transcriptomic_ICA.ipynb)
 * [Stability of ICA components accross several NSCLC cohorts](https://github.com/ncaptier/stabilized-ica/blob/master/examples/stability_study.ipynb)
-* [Stabilized ICA for single-cell expression data (cell cycle)](https://github.com/ncaptier/stabilized-ica/blob/master/examples/cell_cycle_ICA.ipynb)
+* [Stabilized ICA for single-cell expression data (cell cycle)](https://github.com/ncaptier/stabilized-ica/blob/master/examples/cell_cycle_ICA.ipynb)   
+
+We provide one jupyter notebook for an illustration with EEG/MEG data :
+* [Detecting artifacts and biological phenomena on MEG data with stabilized-ica](https://github.com/ncaptier/stabilized-ica/blob/master/examples/sica_MEG.ipynb)
 
 ## Data
 
@@ -86,7 +89,7 @@ ica(adata , observations = 'genes' , n_components = 30 , n_runs = 100)
 
 ## Acknowledgements
 
-This package was created as a part of Master internship by Nicolas Captier in the [Computational Systems Biology of Cancer group](http://sysbio.curie.fr) of Institut Curie.
+This package was created as a part of the PhD project of Nicolas Captier in the [Computational Systems Biology of Cancer group](http://sysbio.curie.fr) of Institut Curie.
 
 ## References
 

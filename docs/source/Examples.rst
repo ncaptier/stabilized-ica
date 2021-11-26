@@ -9,4 +9,12 @@ Omics data analysis
 	
     _examples/transcriptomic_ICA
     _examples/stability_study
-    _examples/cell_cycle_ICA.ipynb
+    _examples/cell_cycle_ICA
+
+EEG/MEG data analysis
+-------------------
+
+.. nbgallery::
+    :name: thumbnail_gallery
+	
+    _examples/sica_MEG

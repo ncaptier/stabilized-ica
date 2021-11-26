@@ -7,3 +7,4 @@ index_test
     transcriptomic_ICA
     stability_study
     cell_cycle_ICA
+    sica_MEG

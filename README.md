@@ -3,7 +3,9 @@
 [![Documentation Status](https://readthedocs.org/projects/stabilized-ica/badge/?version=latest)](https://stabilized-ica.readthedocs.io/en/latest/?badge=latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-<img src="docs/source/images/full_logo.png" width="100" height="100">
+<p align="center">
+    <img src="docs/source/images/full_logo.png" width="400" height="400" />
+</p>
 
 This repository proposes a python implementation for stabilized ICA decomposition algorithm. Most of the technical details can be found in the references [1], [2] and [3].    
 

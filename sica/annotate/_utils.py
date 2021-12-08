@@ -4,7 +4,7 @@ import pandas as pd
 import scipy.stats as stats
 
 
-def _convert_geneID(genes_list , input_type , output_type):
+def _convert_geneID(genes_list, input_type, output_type):
     """ Call mygene querymany() function to convert gene IDs
     https://docs.mygene.info/projects/mygene-py/en/latest/#mygene.MyGeneInfo.querymany
 
@@ -28,15 +28,24 @@ def _convert_geneID(genes_list , input_type , output_type):
         (https://docs.mygene.info/projects/mygene-py/en/latest/)
 
     """
-    
-    #Initiate mygene
+
+    # Initiate mygene
     mg = mygene.MyGeneInfo()
-    #Perform Conversion
-    conversion_df = mg.querymany(genes_list, scopes=input_type, fileds = output_type , verbose=False, as_dataframe=True)
-    
-    return conversion_df[~conversion_df.index.duplicated(keep='first')] #remove potential duplicates
-    
-def convert_to_entrez(genes_list , input_type):
+    # Perform Conversion
+    conversion_df = mg.querymany(
+        genes_list,
+        scopes=input_type,
+        fileds=output_type,
+        verbose=False,
+        as_dataframe=True,
+    )
+
+    return conversion_df[
+        ~conversion_df.index.duplicated(keep="first")
+    ]  # remove potential duplicates
+
+
+def convert_to_entrez(genes_list, input_type):
     """ Convert input gene IDs to Entrez gene IDs with mygene conversion tools (see _convert_geneID function).
     
     Parameters
@@ -60,16 +69,17 @@ def convert_to_entrez(genes_list , input_type):
         Dataframe containing query gene IDs as index returned by _convert_geneID.
 
     """
-    
-    df = _convert_geneID(genes_list , input_type = input_type , output_type = 'entrezgene')
 
-    bool_mask = df['entrezgene'].isna()
-    entrez = list(df[~bool_mask]['entrezgene'])
+    df = _convert_geneID(genes_list, input_type=input_type, output_type="entrezgene")
+
+    bool_mask = df["entrezgene"].isna()
+    entrez = list(df[~bool_mask]["entrezgene"])
     notfound = list(df[bool_mask].index)
-        
-    return entrez , notfound , df
 
-def get_top_genes(metagene , threshold , method , tail):
+    return entrez, notfound, df
+
+
+def get_top_genes(metagene, threshold, method, tail):
     """ Select the extreme expressed genes for a given metagene.
     
     Parameters
@@ -98,54 +108,64 @@ def get_top_genes(metagene , threshold , method , tail):
         List of the IDs of the extreme expressed genes for the given metagene.
 
     """
-    if method == 'quantile':
-        t_left = metagene.quantile(q = threshold[0])
-        t_right = metagene.quantile(q = 1 - threshold[1])            
-    elif method == 'std':
-        mu , std = metagene.mean() , metagene.std()
-        t_left = mu - threshold[0]*std
-        t_right = mu + threshold[1]*std
-    
-    S_l = metagene[metagene <= t_left].sort_values(ascending = False)
-    S_r = metagene[metagene >= t_right].sort_values(ascending = False) 
-    
-    if tail == 'left' :
+    if method == "quantile":
+        t_left = metagene.quantile(q=threshold[0])
+        t_right = metagene.quantile(q=1 - threshold[1])
+    elif method == "std":
+        mu, std = metagene.mean(), metagene.std()
+        t_left = mu - threshold[0] * std
+        t_right = mu + threshold[1] * std
+
+    S_l = metagene[metagene <= t_left].sort_values(ascending=False)
+    S_r = metagene[metagene >= t_right].sort_values(ascending=False)
+
+    if tail == "left":
         top_genes = list(S_l.index)
-    elif tail == 'right' :
+    elif tail == "right":
         top_genes = list(S_r.index)
-    elif tail == 'both' : 
+    elif tail == "both":
         top_genes = list(S_l.index) + list(S_r.index)
-    elif tail == 'heaviest' :
-        if stats.skew(metagene)> 0:
+    elif tail == "heaviest":
+        if stats.skew(metagene) > 0:
             top_genes = list(S_r.index)
-        else : 
+        else:
             top_genes = list(S_l.index)
-            
+
     return top_genes
 
-def check_data(data , pre_selected):
-    
-    if pre_selected :
-       if not isinstance(data , pd.Series):
-        raise ValueError("When pre_selected is True, data parameter must be a pandas.Series of shape (n_metagenes) containing list of extreme expressed genes")    
-    else :
-        if isinstance(data , pd.Series):
+
+def check_data(data, pre_selected):
+
+    if pre_selected:
+        if not isinstance(data, pd.Series):
+            raise ValueError(
+                "When pre_selected is True, data parameter must be a pandas.Series of shape (n_metagenes) containing list of extreme expressed genes"
+            )
+    else:
+        if isinstance(data, pd.Series):
             data = pd.DataFrame(data).transpose()
-        elif not isinstance(data , pd.DataFrame):
-            raise ValueError("When pre_selected is False, data parameter must be a pandas.Series of shape (n_genes) or a pandas.DataFrame of shape (n_metagenes , n_genes)")         
+        elif not isinstance(data, pd.DataFrame):
+            raise ValueError(
+                "When pre_selected is False, data parameter must be a pandas.Series of shape (n_genes) or a pandas.DataFrame of shape (n_metagenes , n_genes)"
+            )
     return
-    
-def check_params(threshold , method , tail):
-    
-    if isinstance(threshold, (int , float)) :
-        threshold = np.array([threshold]*2)
-    elif not isinstance(threshold, (tuple , list , np.array)) or len(threshold) != 2 :
-        raise ValueError("threshold must be either a numeric or an array-like of two numerics") 
-        
-    if not method in ['quantile' , 'std'] :
+
+
+def check_params(threshold, method, tail):
+
+    if isinstance(threshold, (int, float)):
+        threshold = np.array([threshold] * 2)
+    elif not isinstance(threshold, (tuple, list, np.array)) or len(threshold) != 2:
+        raise ValueError(
+            "threshold must be either a numeric or an array-like of two numerics"
+        )
+
+    if not method in ["quantile", "std"]:
         raise ValueError("method parameter value must be either 'quantile' or 'std' ")
-        
-    if not tail in ['left' , 'right' , 'both' , 'heaviest'] :
-        raise ValueError("tail parameter value must be 'left', 'right', 'both' or 'heaviest'")
-        
+
+    if not tail in ["left", "right", "both", "heaviest"]:
+        raise ValueError(
+            "tail parameter value must be 'left', 'right', 'both' or 'heaviest'"
+        )
+
     return threshold

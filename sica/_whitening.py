@@ -2,7 +2,7 @@ import numpy as np
 from sklearn.decomposition import PCA, IncrementalPCA, TruncatedSVD
 from scipy.sparse import issparse
 from scipy.sparse.linalg import LinearOperator, svds
-from sklearn.utils import check_array , check_random_state
+from sklearn.utils import check_array, check_random_state
 from sklearn.utils.extmath import svd_flip
 import warnings
 
@@ -38,7 +38,9 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."""
 
 
-def whitening(X , n_components , svd_solver , chunked , chunk_size , zero_center , random_state = None):
+def whitening(
+    X, n_components, svd_solver, chunked, chunk_size, zero_center, random_state=None
+):
     """ Whiten data (i.e transform variables into a set of new uncorrelated and unit-variance variables) 
     and reduce dimension trhough a PCA-like approach.
     This function handles array-like formats as well as sparse matrices.
@@ -75,38 +77,48 @@ def whitening(X , n_components , svd_solver , chunked , chunk_size , zero_center
 
     """
     random_state = check_random_state(random_state)
-    
+
     if n_components is None:
         n_components = min(X.shape)
-        
-    if chunked :
-        
-        pca = IncrementalPCA(n_components=n_components ,whiten = True , batch_size = chunk_size)
+
+    if chunked:
+
+        pca = IncrementalPCA(
+            n_components=n_components, whiten=True, batch_size=chunk_size
+        )
         X_w = pca.fit_transform(X)
 
     elif issparse(X):
-        
-        if not zero_center :
-            
-            warnings.warn('TruncatedSVD is very similar to PCA, but differs in that the matrix is not centered first.'
-                         ' The following components still often resemble the exact PCA very closely')
-            
-            pca = TruncatedSVD( n_components=n_components, random_state=random_state, algorithm=svd_solver)
+
+        if not zero_center:
+
+            warnings.warn(
+                "TruncatedSVD is very similar to PCA, but differs in that the matrix is not centered first."
+                " The following components still often resemble the exact PCA very closely"
+            )
+
+            pca = TruncatedSVD(
+                n_components=n_components,
+                random_state=random_state,
+                algorithm=svd_solver,
+            )
             X_w = pca.fit_transform(X)
-            X_w = (X_w/pca.singular_values_)*np.sqrt(X.shape[0] - 1)
-            X_w -= X_w.mean(axis = 0)
-        else :
-            X_w = _pca_with_sparse(X, n_components, solver=svd_solver, random_state=random_state)
-    
-    else : 
-        
-        pca = PCA(n_components = n_components , whiten=True , svd_solver = svd_solver)
+            X_w = (X_w / pca.singular_values_) * np.sqrt(X.shape[0] - 1)
+            X_w -= X_w.mean(axis=0)
+        else:
+            X_w = _pca_with_sparse(
+                X, n_components, solver=svd_solver, random_state=random_state
+            )
+
+    else:
+
+        pca = PCA(n_components=n_components, whiten=True, svd_solver=svd_solver)
         X_w = pca.fit_transform(X)
-        
+
     return X_w
 
 
-def _pca_with_sparse(X, npcs, solver='arpack', mu=None, random_state=None):
+def _pca_with_sparse(X, npcs, solver="arpack", mu=None, random_state=None):
     """ Compute PCA decomposition with initial centering for sparse input.
     
     Parameters
@@ -131,15 +143,15 @@ def _pca_with_sparse(X, npcs, solver='arpack', mu=None, random_state=None):
     X_pca : 2D ndarray, shape (n_observations , n_components)
         
     """
-    
+
     random_state = check_random_state(random_state)
     np.random.set_state(random_state.get_state())
     random_init = np.random.rand(np.min(X.shape))
-    X = check_array(X, accept_sparse=['csr', 'csc'])
+    X = check_array(X, accept_sparse=["csr", "csc"])
 
     if mu is None:
         mu = X.mean(0).A.flatten()[None, :]
-        
+
     # Build the linear operator that will be needed for applying svd
     mdot = mu.dot
     mmat = mdot
@@ -163,14 +175,21 @@ def _pca_with_sparse(X, npcs, solver='arpack', mu=None, random_state=None):
     def rmatmat(x):
         return XHmat(x) - mhmat(ones(x))
 
-    XL = LinearOperator(matvec=matvec, dtype=X.dtype, matmat=matmat, shape=X.shape,rmatvec=rmatvec,rmatmat=rmatmat)
-    
+    XL = LinearOperator(
+        matvec=matvec,
+        dtype=X.dtype,
+        matmat=matmat,
+        shape=X.shape,
+        rmatvec=rmatvec,
+        rmatmat=rmatmat,
+    )
+
     # Apply svd
     u, s, v = svds(XL, solver=solver, k=npcs, v0=random_init)
     u, v = svd_flip(u, v)
     idx = np.argsort(-s)
 
-    #Compute whitened projection (unit-variance and zero mean)
-    X_pca = u[:, idx]*np.sqrt(u.shape[0] - 1)
-    
+    # Compute whitened projection (unit-variance and zero mean)
+    X_pca = u[:, idx] * np.sqrt(u.shape[0] - 1)
+
     return X_pca

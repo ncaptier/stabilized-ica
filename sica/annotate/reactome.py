@@ -3,7 +3,8 @@ import pandas as pd
 from reactome2py import analysis
 import warnings
 import webbrowser
-from ._utils import convert_to_entrez , get_top_genes , check_data , check_params
+from ._utils import convert_to_entrez, get_top_genes, check_data, check_params
+
 
 class ReactomeAnalysis(object):
     """ Provide tools for running reactome enrichment analysis for different metagenes.
@@ -58,29 +59,43 @@ class ReactomeAnalysis(object):
     >>> metagene7_annot = annotations.get_analysis(metagene = 'metagene 7')
     >>> metagene7_annot.head()
     """
-    
-    def __init__(self, data , input_type = None , pre_selected = False, threshold = 3 , method = 'std' , tail = 'heaviest'):
-        
-        #Check data
-        check_data(data , pre_selected) 
-              
+
+    def __init__(
+        self,
+        data,
+        input_type=None,
+        pre_selected=False,
+        threshold=3,
+        method="std",
+        tail="heaviest",
+    ):
+
+        # Check data
+        check_data(data, pre_selected)
+
         self.input_type = input_type
-        if self.input_type is None :
-            warnings.warn("If input_type is None the conversion of input IDs to Entrez IDs will not be possible.The inputs should be valid IDs accepted by the reactome analysis tool ((e.g HUGO gene symbols, EntrezGene , Uniprot ...)")
-        
-        # Initialization of selt.top_genes_ attribute          
-        self.top_genes_ = pd.DataFrame({'inputs' : None , 'entrezgene' : None , 'notfound' : None} , index = data.index)        
-        if pre_selected :
-            self.top_genes_['inputs'] = data.copy()
-        else :
-            threshold = check_params(threshold , method, tail)  
-            self.top_genes_['inputs'] = data.apply(get_top_genes , threshold = threshold , method = method , tail = tail , axis = 1)    
-        
+        if self.input_type is None:
+            warnings.warn(
+                "If input_type is None the conversion of input IDs to Entrez IDs will not be possible.The inputs should be valid IDs accepted by the reactome analysis tool ((e.g HUGO gene symbols, EntrezGene , Uniprot ...)"
+            )
+
+        # Initialization of selt.top_genes_ attribute
+        self.top_genes_ = pd.DataFrame(
+            {"inputs": None, "entrezgene": None, "notfound": None}, index=data.index
+        )
+        if pre_selected:
+            self.top_genes_["inputs"] = data.copy()
+        else:
+            threshold = check_params(threshold, method, tail)
+            self.top_genes_["inputs"] = data.apply(
+                get_top_genes, threshold=threshold, method=method, tail=tail, axis=1
+            )
+
         # Initialization of self.tokens dictionary. Keep tokens once the reactome analysis has been performed
         # to avoid repeating the whole analysis when calling get_analysis or open_analysis a second time.
-        self.tokens = {ind : None for ind in data.index}     
-     
-    def convert_metagenes(self , idx):
+        self.tokens = {ind: None for ind in data.index}
+
+    def convert_metagenes(self, idx):
         """ Convert the IDs of the most expressed genes contained in ``top_genes_``.
         
         Parameters
@@ -97,35 +112,45 @@ class ReactomeAnalysis(object):
         None
 
         """
-        
-        if self.input_type is None :
+
+        if self.input_type is None:
             raise ValueError("Conversion is not possible with self.input_type = None.")
-        
+
         # Define the function that will be applied to the rows of self.top_genes_ dataframe
         def fun(row):
-            if row['entrezgene'] is None :
-                return convert_to_entrez(row['inputs'] , self.input_type)[:2]
-            else :
-                return row['entrezgene'] , row['notfound']
-            
-        # Apply func to the rows of self.top_genes_ associated with idx   
-        if idx == 'all' :
-            
-            warnings.warn("idx = 'all' : this operation can take quite some time depending on the number of metagenes and the number of most expressed genes.")
-            self.top_genes_[['entrezgene' , 'notfound']] = self.top_genes_.apply(fun , axis = 1 , result_type = 'expand')
-            
-        elif isinstance(idx , list) :
-            
-            warnings.warn("idx is a list : this operation can take quite some time depending on the number of metagenes and the number of most expressed genes.")
-            self.top_genes_.loc[idx , ['entrezgene' , 'notfound']] = (self.top_genes_.loc[idx].apply(fun , axis = 1 , result_type = 'expand')).values
-            
-        else :
-            
-            self.top_genes_.loc[idx , ['entrezgene' , 'notfound']] = np.array(fun(self.top_genes_.loc[idx]) , dtype="object")
-            
+            if row["entrezgene"] is None:
+                return convert_to_entrez(row["inputs"], self.input_type)[:2]
+            else:
+                return row["entrezgene"], row["notfound"]
+
+        # Apply func to the rows of self.top_genes_ associated with idx
+        if idx == "all":
+
+            warnings.warn(
+                "idx = 'all' : this operation can take quite some time depending on the number of metagenes and the number of most expressed genes."
+            )
+            self.top_genes_[["entrezgene", "notfound"]] = self.top_genes_.apply(
+                fun, axis=1, result_type="expand"
+            )
+
+        elif isinstance(idx, list):
+
+            warnings.warn(
+                "idx is a list : this operation can take quite some time depending on the number of metagenes and the number of most expressed genes."
+            )
+            self.top_genes_.loc[idx, ["entrezgene", "notfound"]] = (
+                self.top_genes_.loc[idx].apply(fun, axis=1, result_type="expand")
+            ).values
+
+        else:
+
+            self.top_genes_.loc[idx, ["entrezgene", "notfound"]] = np.array(
+                fun(self.top_genes_.loc[idx]), dtype="object"
+            )
+
         return
-    
-    def open_full_analysis(self , metagene , use_inputs = False): 
+
+    def open_full_analysis(self, metagene, use_inputs=False):
         """ Browse the analysis for the given metagene in reactome web portal.
         
         Parameters
@@ -143,22 +168,31 @@ class ReactomeAnalysis(object):
         None.
 
         """
-        if self.tokens[metagene] is not None :
+        if self.tokens[metagene] is not None:
             token = self.tokens[metagene]
-        else : 
-            if (self.input_type is None) or use_inputs : 
-                token = _get_token(self.top_genes_.loc[metagene , 'inputs'])
-            else :
-                self.convert_metagenes(idx = metagene)
-                token = _get_token(self.top_genes_.loc[metagene , 'entrezgene'])
+        else:
+            if (self.input_type is None) or use_inputs:
+                token = _get_token(self.top_genes_.loc[metagene, "inputs"])
+            else:
+                self.convert_metagenes(idx=metagene)
+                token = _get_token(self.top_genes_.loc[metagene, "entrezgene"])
             self.tokens[metagene] = token
-            
-        url = 'https://reactome.org/PathwayBrowser/#/DTAB=AN&ANALYSIS=' + token
+
+        url = "https://reactome.org/PathwayBrowser/#/DTAB=AN&ANALYSIS=" + token
         webbrowser.open(url)
-        return 
-    
-    def get_analysis(self , metagene , use_inputs = False , species='Homo sapiens', sort_by='Entities FDR', 
-                     ascending = True, p_value=0.05 , min_entities=10, max_entities=500) :
+        return
+
+    def get_analysis(
+        self,
+        metagene,
+        use_inputs=False,
+        species="Homo sapiens",
+        sort_by="Entities FDR",
+        ascending=True,
+        p_value=0.05,
+        min_entities=10,
+        max_entities=500,
+    ):
         """ Return the reactome enrichment analysis of a given metagene.
         
         Parameters
@@ -195,34 +229,34 @@ class ReactomeAnalysis(object):
             Results of the reactome enrichment analysis for the given metagene.
 
         """
-        if self.tokens[metagene] is not None :
+        if self.tokens[metagene] is not None:
             token = self.tokens[metagene]
-        else : 
-            if (self.input_type is None) or use_inputs : 
-                token = _get_token(self.top_genes_.loc[metagene , 'inputs'])
-            else :
-                self.convert_metagenes(metagenes = metagene)
-                token = _get_token(self.top_genes_.loc[metagene , 'entrezgene'])
+        else:
+            if (self.input_type is None) or use_inputs:
+                token = _get_token(self.top_genes_.loc[metagene, "inputs"])
+            else:
+                self.convert_metagenes(metagenes=metagene)
+                token = _get_token(self.top_genes_.loc[metagene, "entrezgene"])
             self.tokens[metagene] = token
-        
-        df = analysis.pathway2df(token)
-        df.iloc[: , 2:10] = df.iloc[: , 2:10].apply(pd.to_numeric)
 
-        mask= pd.Series(True,index=df.index)
-        if species is not None :
-            mask = mask & (df['Species name'] == species)
-        if p_value is not None :
-            mask = mask & (df['Entities pValue'] <= p_value)
-        if min_entities is not None :
-            mask = mask & (df['#Entities total'] >= min_entities)
-        if max_entities is not None :
-            mask = mask & (df['#Entities total'] <= max_entities)
-            
-        if sort_by is not None :
-            return df[mask].sort_values(by = sort_by , ascending = ascending)
-        else : 
+        df = analysis.pathway2df(token)
+        df.iloc[:, 2:10] = df.iloc[:, 2:10].apply(pd.to_numeric)
+
+        mask = pd.Series(True, index=df.index)
+        if species is not None:
+            mask = mask & (df["Species name"] == species)
+        if p_value is not None:
+            mask = mask & (df["Entities pValue"] <= p_value)
+        if min_entities is not None:
+            mask = mask & (df["#Entities total"] >= min_entities)
+        if max_entities is not None:
+            mask = mask & (df["#Entities total"] <= max_entities)
+
+        if sort_by is not None:
+            return df[mask].sort_values(by=sort_by, ascending=ascending)
+        else:
             return df[mask]
-        
+
 
 def _get_token(ids):
     """ Return the token associated with the reactome enrichment analysis.
@@ -240,5 +274,5 @@ def _get_token(ids):
         request, a token is associated with the result.
 
     """
-    result = analysis.identifiers(ids=','.join(ids))
-    return result['summary']['token']
+    result = analysis.identifiers(ids=",".join(ids))
+    return result["summary"]["token"]

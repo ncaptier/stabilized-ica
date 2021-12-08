@@ -2,8 +2,26 @@ from anndata import AnnData
 from .base import StabilizedICA
 import warnings
 
-def ica(data, observations , n_components,  n_runs , resampling = None , return_info = False , copy = False , plot_projection = None , fun = 'logcosh' , algorithm = 'fastica_par' 
-     , normalize = True , reorientation = True , whiten = True , pca_solver = 'full', chunked = False , chunk_size = None , zero_center = True):
+
+def ica(
+    data,
+    observations,
+    n_components,
+    n_runs,
+    resampling=None,
+    return_info=False,
+    copy=False,
+    plot_projection=None,
+    fun="logcosh",
+    algorithm="fastica_par",
+    normalize=True,
+    reorientation=True,
+    whiten=True,
+    pca_solver="full",
+    chunked=False,
+    chunk_size=None,
+    zero_center=True,
+):
     """ Compute stabilized ICA decomposition for AnnData formats. Use the implementation of stabilized ICA in
     the same package (see module sica.base.py)
     
@@ -85,9 +103,9 @@ def ica(data, observations , n_components,  n_runs , resampling = None , return_
     >>> ica(adata , observations = 'genes' , n_components = 30 , n_runs = 100)
 
     """
-    
+
     #### 0. Initialisation
-    
+
     data_is_AnnData = isinstance(data, AnnData)
     if data_is_AnnData:
         adata = data.copy() if copy else data
@@ -95,64 +113,110 @@ def ica(data, observations , n_components,  n_runs , resampling = None , return_
         adata = AnnData(data)
 
     X = adata.X
-    sica = StabilizedICA(n_components = n_components ,  max_iter = 2000 , resampling = resampling , n_jobs = -1)
-    
-    #### 1. Apply stabilized ICA
-    
-    # Apply stabilized ICA to discover independent metagenes
-    if observations == 'genes':
+    sica = StabilizedICA(
+        n_components=n_components, max_iter=2000, resampling=resampling, n_jobs=-1
+    )
 
-        sica.fit(X.T , n_runs = n_runs , fun = fun , algorithm = algorithm , normalize = normalize , reorientation = reorientation , whiten = whiten
-                 ,pca_solver = pca_solver , chunked = chunked , chunk_size = chunk_size , zero_center = zero_center)
-        
+    #### 1. Apply stabilized ICA
+
+    # Apply stabilized ICA to discover independent metagenes
+    if observations == "genes":
+
+        sica.fit(
+            X.T,
+            n_runs=n_runs,
+            fun=fun,
+            algorithm=algorithm,
+            normalize=normalize,
+            reorientation=reorientation,
+            whiten=whiten,
+            pca_solver=pca_solver,
+            chunked=chunked,
+            chunk_size=chunk_size,
+            zero_center=zero_center,
+        )
+
     # Apply stabilized ICA to discover independent metasamples
-    elif observations == 'cells' :
-        
-        # If no resampling is needed and 'X_pca' is already computed, we try to use it 
-        if (resampling is None) and whiten and 'X_pca' in adata.obsm:
-            
-            n_pcs = adata.obsm['X_pca'].shape[1]
-            
-            if (n_components is None and n_pcs < min(X.shape) ) or (n_components > n_pcs) :
-                
-                warnings.warn("The number of PCA components in adata.obsm['X_pca'] is strictly less than n_components."
-                              " By default, the PCA step is redone within the stabilized ICA algorithm with the desired number of components (i.e n_components)." )
-                
-                sica.fit(X , n_runs = n_runs , fun = fun , algorithm = algorithm , normalize = normalize , reorientation = reorientation , whiten = whiten
-                 ,pca_solver = pca_solver , chunked = chunked , chunk_size = chunk_size , zero_center = zero_center )
-            else :
-                sica.fit(adata.obsm['X_pca'][: , : n_components] , n_runs = n_runs , fun = fun , algorithm = algorithm , normalize = normalize
-                         , reorientation = reorientation , whiten = False)
-        else :           
-            sica.fit(X , n_runs = n_runs , fun = fun , algorithm = algorithm , normalize = normalize , reorientation = reorientation , whiten = whiten
-                 ,pca_solver = pca_solver , chunked = chunked , chunk_size = chunk_size , zero_center = zero_center )           
-    
+    elif observations == "cells":
+
+        # If no resampling is needed and 'X_pca' is already computed, we try to use it
+        if (resampling is None) and whiten and "X_pca" in adata.obsm:
+
+            n_pcs = adata.obsm["X_pca"].shape[1]
+
+            if (n_components is None and n_pcs < min(X.shape)) or (
+                n_components > n_pcs
+            ):
+
+                warnings.warn(
+                    "The number of PCA components in adata.obsm['X_pca'] is strictly less than n_components."
+                    " By default, the PCA step is redone within the stabilized ICA algorithm with the desired number of components (i.e n_components)."
+                )
+
+                sica.fit(
+                    X,
+                    n_runs=n_runs,
+                    fun=fun,
+                    algorithm=algorithm,
+                    normalize=normalize,
+                    reorientation=reorientation,
+                    whiten=whiten,
+                    pca_solver=pca_solver,
+                    chunked=chunked,
+                    chunk_size=chunk_size,
+                    zero_center=zero_center,
+                )
+            else:
+                sica.fit(
+                    adata.obsm["X_pca"][:, :n_components],
+                    n_runs=n_runs,
+                    fun=fun,
+                    algorithm=algorithm,
+                    normalize=normalize,
+                    reorientation=reorientation,
+                    whiten=False,
+                )
+        else:
+            sica.fit(
+                X,
+                n_runs=n_runs,
+                fun=fun,
+                algorithm=algorithm,
+                normalize=normalize,
+                reorientation=reorientation,
+                whiten=whiten,
+                pca_solver=pca_solver,
+                chunked=chunked,
+                chunk_size=chunk_size,
+                zero_center=zero_center,
+            )
+
     #### 2. Plot 2D projection (optional)
-    
-    if plot_projection is not None:        
-      sica.projection(method = plot_projection)  
-    
-    #### 3. Return data 
-    
-    if observations == 'genes' :
+
+    if plot_projection is not None:
+        sica.projection(method=plot_projection)
+
+    #### 3. Return data
+
+    if observations == "genes":
         Metasamples = sica.A_
         Metagenes = sica.S_
-    elif observations == 'cells' :
+    elif observations == "cells":
         Metasamples = sica.S_.T
-        Metagenes = sica.A_.T   
+        Metagenes = sica.A_.T
     stability_indexes = sica.stability_indexes_
-    
+
     if data_is_AnnData:
-        
-        adata.obsm['sica_metasamples'] = Metasamples
-        adata.varm['sica_metagenes'] = Metagenes.T
-        adata.uns['sica'] = {}
-        adata.uns['sica']['stability_indexes'] = stability_indexes
-        
+
+        adata.obsm["sica_metasamples"] = Metasamples
+        adata.varm["sica_metagenes"] = Metagenes.T
+        adata.uns["sica"] = {}
+        adata.uns["sica"]["stability_indexes"] = stability_indexes
+
         return adata if copy else None
-    
-    else :
+
+    else:
         if return_info:
-            return (Metasamples , Metagenes , stability_indexes)
+            return (Metasamples, Metagenes, stability_indexes)
         else:
             return Metasamples

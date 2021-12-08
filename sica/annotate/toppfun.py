@@ -3,9 +3,10 @@ import requests
 import json
 import pandas as pd
 import warnings
-from ._utils import convert_to_entrez , get_top_genes , check_data , check_params
+from ._utils import convert_to_entrez, get_top_genes, check_data, check_params
 
-class ToppFunAnalysis(object):    
+
+class ToppFunAnalysis(object):
     """ Provide tools for running Toppfun enrichment analysis for different metagenes.
     
     Parameters
@@ -55,26 +56,39 @@ class ToppFunAnalysis(object):
     >>> metagene7_annot = annotations.get_analysis(metagene = 'metagene 7')
     >>> metagene7_annot.head()
     """
-    
-    def __init__(self , data , input_type = None , pre_selected = False, threshold = 3 , method = 'std' , tail = 'heaviest'):
-        
+
+    def __init__(
+        self,
+        data,
+        input_type=None,
+        pre_selected=False,
+        threshold=3,
+        method="std",
+        tail="heaviest",
+    ):
+
         # Check data
-        check_data(data , pre_selected)   
-        
+        check_data(data, pre_selected)
+
         self.input_type = input_type
-        if self.input_type is None :
-            warnings.warn("If input_type is None the conversion of input IDs to Entrez ids will not be possible. ToppFunAnalysis will assume that the inputs are already Entrez IDs.")
-            
+        if self.input_type is None:
+            warnings.warn(
+                "If input_type is None the conversion of input IDs to Entrez ids will not be possible. ToppFunAnalysis will assume that the inputs are already Entrez IDs."
+            )
+
         # Initialization of selt.top_genes_ attribute
-        self.top_genes_ = pd.DataFrame({'inputs' : None , 'entrezgene' : None , 'notfound' : None} , index = data.index)        
-        if pre_selected :
-            self.top_genes_['inputs'] = data.copy()
-        else :
-            threshold = check_params(threshold , method, tail)  
-            self.top_genes_['inputs'] = data.apply(get_top_genes , threshold = threshold , method = method , tail = tail , axis = 1)   
-        
-            
-    def convert_metagenes(self , idx):
+        self.top_genes_ = pd.DataFrame(
+            {"inputs": None, "entrezgene": None, "notfound": None}, index=data.index
+        )
+        if pre_selected:
+            self.top_genes_["inputs"] = data.copy()
+        else:
+            threshold = check_params(threshold, method, tail)
+            self.top_genes_["inputs"] = data.apply(
+                get_top_genes, threshold=threshold, method=method, tail=tail, axis=1
+            )
+
+    def convert_metagenes(self, idx):
         """ Convert the IDs of the most expressed genes contained in ``top_genes_``.
         
         Parameters
@@ -91,36 +105,54 @@ class ToppFunAnalysis(object):
         None
         
         """
-        
-        if self.input_type is None :
+
+        if self.input_type is None:
             raise ValueError("Conversion is not possible with self.input_type = None.")
-        
+
         # Define the function that will be applied to the rows of self.top_genes_ dataframe
         def fun(row):
-            if row['entrezgene'] is None :
-                return convert_to_entrez(row['inputs'] , self.input_type)[:2]
-            else :
-                return row['entrezgene'] , row['notfound']
-            
-        # Apply func to the rows of self.top_genes_ associated with the metagenes parameter 
-        if idx == 'all' :
-            
-            warnings.warn("idx = 'all' : this operation can take quite some time depending on the number of metagenes and the number of most expressed genes.")
-            self.top_genes_[['entrezgene' , 'notfound']] = self.top_genes_.apply(fun , axis = 1 , result_type = 'expand')
-            
-        elif isinstance(idx , list) :
-            
-            warnings.warn("metagenes is a list : this operation can take quite some time depending on the number of metagenes and the number of most expressed genes.")
-            self.top_genes_.loc[idx , ['entrezgene' , 'notfound']] = (self.top_genes_.loc[idx].apply(fun , axis = 1 , result_type = 'expand')).values
-            
-        else :
-            
-            self.top_genes_.loc[idx, ['entrezgene' , 'notfound']] = np.array(fun(self.top_genes_.loc[idx]) , dtype="object")
-            
+            if row["entrezgene"] is None:
+                return convert_to_entrez(row["inputs"], self.input_type)[:2]
+            else:
+                return row["entrezgene"], row["notfound"]
+
+        # Apply func to the rows of self.top_genes_ associated with the metagenes parameter
+        if idx == "all":
+
+            warnings.warn(
+                "idx = 'all' : this operation can take quite some time depending on the number of metagenes and the number of most expressed genes."
+            )
+            self.top_genes_[["entrezgene", "notfound"]] = self.top_genes_.apply(
+                fun, axis=1, result_type="expand"
+            )
+
+        elif isinstance(idx, list):
+
+            warnings.warn(
+                "metagenes is a list : this operation can take quite some time depending on the number of metagenes and the number of most expressed genes."
+            )
+            self.top_genes_.loc[idx, ["entrezgene", "notfound"]] = (
+                self.top_genes_.loc[idx].apply(fun, axis=1, result_type="expand")
+            ).values
+
+        else:
+
+            self.top_genes_.loc[idx, ["entrezgene", "notfound"]] = np.array(
+                fun(self.top_genes_.loc[idx]), dtype="object"
+            )
+
         return
-    
-    
-    def get_analysis(self , metagene , type_list = None , p_value=0.05 , min_entities=10, max_entities=500 , maxres=10, correct="FDR"):
+
+    def get_analysis(
+        self,
+        metagene,
+        type_list=None,
+        p_value=0.05,
+        min_entities=10,
+        max_entities=500,
+        maxres=10,
+        correct="FDR",
+    ):
         """ Return the ToppFun enrichment analysis of a given metagene.
         
         Parameters
@@ -154,27 +186,34 @@ class ToppFunAnalysis(object):
             Results of the Toppfun enrichment analysis for the given metagene.
 
         """
-                    
-        if self.input_type is None :
-            entrez_dict = {'Genes' : [int(id) for id in self.top_genes_.loc[metagene , 'inputs']]}
-        else :
-            self.convert_metagenes(idx = metagene)
-            entrez_dict = {'Genes' : [int(id) for id in self.top_genes_.loc[metagene , 'entrezgene']]}
-            
+
+        if self.input_type is None:
+            entrez_dict = {
+                "Genes": [int(id) for id in self.top_genes_.loc[metagene, "inputs"]]
+            }
+        else:
+            self.convert_metagenes(idx=metagene)
+            entrez_dict = {
+                "Genes": [int(id) for id in self.top_genes_.loc[metagene, "entrezgene"]]
+            }
+
         results = []
-        annotations = _get_analysis(entrez_dict, type_list , p_value , min_entities 
-                                    , max_entities , maxres , correct).json()["Annotations"]
-        
-        for element in annotations :
-            gene_symbol_list = [gene['Symbol'] for gene in element['Genes']]
-            element["Gene_Symbol"] = ','.join(gene_symbol_list)
+        annotations = _get_analysis(
+            entrez_dict, type_list, p_value, min_entities, max_entities, maxres, correct
+        ).json()["Annotations"]
+
+        for element in annotations:
+            gene_symbol_list = [gene["Symbol"] for gene in element["Genes"]]
+            element["Gene_Symbol"] = ",".join(gene_symbol_list)
             element.pop("Genes", None)
             results.append(element)
-            
+
         return pd.DataFrame(results)
-    
-    
-def _get_analysis(entrez_dict, type_list, p_value , min_entities , max_entities , maxres , correct ):
+
+
+def _get_analysis(
+    entrez_dict, type_list, p_value, min_entities, max_entities, maxres, correct
+):
     """ Call TOPPGENE API to detect functional enrichments of a gene list (https://toppgene.cchmc.org/API/enrich.)
     
     Parameters
@@ -188,28 +227,53 @@ def _get_analysis(entrez_dict, type_list, p_value , min_entities , max_entities 
         Response from "https://toppgene.cchmc.org/API/enrich" API call.
     
     """
-    if type_list is None :
-        type_list = ["GeneOntologyMolecularFunction","GeneOntologyBiologicalProcess", "GeneOntologyCellularComponent","HumanPheno", "MousePheno",
-                     "Domain" , "Pathway", "Pubmed", "Interaction", "Cytoband", "TFBS", "GeneFamily", "Coexpression", "CoexpressionAtlas","GeneFamily",
-                     "Computational","MicroRNA","Drug","Disease"]
-        
+    if type_list is None:
+        type_list = [
+            "GeneOntologyMolecularFunction",
+            "GeneOntologyBiologicalProcess",
+            "GeneOntologyCellularComponent",
+            "HumanPheno",
+            "MousePheno",
+            "Domain",
+            "Pathway",
+            "Pubmed",
+            "Interaction",
+            "Cytoband",
+            "TFBS",
+            "GeneFamily",
+            "Coexpression",
+            "CoexpressionAtlas",
+            "GeneFamily",
+            "Computational",
+            "MicroRNA",
+            "Drug",
+            "Disease",
+        ]
+
     url = "https://toppgene.cchmc.org/API/enrich"
-    headers = {'Content-Type': 'text/json'}
+    headers = {"Content-Type": "text/json"}
     parameters = {}
     parameters["Categories"] = []
     for type_id in type_list:
-        parameters["Categories"].append({"Type":type_id,
-                                        "Pvalue":p_value,
-                                        "MinGenes":min_entities,
-                                        "MaxGenes":max_entities,
-                                        "MaxResults":maxres,
-                                        "Correction":correct})
+        parameters["Categories"].append(
+            {
+                "Type": type_id,
+                "Pvalue": p_value,
+                "MinGenes": min_entities,
+                "MaxGenes": max_entities,
+                "MaxResults": maxres,
+                "Correction": correct,
+            }
+        )
     data_all = {}
     data_all["Genes"] = entrez_dict["Genes"]
     data_all["Categories"] = parameters["Categories"]
-    response = requests.post(url,headers=headers,data=json.dumps(data_all))
+    response = requests.post(url, headers=headers, data=json.dumps(data_all))
     if response.status_code == 200:
         print("Enrichment analysis success!")
     else:
-        print("Something went wrong during enrichment... Status code:", response.status_code)
+        print(
+            "Something went wrong during enrichment... Status code:",
+            response.status_code,
+        )
     return response

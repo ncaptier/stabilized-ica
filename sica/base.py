@@ -40,7 +40,11 @@ def _check_algorithm(algorithm , fun):
         
     if fun != 'tanh' and algorithm in ['fastica_picard' , 'infomax_ext'] :
         warnings.warn("Using a different density than `'tanh'` may lead to erratic behavior of the picard algorithm" 
-                      "when extended=True (see picard package for more explanations)")
+                      " when extended=True (see picard package for more explanations)")
+        
+    if fun == 'exp' and algorithm == 'infomax' :
+        warnings.warn("Using the exponential density model may lead to a FloatingPointError. To solve this problem you may try to scale the non-linearity changing the alpha parameter in the exp density"
+                      " (ex : set the `fun` parameter of fit method to `picard.densities.Exp(params={'alpha': 0.1})`)")
         
     if algorithm == 'fastica_par' :
         return 'fastica' , {'algorithm' : 'parallel',  'fun' : fun}

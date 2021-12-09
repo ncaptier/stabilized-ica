@@ -2,6 +2,8 @@
 [![PyPI version](https://badge.fury.io/py/stabilized-ica.svg)](https://badge.fury.io/py/stabilized-ica)
 [![Documentation Status](https://readthedocs.org/projects/stabilized-ica/badge/?version=latest)](https://stabilized-ica.readthedocs.io/en/latest/?badge=latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Downloads](https://pepy.tech/badge/stabilized-ica)](https://pepy.tech/project/stabilized-ica)
 
 <p align="center">
     <img src="docs/source/images/full_logo.png" width="400" height="400" />

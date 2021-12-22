@@ -37,7 +37,7 @@ author = 'Nicolas Captier'
 #     release = parsed_version.base_version
 # else:
 #     release = sica.__version__
-release = '1.0.1'
+release = '1.1.0'
 
 # -- General configuration ---------------------------------------------------
 

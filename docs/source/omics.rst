@@ -53,7 +53,7 @@ The tools `sica.annotate.reactome.ReactomeAnalysis <modules/generated/sica.annot
 
 **Note 1 :** The ICA sources can be recovered up to some trivial transformations (i.e scaling, permutation, sign change). Thus the sign of the coefficients associated to each gene is actually quite difficult to interpret. Selecting the top genes from both tails or from the heaviest one may be more reasonable choices if there is no complementary information that could favor the positive over the negative tail or vice versa.
 
-**Note 2 :** With the `top_genes_` attribute you can have access to the list of top expressed genes for each extarcted ICA components.
+**Note 2 :** With the `top_genes_` attribute you can have access to the list of top expressed genes for each extracted ICA components.
 
 Enrichment analysis with Reactome and ToppFun
 ______________________________________________
@@ -73,7 +73,7 @@ For a given annotation :math:`j`, we denote by :math:`k_j` the number of genes a
 
 **Note 1 :** Both annotation databases provide correction for multiple testing. ToppFun uses `Bonferonni <https://en.wikipedia.org/wiki/Bonferroni_correction>`_, `Benjamini-Hochberg <https://en.wikipedia.org/wiki/False_discovery_rate#Benjamini%E2%80%93Hochberg_procedure>`_ and `Benjamini-Yekutieli <https://en.wikipedia.org/wiki/False_discovery_rate#Benjamini%E2%80%93Yekutieli_procedure>`_ procedures while Reactome only uses Benjamini-Hochberg procedure (Entities FDR).
 
-**Note 2 :** A wide range of analyses could be performed on top of/instead of this simple annotation process to gain more insights about the biological meaning of the extracted ICA components. The strategy implemented in **stabilized-ica** will roughly highlight the components that could be relevant, but this will not be enough to have a deep understading of your transcriptomic data set. At one point, diving into the list of the top expressed genes of each component will be needed.
+**Note 2 :** A wide range of analyses could be performed on top of/instead of this simple annotation process to gain more insights about the biological meaning of the extracted ICA components. The strategy implemented in **stabilized-ica** will roughly highlight the components that could be relevant, but this will not be enough to have a deep understanding of your transcriptomic data set. At one point, diving into the list of the top expressed genes of each component will be needed.
 
 Single-cell data
 ----------------

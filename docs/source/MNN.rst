@@ -34,7 +34,7 @@ The following figure illustrates the building of a mutual nearest neighbors grap
 
    Comparison of two situations for the building of the mutual k-nearest neighbors graph (k=2)
 
-**Note :** The mutual k-nearest neighbors approach is and extension of the classical k-nearest neighbors method. It seems to date back to the early eighties in the context of clustering [1]_. Nowadays, it is growing more and more popular and emerges as a performing alternative to k-nearest neighbors in many machine learning algorithms. In particular, it is claimed to reduce the effect of hubness in high dimension. However, to our knowledge, the theoretical properties of such a method are not yet fully understood. Thus, you shoud choose a metric and a value for k wisely and interpret the resulting graph with care.
+**Note :** The mutual k-nearest neighbors approach is an extension of the classical k-nearest neighbors method. It seems to date back to the early eighties in the context of clustering [1]_. Nowadays, it is growing more and more popular and emerges as a performing alternative to k-nearest neighbors in many machine learning algorithms. In particular, it is claimed to reduce the effect of hubness in high dimension. However, to our knowledge, the theoretical properties of such a method are not yet fully understood. Thus, you shoud choose a metric and a value for k wisely and interpret the resulting graph with care.
 
 .. topic:: References:
 

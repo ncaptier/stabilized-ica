@@ -21,7 +21,7 @@ Independent component analysis adds three fundamental assumptions to this mixing
 
 **Note :** Here, we used a squared mixing matrix for simplicity. Please note that this assumption can be relaxed and cases where there are more mixtures than sources still fall into the scope of ICA.   
 
-Since, in general these assumptions do not necessarily hold, we can reformulate the problem saying that the goal is to find the linear transformation :math:`\boldsymbol{A}` so that the observed vector :math:`\boldsymbol{x}` best satisfies the generative model describe above.
+Since, in general these assumptions do not necessarily hold, we can reformulate the problem saying that the goal is to find the linear transformation :math:`\boldsymbol{A}` so that the observed vector :math:`\boldsymbol{x}` best satisfies the generative model described above.
 
 Usually, we are dealing with several observations :math:`\boldsymbol{x}^1, ... , \boldsymbol{x}^p` assumed to come from the generative model described above. ICA then takes the following matrix form :
 
@@ -77,7 +77,7 @@ The idea is to assume that we actually have access to some information about the
 
 **Note :** In practice the term :math:`\mathbb{E} \left[ G(y) \right] = \mathbb{E} \left[ G(\boldsymbol{w}^T \boldsymbol{x}) \right]` will be computed with an empirical mean over the different observations :math:`\boldsymbol{X} = \left[ \boldsymbol{x}^1 , ... , \boldsymbol{x}^p \right]` we will have access to.
 
-In a nutshell, this approximation :math:`J_G` gives a us a new optimization problem (replacing :math:`J(y_i)` by :math:`J_G(y_i)` in the previous section) which the FastICA approach will try to deal with to solve ICA. 
+In a nutshell, this approximation :math:`J_G` gives us a new optimization problem (replacing :math:`J(y_i)` by :math:`J_G(y_i)` in the previous section) which the FastICA approach will try to deal with to solve ICA. 
 
 Practical choice for the measuring function G
 _____________________________________________
@@ -98,7 +98,7 @@ The second criteria is the most difficult to satisfy. It requires the user to ha
 A fixed-point algorithm
 _______________________
 
-In order to complete the FastICA approach, we finally need and efficient algorithm for solving the approximate optimization problem we derive in the previous sections. A gradient descent scheme could absolutly work but it would require tuning the learning rate to ensure and speed up the convergence. Hyvärinen proposed instead a fixed-point strategy. 
+In order to complete the FastICA approach, we finally need an efficient algorithm for solving the approximate optimization problem we derive in the previous sections. A gradient descent scheme could absolutly work but it would require tuning the learning rate to ensure and speed up the convergence. Hyvärinen proposed instead a fixed-point strategy. 
 
 We can briefly detail the principles of such an algorithm using the more simple task of finding a single independent component :math:`\boldsymbol{w}_*^T \boldsymbol{x}`. It writes very similarly to the previous optimization problem except that :math:`\sum\limits_{i=1}^{n} J_G(\boldsymbol{w_i}^T \boldsymbol{x})` is replaced by a single term :math:`J_G(\boldsymbol{w}^T \boldsymbol{x})`.
 

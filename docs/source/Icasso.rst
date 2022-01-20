@@ -22,7 +22,7 @@ This algorithm gives us a way to measure the reliability of the ICA components [
 
 .. math:: I_q (C_m) = \underbrace{\dfrac{1}{|C_m|^2} \sum_{i , j \in C_m} \sigma_{ij}}_{\text{mean intra-cluster similarity}} - \underbrace{\dfrac{1}{|C_m||C_{-m}|} \sum_{i \in C_m} \sum_{j \in C_{-m}} \sigma_{ij}}_{\text{mean extra-cluster similarity}} \quad \in \quad [0 ,1]
 
-where :math:`|C_m|` corresponds to the number of points in the clusters, :math:`|C_{-m}|` corresponds to the number of points outside the cluster and :math:`\sigma_{ij}` corresponds to the similarity beween components i and j (i.e absolute value of Pearson correlation).
+where :math:`|C_m|` corresponds to the number of points in the clusters, :math:`|C_{-m}|` corresponds to the number of points outside the cluster and :math:`\sigma_{ij}` corresponds to the similarity between components i and j (i.e absolute value of Pearson correlation).
 
 This stability index can measure the robustness of the ICA components with respect to two main uncertainty sources :
 
@@ -37,16 +37,16 @@ The choice of the number of ICA components to extract is a crucial step but yet 
 
 The choice of the order of decomposition relates to the determination of the intrinsic data dimension. Many methods address this question (ex: using PCA and the Kaiser rule) but a few are specific to ICA. In [3]_ U. Kairov et al. empirically developped a method for choosing an optimal number of components. In particular they showed that, for gene expression data, this method led to more interpretable and more reproducible components. Their protocol relies on the natural ranking that stabilized ICA offers through the stability index associated to each component. It could be roughly summarized with two steps:
 
-   * For a number of extracted components varying between :math:`n_{min}` and :math:`n_{max}` (ex: :math:`n_{min} = 2 ,3 , ... , n_{max} = 100`), they run the stabilized ICA algorithm and plot the associated stability profile (i.e the stability indexes of the components ordered from the most stable to the least one). At the end, within a single plot they obtain several stability profiles, associated to different order of decomposition (cf figure below).
+   * For a number of extracted components varying between :math:`n_{min}` and :math:`n_{max}` (ex: :math:`n_{min} = 2 ,3 , ... , n_{max} = 100`), they run the stabilized ICA algorithm and plot the associated stability profile (i.e the stability indexes of the components ordered from the most stable to the least one). At the end, within a single plot they obtain several stability profiles, associated to different orders of decomposition (cf figure below).
    * Looking at these stability profiles, they try to select a sufficiently large number of components to capture the information contained in the original data set, but small enough to avoid producing an excessive amount of highly unstable components. With their experiments with gene expression data sets, they noticed that an inflection point in the distribution of the stability profiles often offers such a satisfying trade-off.
 
 .. figure:: images/MSTD.png
    :align: center
    :scale: 50 %
 
-The module `sica.base.MSTD <modules/generated/sica.base.MSTD.html#sica.base.MSTD>`_ allows the user to plot the stability profiles for several order of decomposition. It offers an insightful visualization tool to select a relevant number of ICA components to extract, using the reasoning described above. 
+The module `sica.base.MSTD <modules/generated/sica.base.MSTD.html#sica.base.MSTD>`_ allows the user to plot the stability profiles for several orders of decomposition. It offers an insightful visualization tool to select a relevant number of ICA components to extract, using the reasoning described above. 
 
-**Note 1:** There is no guarantee to obtain a distribution of stability profiles similar to the figure above or to those plotted in [3]. This very much depends on the data and the choice of hyperparamters for the ICA solver. However the philosophy of the method developped in [3] remains the same : the plot of this distribution should help you finding a satisfying compromise between many components and a high overall stability.
+**Note 1:** There is no guarantee to obtain a distribution of stability profiles similar to the figure above or to those plotted in [3]. This very much depends on the data and the choice of hyperparameters for the ICA solver. However the philosophy of the method developped in [3] remains the same : the plot of this distribution should help you finding a satisfying compromise between many components and a high overall stability.
 
 **Note 2:** Many other methods could be used to infer the intrinsic dimension of a data set and selecting a relevant number of components before using **stabilized-ica**. We advise the user to explore the `scikit-dimension package <https://scikit-dimension.readthedocs.io/en/latest/>`_ . 
 

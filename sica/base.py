@@ -666,7 +666,18 @@ class StabilizedICA(object):
         return
 
 
-def MSTD(X, m, M, step, n_runs, whiten=True, max_iter=2000, n_jobs=-1, ax=None):
+def MSTD(X, 
+         m, 
+         M, 
+         step, 
+         n_runs,
+         fun="logcosh", 
+         algorithm="fastica_par", 
+         whiten=True, 
+         max_iter=2000, 
+         n_jobs=-1, 
+         ax=None
+):
     """Plot "MSTD graphs" to help choosing an optimal dimension for ICA decomposition.
         
     Run stabilized ICA algorithm for several dimensions in [m , M] and compute the
@@ -689,7 +700,18 @@ def MSTD(X, m, M, step, n_runs, whiten=True, max_iter=2000, n_jobs=-1, ax=None):
         
     n_runs : int
         Number of times we run the FastICA algorithm (see fit method of class Stabilized_ICA)
-            
+    
+    fun : str {'cube' , 'exp' , 'logcosh' , 'tanh'} or function, optional.
+        The default is 'logcosh'. See the fit method of StabilizedICA for more details.
+        
+    algorithm : str {'fastica_par' , 'fastica_def' , 'fastica_picard' , 'infomax' , 'infomax_ext' , 'infomax_orth'}, optional.
+        The algorithm applied for solving the ICA problem at each run. Please the supplementary explanations for more details.
+        The default is 'fastica_par', i.e FastICA from sklearn with parallel implementation.
+        
+    whiten : bool, optional
+        It True, X is whitened only once as an initial step, with a SVD solver and M components. If False, X must be already
+        whitened, with M components. The default is True.
+              
     max_iter : int, optional
         Parameter for _ICA_decomposition. The default is 2000.
     
@@ -743,11 +765,13 @@ def MSTD(X, m, M, step, n_runs, whiten=True, max_iter=2000, n_jobs=-1, ax=None):
             chunk_size=None,
             zero_center=True,
         )
+    else:
+        X_w = as_float_array(X, copy=False)
 
     # for i in range(m , M+step , step): #uncomment if you don't want to use tqdm (and comment the line below !)
     for i in tqdm(range(m, M + step, step)):
         s = StabilizedICA(n_components = i, max_iter = max_iter, n_jobs = n_jobs)
-        s.fit(X_w[:, :i], n_runs, whiten=False)
+        s.fit(X_w[:, :i], n_runs, fun = fun, algorithm = algorithm, whiten=False)
         mean.append(np.mean(s.stability_indexes_))
         ax[0].plot(range(1, len(s.stability_indexes_) + 1), s.stability_indexes_, "k")
 

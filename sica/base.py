@@ -276,7 +276,7 @@ class StabilizedICA(object):
             The default is 'logcosh'.
             
         algorithm : str {'fastica_par' , 'fastica_def' , 'fastica_picard' , 'infomax' , 'infomax_ext' , 'infomax_orth'}, optional.
-            The algorithm applied for solving the ICA problem at each run. Please the supplementary explanations for more details.
+            The algorithm applied for solving the ICA problem at each run. Please see the supplementary explanations for more details.
             The default is 'fastica_par', i.e FastICA from sklearn with parallel implementation.
               
         plot : boolean, optional

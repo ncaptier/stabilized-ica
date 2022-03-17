@@ -8,7 +8,7 @@ from ._utils import convert_to_entrez, get_top_genes, check_data, check_params
 
 class ToppFunAnalysis(object):
     """ Provide tools for running Toppfun enrichment analysis for different metagenes.
-    
+
     Parameters
     ----------
     data : 
@@ -17,26 +17,24 @@ class ToppFunAnalysis(object):
         If ``pre_selected = True`` : pandas.Series , shape (n_metagenes)
                 For each metagene the serie contains a list of the IDs of the extreme expressed
                 genes.
-                
-    input_type : string, optional.
-        Type of input gene IDs. Common types are 'entrezgene' , 'symbol' , 'uniprot' , 'ensembl.gene' , 'refseq'...
-        For the complete list of available types, see https://docs.mygene.info/en/latest/doc/query_service.html#available_fields .
+
+    convert_to_entrez : boolean, optional.
+        If True gene ids will be converted to Entrez IDs. ToppFunAnalysis conversion tool can handle Entrez gene ids, Ensemble gene ids, 
+        NCBI RefSeq ids, official gene symbols, HUGO Gene Nomenclature, UniProt ids, Affymetrix probeset ids, and a mix of everything.
+        If False ToppFunAnalysis will assume that the inputs are already Entrez IDs. No conversion will be performed.
+        The default is True.
         
-        If ``input_type is None``, conversion will not be possible and input IDs will be assumed to be Entrez IDs.
-        
-        The default is None.
-        
-    pre_selected : boolean , optional.
+    pre_selected : boolean, optional.
         Indicate whether the extreme genes have already been selected (see above).
         The default is False.
         
-    threshold : numeric or array-like of two numerics , optional
+    threshold : numeric or array-like of two numerics, optional
         See sica.annotate._utils.get_top_genes. The default is 3.
         
-    method : {'quantile' , 'std'} , optional
+    method : {'quantile' , 'std'}, optional
         See sica.annotate._utils.get_top_genes. The default is 'std'.
         
-    tail : {'left' , 'right' , 'both' , 'heaviest'} , optional
+    tail : {'left' , 'right' , 'both' , 'heaviest'}, optional
         See sica.annotate._utils.get_top_genes. The default is 'heaviest'.
     
     Attributes
@@ -60,7 +58,7 @@ class ToppFunAnalysis(object):
     def __init__(
         self,
         data,
-        input_type=None,
+        convert_to_entrez=True,
         pre_selected=False,
         threshold=3,
         method="std",
@@ -70,10 +68,10 @@ class ToppFunAnalysis(object):
         # Check data
         check_data(data, pre_selected)
 
-        self.input_type = input_type
-        if self.input_type is None:
+        self.convert_to_entrez = convert_to_entrez
+        if not self.convert_to_entrez:
             warnings.warn(
-                "If input_type is None the conversion of input IDs to Entrez ids will not be possible. ToppFunAnalysis will assume that the inputs are already Entrez IDs."
+                "If convert_to_entrez is False ToppFunAnalysis will assume that the inputs are already Entrez gene IDs. No conversion will be performed."
             )
 
         # Initialization of selt.top_genes_ attribute
@@ -106,13 +104,10 @@ class ToppFunAnalysis(object):
         
         """
 
-        if self.input_type is None:
-            raise ValueError("Conversion is not possible with self.input_type = None.")
-
         # Define the function that will be applied to the rows of self.top_genes_ dataframe
         def fun(row):
             if row["entrezgene"] is None:
-                return convert_to_entrez(row["inputs"], self.input_type)[:2]
+                return convert_to_entrez(row["inputs"])[:2]
             else:
                 return row["entrezgene"], row["notfound"]
 
@@ -187,14 +182,14 @@ class ToppFunAnalysis(object):
 
         """
 
-        if self.input_type is None:
-            entrez_dict = {
-                "Genes": [int(id) for id in self.top_genes_.loc[metagene, "inputs"]]
-            }
-        else:
+        if self.convert_to_entrez:
             self.convert_metagenes(idx=metagene)
             entrez_dict = {
                 "Genes": [int(id) for id in self.top_genes_.loc[metagene, "entrezgene"]]
+            }
+        else:
+            entrez_dict = {
+                "Genes": [int(id) for id in self.top_genes_.loc[metagene, "inputs"]]
             }
 
         results = []

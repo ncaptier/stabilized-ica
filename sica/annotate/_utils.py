@@ -4,58 +4,54 @@ import pandas as pd
 import scipy.stats as stats
 
 
-def _convert_geneID(genes_list, input_type, output_type):
-    """ Call mygene querymany() function to convert gene IDs
-    https://docs.mygene.info/projects/mygene-py/en/latest/#mygene.MyGeneInfo.querymany
+#def _convert_geneID(genes_list, input_type, output_type):
+#    """ Call mygene querymany() function to convert gene IDs
+#    https://docs.mygene.info/projects/mygene-py/en/latest/#mygene.MyGeneInfo.querymany
 
-    Parameters
-    ----------
-    genes_list : List of strings
-        List containing gene IDs.
-        
-    input_type: string
-        Type of input gene IDs.
-        For available types, see: https://docs.mygene.info/en/latest/doc/query_service.html#available_fields
+#    Parameters
+#    ----------
+#    genes_list : List of strings
+#        List containing gene IDs.
+#        
+#    input_type: string
+#        Type of input gene IDs.
+#        For available types, see: https://docs.mygene.info/en/latest/doc/query_service.html#available_fields
+#
+#    output_type: string
+#        Type of output gene IDs.
+#        For available types, see: https://docs.mygene.info/en/latest/doc/data.html#available-fields
+#
+#    Returns
+#    -------
+#    pandas.DataFrame
+#        Dataframe containing query gene IDs as index. See mygene documentation for more details
+#        (https://docs.mygene.info/projects/mygene-py/en/latest/)
+#
+#    """
+#
+#    # Initiate mygene
+#    mg = mygene.MyGeneInfo()
+#    # Perform Conversion
+#    conversion_df = mg.querymany(
+#        genes_list,
+#        scopes=input_type,
+#        fileds=output_type,
+#        verbose=False,
+#        as_dataframe=True,
+#    )
+#
+#    return conversion_df[
+#        ~conversion_df.index.duplicated(keep="first")
+#    ]  # remove potential duplicates
 
-    output_type: string
-        Type of output gene IDs.
-        For available types, see: https://docs.mygene.info/en/latest/doc/data.html#available-fields
 
-    Returns
-    -------
-    pandas.DataFrame
-        Dataframe containing query gene IDs as index. See mygene documentation for more details
-        (https://docs.mygene.info/projects/mygene-py/en/latest/)
-
-    """
-
-    # Initiate mygene
-    mg = mygene.MyGeneInfo()
-    # Perform Conversion
-    conversion_df = mg.querymany(
-        genes_list,
-        scopes=input_type,
-        fileds=output_type,
-        verbose=False,
-        as_dataframe=True,
-    )
-
-    return conversion_df[
-        ~conversion_df.index.duplicated(keep="first")
-    ]  # remove potential duplicates
-
-
-def convert_to_entrez(genes_list, input_type):
+def convert_to_entrez(genes_list):
     """ Convert input gene IDs to Entrez gene IDs with mygene conversion tools (see _convert_geneID function).
     
     Parameters
     ----------
     genes_list : List of strings
         List containing gene IDs.
-        
-    input_type: string
-        Type of input gene IDs.
-        For available types, see: https://docs.mygene.info/en/latest/doc/query_service.html#available_fields
 
     Returns
     -------
@@ -70,7 +66,20 @@ def convert_to_entrez(genes_list, input_type):
 
     """
 
-    df = _convert_geneID(genes_list, input_type=input_type, output_type="entrezgene")
+    # Initiate mygene
+    mg = mygene.MyGeneInfo()
+    # Perform Conversion
+    df = mg.querymany(
+        genes_list,
+        scopes='refseq,symbol,entrezgene,reporter,uniprot,hgnc,ensembl.gene',
+        verbose=False,
+        as_dataframe=True,
+        entrezonly = True,
+    )
+
+    # remove potential duplicates
+    df = df[~df.index.duplicated(keep="first")]
+    #df = _convert_geneID(genes_list, input_type=input_type, output_type="entrezgene")
 
     bool_mask = df["entrezgene"].isna()
     entrez = list(df[~bool_mask]["entrezgene"])

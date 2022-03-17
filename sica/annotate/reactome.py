@@ -18,15 +18,11 @@ class ReactomeAnalysis(object):
                 For each metagene the serie contains a list of the IDs of the extreme expressed
                 genes.
                 
-    input_type : string, optional.
-        Type of input gene IDs. Common types are 'entrezgene' , 'symbol' , 'uniprot' , 'ensembl.gene' , 'refseq'...
-        For the complete list of available types, see https://docs.mygene.info/en/latest/doc/query_service.html#available_fields .
-        
-        If ``input_type is None``, conversion will not be possible and inputs IDs will be assumed to be valid inputs for the reactome
-        analysis tools.
-        
-        The default is None.
-       
+    convert_to_entrez : boolean, optional.
+        If True gene ids will be converted to Entrez gene ids. If False, gene ids should be valid ids for Reactome analysis
+        (e.g HUGO gene symbols, EntrezGene , Uniprot ...). See https://reactome.org/userguide/analysis for more details.
+        The default is True.
+
     pre_selected : boolean , optional.
         Indicate whether the extreme genes have already been selected (see above).
         The default is False.
@@ -63,7 +59,7 @@ class ReactomeAnalysis(object):
     def __init__(
         self,
         data,
-        input_type=None,
+        convert_to_entrez=True,
         pre_selected=False,
         threshold=3,
         method="std",
@@ -73,10 +69,11 @@ class ReactomeAnalysis(object):
         # Check data
         check_data(data, pre_selected)
 
-        self.input_type = input_type
-        if self.input_type is None:
+        self.convert_to_entrez = convert_to_entrez
+        if not self.convert_to_entrez:
             warnings.warn(
-                "If input_type is None the conversion of input IDs to Entrez IDs will not be possible.The inputs should be valid IDs accepted by the reactome analysis tool ((e.g HUGO gene symbols, EntrezGene , Uniprot ...)"
+            "If convert_to_entrez is False ReactomeAnalysis will assume that the inputs are valid gene ids for Reactome analysis." \
+            + " ((e.g HUGO gene symbols, EntrezGene , Uniprot ...). No conversion will be performed. See https://reactome.org/userguide/analysis for more details."
             )
 
         # Initialization of selt.top_genes_ attribute
@@ -113,13 +110,10 @@ class ReactomeAnalysis(object):
 
         """
 
-        if self.input_type is None:
-            raise ValueError("Conversion is not possible with self.input_type = None.")
-
         # Define the function that will be applied to the rows of self.top_genes_ dataframe
         def fun(row):
             if row["entrezgene"] is None:
-                return convert_to_entrez(row["inputs"], self.input_type)[:2]
+                return convert_to_entrez(row["inputs"])[:2]
             else:
                 return row["entrezgene"], row["notfound"]
 
@@ -150,19 +144,14 @@ class ReactomeAnalysis(object):
 
         return
 
-    def open_full_analysis(self, metagene, use_inputs=False):
+    def open_full_analysis(self, metagene):
         """ Browse the analysis for the given metagene in reactome web portal.
         
         Parameters
         ----------
         metagene : object
             It must correspond to a valid index of the input data.
-        
-        use_inputs : boolean, optional
-            This only acts when ``input_type is not None``.
-            If True, inputs are used for the analysis. Otherwise, entrezgene are used. 
-            The default is False.
-            
+
         Returns
         -------
         None.
@@ -171,11 +160,11 @@ class ReactomeAnalysis(object):
         if self.tokens[metagene] is not None:
             token = self.tokens[metagene]
         else:
-            if (self.input_type is None) or use_inputs:
-                token = _get_token(self.top_genes_.loc[metagene, "inputs"])
-            else:
+            if self.convert_to_entrez:
                 self.convert_metagenes(idx=metagene)
                 token = _get_token(self.top_genes_.loc[metagene, "entrezgene"])
+            else:
+                token = _get_token(self.top_genes_.loc[metagene, "inputs"])
             self.tokens[metagene] = token
 
         url = "https://reactome.org/PathwayBrowser/#/DTAB=AN&ANALYSIS=" + token
@@ -232,11 +221,11 @@ class ReactomeAnalysis(object):
         if self.tokens[metagene] is not None:
             token = self.tokens[metagene]
         else:
-            if (self.input_type is None) or use_inputs:
-                token = _get_token(self.top_genes_.loc[metagene, "inputs"])
-            else:
-                self.convert_metagenes(metagenes=metagene)
+            if self.convert_to_entrez:
+                self.convert_metagenes(idx=metagene)
                 token = _get_token(self.top_genes_.loc[metagene, "entrezgene"])
+            else:
+                token = _get_token(self.top_genes_.loc[metagene, "inputs"])
             self.tokens[metagene] = token
 
         df = analysis.pathway2df(token)
@@ -263,7 +252,7 @@ def _get_token(ids):
 
     Parameters
     ----------
-    ids : comma seperated list of genes IDs in string format.
+    ids : comma separated list of genes IDs in string format.
         The type of ID should be accepted by the Reactome analysis tool 
         (see https://reactome.org/userguide/analysis for more details).
 

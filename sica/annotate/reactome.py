@@ -18,10 +18,10 @@ class ReactomeAnalysis(object):
                 For each metagene the serie contains a list of the IDs of the extreme expressed
                 genes.
                 
-    convert_to_entrez : boolean, optional.
-        If True gene ids will be converted to Entrez gene ids. If False, gene ids should be valid ids for Reactome analysis
-        (e.g HUGO gene symbols, EntrezGene , Uniprot ...). See https://reactome.org/userguide/analysis for more details.
-        The default is True.
+    convert_ids : boolean, optional.
+        If True gene ids will be converted to Entrez gene ids. If False, gene ids should be valid ids for Reactome
+        analysis (e.g. HUGO gene symbols, EntrezGene , Uniprot ...).
+        See https://reactome.org/userguide/analysis for more details. The default is True.
 
     pre_selected : boolean , optional.
         Indicate whether the extreme genes have already been selected (see above).
@@ -57,23 +57,24 @@ class ReactomeAnalysis(object):
     """
 
     def __init__(
-        self,
-        data,
-        convert_to_entrez=True,
-        pre_selected=False,
-        threshold=3,
-        method="std",
-        tail="heaviest",
+            self,
+            data,
+            convert_ids=True,
+            pre_selected=False,
+            threshold=3,
+            method="std",
+            tail="heaviest",
     ):
 
         # Check data
         check_data(data, pre_selected)
 
-        self.convert_to_entrez = convert_to_entrez
-        if not self.convert_to_entrez:
+        self.convert_ids = convert_ids
+        if not self.convert_ids:
             warnings.warn(
-            "If convert_to_entrez is False ReactomeAnalysis will assume that the inputs are valid gene ids for Reactome analysis." \
-            + " ((e.g HUGO gene symbols, EntrezGene , Uniprot ...). No conversion will be performed. See https://reactome.org/userguide/analysis for more details."
+                "If convert_ids is False ReactomeAnalysis will assume that the inputs are valid gene ids for "
+                "Reactome analysis ((e.g HUGO gene symbols, EntrezGene , Uniprot ...). No conversion will be performed. "
+                "See https://reactome.org/userguide/analysis for more details. "
             )
 
         # Initialization of selt.top_genes_ attribute
@@ -101,8 +102,8 @@ class ReactomeAnalysis(object):
         
             If ``idx = "all"`` all the metagenes will be converted. 
             
-            Otherwise, only the metagenes associated with ``idx`` will be converted. In that case, ``idx`` must correspond to valid 
-            indexes of the input data.
+            Otherwise, only the metagenes associated with ``idx`` will be converted. In that case, ``idx`` must
+            correspond to valid indexes of the input data.
 
         Returns
         -------
@@ -121,7 +122,8 @@ class ReactomeAnalysis(object):
         if idx == "all":
 
             warnings.warn(
-                "idx = 'all' : this operation can take quite some time depending on the number of metagenes and the number of most expressed genes."
+                "idx = 'all' : this operation can take quite some time depending on the number of metagenes and the "
+                "number of most expressed genes. "
             )
             self.top_genes_[["entrezgene", "notfound"]] = self.top_genes_.apply(
                 fun, axis=1, result_type="expand"
@@ -130,7 +132,8 @@ class ReactomeAnalysis(object):
         elif isinstance(idx, list):
 
             warnings.warn(
-                "idx is a list : this operation can take quite some time depending on the number of metagenes and the number of most expressed genes."
+                "idx is a list : this operation can take quite some time depending on the number of metagenes and the "
+                "number of most expressed genes. "
             )
             self.top_genes_.loc[idx, ["entrezgene", "notfound"]] = (
                 self.top_genes_.loc[idx].apply(fun, axis=1, result_type="expand")
@@ -160,7 +163,7 @@ class ReactomeAnalysis(object):
         if self.tokens[metagene] is not None:
             token = self.tokens[metagene]
         else:
-            if self.convert_to_entrez:
+            if self.convert_ids:
                 self.convert_metagenes(idx=metagene)
                 token = _get_token(self.top_genes_.loc[metagene, "entrezgene"])
             else:
@@ -172,15 +175,14 @@ class ReactomeAnalysis(object):
         return
 
     def get_analysis(
-        self,
-        metagene,
-        use_inputs=False,
-        species="Homo sapiens",
-        sort_by="Entities FDR",
-        ascending=True,
-        p_value=0.05,
-        min_entities=10,
-        max_entities=500,
+            self,
+            metagene,
+            species="Homo sapiens",
+            sort_by="Entities FDR",
+            ascending=True,
+            p_value=0.05,
+            min_entities=10,
+            max_entities=500,
     ):
         """ Return the reactome enrichment analysis of a given metagene.
         
@@ -188,12 +190,7 @@ class ReactomeAnalysis(object):
         ----------
         metagene : object
             It must correspond to a valid index of the input data.
-        
-        use_inputs : boolean, optional
-            This only acts when ``input_type is not None``.
-            If True, inputs are used for the analysis. Otherwise, entrezgene are used. 
-            The default is False.
-            
+
         species : string or list of string, optional
             List of species to filter the result. The default is 'Homo sapiens'.
             
@@ -221,7 +218,7 @@ class ReactomeAnalysis(object):
         if self.tokens[metagene] is not None:
             token = self.tokens[metagene]
         else:
-            if self.convert_to_entrez:
+            if self.convert_ids:
                 self.convert_metagenes(idx=metagene)
                 token = _get_token(self.top_genes_.loc[metagene, "entrezgene"])
             else:

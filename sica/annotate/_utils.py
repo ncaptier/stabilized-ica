@@ -4,7 +4,7 @@ import pandas as pd
 import scipy.stats as stats
 
 
-#def _convert_geneID(genes_list, input_type, output_type):
+# def _convert_geneID(genes_list, input_type, output_type):
 #    """ Call mygene querymany() function to convert gene IDs
 #    https://docs.mygene.info/projects/mygene-py/en/latest/#mygene.MyGeneInfo.querymany
 
@@ -74,12 +74,12 @@ def convert_to_entrez(genes_list):
         scopes='refseq,symbol,entrezgene,reporter,uniprot,hgnc,ensembl.gene',
         verbose=False,
         as_dataframe=True,
-        entrezonly = True,
+        entrezonly=True,
     )
 
     # remove potential duplicates
     df = df[~df.index.duplicated(keep="first")]
-    #df = _convert_geneID(genes_list, input_type=input_type, output_type="entrezgene")
+    # df = _convert_geneID(genes_list, input_type=input_type, output_type="entrezgene")
 
     bool_mask = df["entrezgene"].isna()
     entrez = list(df[~bool_mask]["entrezgene"])
@@ -94,10 +94,10 @@ def get_top_genes(metagene, threshold, method, tail):
     Parameters
     ----------
     metagene : pandas.Series, shape (n_genes)
-        The indexes should be valid gene IDs (e.g HUGO gene symbols, EntrezGene...)
+        The indexes should be valid gene IDs (e.g. HUGO gene symbols, EntrezGene...)
         
     threshold : numeric or array-like of two numerics
-        Used for selecting the extreme expressed genes in the metagene (i.e most expressed 
+        Used for selecting the extreme expressed genes in the metagene (i.e. most expressed
         and/or least expressed genes). If a tuple is passed, different thresholds are used 
         for the left tail and the right tail of the metagene distribution.
         
@@ -148,14 +148,16 @@ def check_data(data, pre_selected):
     if pre_selected:
         if not isinstance(data, pd.Series):
             raise ValueError(
-                "When pre_selected is True, data parameter must be a pandas.Series of shape (n_metagenes) containing list of extreme expressed genes"
+                "When pre_selected is True, data parameter must be a pandas.Series of shape (n_metagenes) containing "
+                "list of extreme expressed genes "
             )
     else:
         if isinstance(data, pd.Series):
             data = pd.DataFrame(data).transpose()
         elif not isinstance(data, pd.DataFrame):
             raise ValueError(
-                "When pre_selected is False, data parameter must be a pandas.Series of shape (n_genes) or a pandas.DataFrame of shape (n_metagenes , n_genes)"
+                "When pre_selected is False, data parameter must be a pandas.Series of shape (n_genes) or a "
+                "pandas.DataFrame of shape (n_metagenes , n_genes) "
             )
     return
 
@@ -169,10 +171,10 @@ def check_params(threshold, method, tail):
             "threshold must be either a numeric or an array-like of two numerics"
         )
 
-    if not method in ["quantile", "std"]:
+    if method not in ["quantile", "std"]:
         raise ValueError("method parameter value must be either 'quantile' or 'std' ")
 
-    if not tail in ["left", "right", "both", "heaviest"]:
+    if tail not in ["left", "right", "both", "heaviest"]:
         raise ValueError(
             "tail parameter value must be 'left', 'right', 'both' or 'heaviest'"
         )

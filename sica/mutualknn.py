@@ -17,13 +17,14 @@ class MNN(object):
     
     Parameters
     ----------
-    X : 2D array of shape (n_components_1 , n_features_1), 2D array of shape (n_components_1 , n_components_2) if metric = "precomputed".
+    X : 2D array of shape (n_components_1 , n_features_1), 2D array of shape (n_components_1 , n_components_2)
+        if metric = "precomputed".
     
     Y : 2D array of shape (n_components_2 , n_features_2), optional
         The default is None.
         
     k : int > 0
-        Parameter for the Mutual Nearest Neighbor method (i.e number of neighbors that we consider).
+        Parameter for the Mutual Nearest Neighbor method (i.e. number of neighbors that we consider).
         
     metric : string
         Metric for the computation of the adjacency matrix (e.g "pearson" , "spearman" 
@@ -74,7 +75,7 @@ class MNN(object):
             Y = pd.DataFrame(Y)
 
         if metric in ["pearson", "spearman", "kendall"]:
-            corr = (pd.concat([X, Y], keys=["X", "Y"]).T).corr(method=metric)
+            corr = pd.concat([X, Y], keys=["X", "Y"]).T.corr(method=metric)
             return 1 - np.abs((corr.loc["X", "Y"]).values)
         else:
             return cdist(X, Y, metric=metric)
@@ -83,9 +84,10 @@ class MNN(object):
         """Compute the undirected adjacency matrix with the Mutual Nearest Neighbors method (``k`` neighbors)
 
         Parameters
-        ----------        
+        ----------
         weighted : boolean
-            If True each coefficient of the adjacency matrix is weighted by ``1 - distance``, otherwise the coefficient are 0 or 1. 
+            If True each coefficient of the adjacency matrix is weighted by ``1 - distance``, otherwise the coefficient
+            are 0 or 1.
 
         Returns
         -------

@@ -18,9 +18,10 @@ class ToppFunAnalysis(object):
                 For each metagene the serie contains a list of the IDs of the extreme expressed
                 genes.
 
-    convert_to_entrez : boolean, optional.
-        If True gene ids will be converted to Entrez IDs. ToppFunAnalysis conversion tool can handle Entrez gene ids, Ensemble gene ids, 
-        NCBI RefSeq ids, official gene symbols, HUGO Gene Nomenclature, UniProt ids, Affymetrix probeset ids, and a mix of everything.
+    convert_ids : boolean, optional.
+        If True gene ids will be converted to Entrez IDs. ToppFunAnalysis conversion tool can handle Entrez gene ids,
+        Ensemble gene ids, NCBI RefSeq ids, official gene symbols, HUGO Gene Nomenclature, UniProt ids, Affymetrix
+        probeset ids, and a mix of everything.
         If False ToppFunAnalysis will assume that the inputs are already Entrez IDs. No conversion will be performed.
         The default is True.
         
@@ -58,7 +59,7 @@ class ToppFunAnalysis(object):
     def __init__(
         self,
         data,
-        convert_to_entrez=True,
+        convert_ids=True,
         pre_selected=False,
         threshold=3,
         method="std",
@@ -68,10 +69,11 @@ class ToppFunAnalysis(object):
         # Check data
         check_data(data, pre_selected)
 
-        self.convert_to_entrez = convert_to_entrez
-        if not self.convert_to_entrez:
+        self.convert_ids = convert_ids
+        if not self.convert_ids:
             warnings.warn(
-                "If convert_to_entrez is False ToppFunAnalysis will assume that the inputs are already Entrez gene IDs. No conversion will be performed."
+                "If convert_ids is False ToppFunAnalysis will assume that the inputs are already Entrez gene "
+                "IDs. No conversion will be performed. "
             )
 
         # Initialization of selt.top_genes_ attribute
@@ -95,8 +97,8 @@ class ToppFunAnalysis(object):
         
             If ``idx = "all"`` all the metagenes will be converted. 
             
-            Otherwise, only the metagenes associated with ``idx`` will be converted. In that case, ``idx`` must correspond to valid 
-            indexes of the input data.
+            Otherwise, only the metagenes associated with ``idx`` will be converted. In that case, ``idx`` must
+            correspond to valid indexes of the input data.
  
         Returns
         -------
@@ -115,7 +117,8 @@ class ToppFunAnalysis(object):
         if idx == "all":
 
             warnings.warn(
-                "idx = 'all' : this operation can take quite some time depending on the number of metagenes and the number of most expressed genes."
+                "idx = 'all' : this operation can take quite some time depending on the number of metagenes and the "
+                "number of most expressed genes. "
             )
             self.top_genes_[["entrezgene", "notfound"]] = self.top_genes_.apply(
                 fun, axis=1, result_type="expand"
@@ -124,7 +127,8 @@ class ToppFunAnalysis(object):
         elif isinstance(idx, list):
 
             warnings.warn(
-                "metagenes is a list : this operation can take quite some time depending on the number of metagenes and the number of most expressed genes."
+                "metagenes is a list : this operation can take quite some time depending on the number of metagenes "
+                "and the number of most expressed genes. "
             )
             self.top_genes_.loc[idx, ["entrezgene", "notfound"]] = (
                 self.top_genes_.loc[idx].apply(fun, axis=1, result_type="expand")
@@ -182,14 +186,14 @@ class ToppFunAnalysis(object):
 
         """
 
-        if self.convert_to_entrez:
+        if self.convert_ids:
             self.convert_metagenes(idx=metagene)
             entrez_dict = {
-                "Genes": [int(id) for id in self.top_genes_.loc[metagene, "entrezgene"]]
+                "Genes": [int(k) for k in self.top_genes_.loc[metagene, "entrezgene"]]
             }
         else:
             entrez_dict = {
-                "Genes": [int(id) for id in self.top_genes_.loc[metagene, "inputs"]]
+                "Genes": [int(k) for k in self.top_genes_.loc[metagene, "inputs"]]
             }
 
         results = []
@@ -247,8 +251,7 @@ def _get_analysis(
 
     url = "https://toppgene.cchmc.org/API/enrich"
     headers = {"Content-Type": "text/json"}
-    parameters = {}
-    parameters["Categories"] = []
+    parameters = {"Categories": []}
     for type_id in type_list:
         parameters["Categories"].append(
             {
@@ -260,9 +263,7 @@ def _get_analysis(
                 "Correction": correct,
             }
         )
-    data_all = {}
-    data_all["Genes"] = entrez_dict["Genes"]
-    data_all["Categories"] = parameters["Categories"]
+    data_all = {"Genes": entrez_dict["Genes"], "Categories": parameters["Categories"]}
     response = requests.post(url, headers=headers, data=json.dumps(data_all))
     if response.status_code == 200:
         print("Enrichment analysis success!")

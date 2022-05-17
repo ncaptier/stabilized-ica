@@ -17,7 +17,7 @@ def ica(
     normalize=True,
     reorientation=True,
     whiten=True,
-    pca_solver="full",
+    pca_solver="auto",
     chunked=False,
     chunk_size=None,
     zero_center=True,
@@ -63,8 +63,55 @@ def ica(
         not computed.
         The default is None.
     
-    
-    ** See fit method of sica.base.StabilizedICA for more details about the remaining parameters.
+    fun : str {'cube' , 'exp' , 'logcosh' , 'tanh'} or function, optional.
+
+        If ``algorithm`` is in {'fastica_par' , 'fastica_def'}, it represents the functional form of the G function used
+        in the approximation to neg-entropy. Could be either ‘logcosh’, ‘exp’, or ‘cube’.
+
+        If ``algorithm`` is in {'fastica_picard' , 'infomax' , 'infomax_ext' , 'infomax_orth'}, it is associated with
+        the choice of a density model for the sources. See supplementary explanations for more details.
+
+        The default is 'logcosh'.
+
+    algorithm : str {'fastica_par' , 'fastica_def' , 'fastica_picard' , 'infomax' , 'infomax_ext' , 'infomax_orth'}, optional.
+            The algorithm applied for solving the ICA problem at each run. Please see the supplementary explanations for
+            more details.
+            The default is 'fastica_par', i.e. FastICA from sklearn with parallel implementation.
+
+    normalize : boolean, optional
+        If True normalize the rows of ``S_`` (i.e. the stabilized ICA components) to unit standard deviation.
+        The default is True.
+
+    reorientation : boolean,optional
+        If True re-oriente the rows of ``S_`` towards positive heavy tail.
+        The default is True.
+
+    whiten : boolean, optional
+
+        If True the matrix X is whitened, i.e. centered then projected in the space defined by its
+        first ``n_components`` PCA components and reduced to unit variance along each of these axes.
+
+        If False the input X matrix must be already whitened (the columns must be centered, scaled to unit
+        variance and uncorrelated.)
+
+        The default is True.
+
+    pca_solver : str {‘auto’, ‘full’, ‘arpack’, ‘randomized’ , 'lobpcg'}, optional
+        Solver for the different PCA methods. Please note that some solvers may not be compatible with
+        some PCA methods. See _whitening.py for more details.
+        The default is "full" (i.e SVD decomposition)
+
+    chunked : boolean, optional
+        Parameter for the whitening step, see _whitening.py for more details.
+        The default is False.
+
+    chunk_size : int, optional
+        Parameter for the whitening step, see _whitening.py for more details.
+        The default is None.
+
+    zero_center : boolean, optional
+        Parameter for the whitening step, see _whitening.py for more details.
+        The default is True.
     
     Returns
     -------
@@ -98,9 +145,9 @@ def ica(
     --------
     >>> import scanpy
     >>> from sica.singlecell import ica    
-    >>> adata = scanpy.read_h5ad('GSE90860_3.h5ad')
-    >>> adata.X -= adata.X.mean(axis =0)   
-    >>> ica(adata , observations = 'genes' , n_components = 30 , n_runs = 100)
+    >>> anndata = scanpy.read_h5ad('GSE90860_3.h5ad')
+    >>> anndata.X -= anndata.X.mean(axis =0)
+    >>> ica(anndata , observations = 'genes' , n_components = 30 , n_runs = 100)
 
     """
 
@@ -114,7 +161,19 @@ def ica(
 
     X = adata.X
     sica = StabilizedICA(
-        n_components=n_components, max_iter=2000, resampling=resampling, n_jobs=-1
+            n_components=n_components,
+            n_runs=n_runs,
+            resampling=resampling,
+            algorithm=algorithm,
+            fun=fun,
+            whiten=whiten,
+            normalize=normalize,
+            reorientation=reorientation,
+            pca_solver=pca_solver,
+            chunked=chunked,
+            chunk_size=chunk_size,
+            zero_center=zero_center,
+            n_jobs=-1,
     )
 
     #### 1. Apply stabilized ICA
@@ -122,19 +181,7 @@ def ica(
     # Apply stabilized ICA to discover independent metagenes
     if observations == "genes":
 
-        sica.fit(
-            X.T,
-            n_runs=n_runs,
-            fun=fun,
-            algorithm=algorithm,
-            normalize=normalize,
-            reorientation=reorientation,
-            whiten=whiten,
-            pca_solver=pca_solver,
-            chunked=chunked,
-            chunk_size=chunk_size,
-            zero_center=zero_center,
-        )
+        sica.fit(X.T)
 
     # Apply stabilized ICA to discover independent metasamples
     elif observations == "cells":
@@ -150,46 +197,17 @@ def ica(
 
                 warnings.warn(
                     "The number of PCA components in adata.obsm['X_pca'] is strictly less than n_components."
-                    " By default, the PCA step is redone within the stabilized ICA algorithm with the desired number of components (i.e n_components)."
+                    "By default, the PCA step is redone within the stabilized ICA algorithm with the desired number "
+                    "of components (i.e n_components). "
                 )
 
-                sica.fit(
-                    X,
-                    n_runs=n_runs,
-                    fun=fun,
-                    algorithm=algorithm,
-                    normalize=normalize,
-                    reorientation=reorientation,
-                    whiten=whiten,
-                    pca_solver=pca_solver,
-                    chunked=chunked,
-                    chunk_size=chunk_size,
-                    zero_center=zero_center,
-                )
+                sica.fit(X)
+
             else:
-                sica.fit(
-                    adata.obsm["X_pca"][:, :n_components],
-                    n_runs=n_runs,
-                    fun=fun,
-                    algorithm=algorithm,
-                    normalize=normalize,
-                    reorientation=reorientation,
-                    whiten=False,
-                )
+                sica.set_params({"whiten": False})
+                sica.fit(adata.obsm["X_pca"][:, :n_components])
         else:
-            sica.fit(
-                X,
-                n_runs=n_runs,
-                fun=fun,
-                algorithm=algorithm,
-                normalize=normalize,
-                reorientation=reorientation,
-                whiten=whiten,
-                pca_solver=pca_solver,
-                chunked=chunked,
-                chunk_size=chunk_size,
-                zero_center=zero_center,
-            )
+            sica.fit(X)
 
     #### 2. Plot 2D projection (optional)
 
@@ -199,17 +217,17 @@ def ica(
     #### 3. Return data
 
     if observations == "genes":
-        Metasamples = sica.A_
-        Metagenes = sica.S_
+        metasamples = sica.transform(X.T)
+        metagenes = sica.S_
     elif observations == "cells":
-        Metasamples = sica.S_.T
-        Metagenes = sica.A_.T
+        metasamples = sica.S_.T
+        metagenes = sica.transform(X).T
     stability_indexes = sica.stability_indexes_
 
     if data_is_AnnData:
 
-        adata.obsm["sica_metasamples"] = Metasamples
-        adata.varm["sica_metagenes"] = Metagenes.T
+        adata.obsm["sica_metasamples"] = metasamples
+        adata.varm["sica_metagenes"] = metagenes.T
         adata.uns["sica"] = {}
         adata.uns["sica"]["stability_indexes"] = stability_indexes
 
@@ -217,6 +235,6 @@ def ica(
 
     else:
         if return_info:
-            return (Metasamples, Metagenes, stability_indexes)
+            return metasamples, metagenes, stability_indexes
         else:
-            return Metasamples
+            return metasamples

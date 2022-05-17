@@ -56,6 +56,13 @@ def create_data_superGauss(add_noise, seed, N=3, T=1000, M=None):
     else:
         A = rng.randn(M, N)
     X = np.dot(A, S)
+
+    if add_noise:
+        if M is None:
+            X += 0.1*rng.randn(N, T)
+        else:
+            X += 0.1*rng.randn(M, T)
+
     return X, A, S, rng
 
 
@@ -70,6 +77,13 @@ def create_data_subGauss(add_noise, seed, N=3, T=1000, M=None):
     else:
         A = rng.randn(M, N)
     X = np.dot(A, S)
+
+    if add_noise:
+        if M is None:
+            X += 0.1*rng.randn(N, T)
+        else:
+            X += 0.1*rng.randn(M, T)
+
     return X, A, S, rng
 
 
@@ -80,13 +94,20 @@ def create_data_mix(add_noise, seed, N=3, T=1000, M=None):
     rng = np.random.RandomState(seed)
     S = np.zeros((3, 1000))
     S[: int(N // 2), :] = rng.uniform(low=-1, high=1, size=(int(N // 2), T))
-    S[int(N // 2) :, :] = rng.laplace(size=(N - int(N // 2), T))
+    S[int(N // 2):, :] = rng.laplace(size=(N - int(N // 2), T))
     center_and_norm(S)
     if M is None:
         A = rng.randn(N, N)
     else:
         A = rng.randn(M, N)
     X = np.dot(A, S)
+
+    if add_noise:
+        if M is None:
+            X += 0.1*rng.randn(N, T)
+        else:
+            X += 0.1*rng.randn(M, T)
+
     return X, A, S, rng
 
 
@@ -95,7 +116,8 @@ def base_test_simple(strategy, data):
     Parameters
     ----------
     strategy : (string , string)
-        Pair of algorithm and function which characterizes the solver of the ICA problem (ex : ('fastica_par' , 'logcosh')).
+        Pair of algorithm and function which characterizes the solver of the ICA problem
+        (ex : ('fastica_par' , 'logcosh')).
     data : array X, array A, array S, randomstate 
         Simulated data.
     Returns
@@ -106,46 +128,37 @@ def base_test_simple(strategy, data):
     X, A, S, rng = data
     n_samples = S.shape[1]
 
-    sica = StabilizedICA(
-        n_components=S.shape[0], max_iter=2000, resampling=None, n_jobs=1, verbose=0
-    )
-
     whitening = [True, False]
     normalizing = [True, False]
     reorienting = [True, False]
     for whiten, norm, reorient in itertools.product(
         whitening, normalizing, reorienting
     ):
+        sica = StabilizedICA(n_components=S.shape[0],
+                             n_runs=10,
+                             fun=strategy[1],
+                             algorithm=strategy[0],
+                             whiten=whiten,
+                             normalize=norm,
+                             reorientation=reorient,
+                             resampling=None,
+                             n_jobs=1,
+                             verbose=0
+                             )
         if whiten:
-            sica.fit(
-                X.T,
-                n_runs=10,
-                fun=strategy[1],
-                algorithm=strategy[0],
-                whiten=whiten,
-                normalize=norm,
-                reorientation=reorient,
-            )
+            test_A = sica.fit_transform(X.T)
         else:
             pca = PCA(n_components=S.shape[0], whiten=True, random_state=rng)
             Xw = pca.fit_transform(X.T)
-            sica.fit(
-                Xw,
-                n_runs=10,
-                fun=strategy[1],
-                algorithm=strategy[0],
-                whiten=whiten,
-                normalize=norm,
-                reorientation=reorient,
-            )
+            test_A = sica.fit_transform(Xw)
 
-        assert sica.A_.shape == A.shape
+        assert test_A.shape == A.shape
         assert sica.S_.shape == S.shape
         assert sica.stability_indexes_.shape == (S.shape[0],)
 
         # Check that the mixing model described in the docstring holds:
         if whiten:
-            assert_almost_equal(X, np.dot(sica.A_, sica.S_))
+            assert_almost_equal(X, np.dot(test_A, sica.S_))
 
         center_and_norm(sica.S_)
         s1_, s2_, s3_ = sica.S_
@@ -175,7 +188,8 @@ def base_test_with_bootstrap(resampling, strategy, data):
     resampling : {'bootstrap' , 'fast_bootstrap'}
         Resampling strategy.
     strategy : (string , string)
-        Pair of algorithm and function which characterizes the solver of the ICA problem (ex : ('fastica_par' , 'logcosh')).
+        Pair of algorithm and function which characterizes the solver of the ICA problem
+        (ex : ('fastica_par' , 'logcosh')).
     data : array X, array A, array S, randomstate 
         Simulated data.
     Returns
@@ -188,20 +202,22 @@ def base_test_with_bootstrap(resampling, strategy, data):
 
     sica = StabilizedICA(
         n_components=S.shape[0],
-        max_iter=2000,
+        n_runs=10,
+        fun=strategy[1],
+        algorithm=strategy[0],
         resampling=resampling,
         n_jobs=-1,
         verbose=0,
     )
 
-    sica.fit(X.T, n_runs=10, fun=strategy[1], algorithm=strategy[0], whiten=True)
+    test_A = sica.fit_transform(X.T)
 
-    assert sica.A_.shape == A.shape
+    assert test_A.shape == A.shape
     assert sica.S_.shape == S.shape
     assert sica.stability_indexes_.shape == (S.shape[0],)
 
     # Check that the mixing model described in the docstring holds:
-    assert_almost_equal(X, np.dot(sica.A_, sica.S_))
+    assert_almost_equal(X, np.dot(test_A, sica.S_))
 
     center_and_norm(sica.S_)
     s1_, s2_, s3_ = sica.S_
@@ -224,7 +240,17 @@ def base_test_with_bootstrap(resampling, strategy, data):
     assert_almost_equal(np.dot(s3_, s3) / n_samples, 1, decimal=1)
 
     with pytest.raises(ValueError):
-        sica.fit(X.T, n_runs=10, fun=strategy[1], algorithm=strategy[0], whiten=False)
+        sica_wf = StabilizedICA(
+            n_components=S.shape[0],
+            n_runs=10,
+            fun=strategy[1],
+            whiten=False,
+            algorithm=strategy[0],
+            resampling=resampling,
+            n_jobs=-1,
+            verbose=0,
+        )
+        sica_wf.fit(X.T)
 
 
 @pytest.mark.parametrize("add_noise", [True, False])
@@ -358,9 +384,9 @@ def test_StabilizedICA_bootstrap_mix(add_noise, seed, strategy, resampling):
 def test_reorientation():
     X, A, S, rng = create_data_superGauss(add_noise=False, seed=42)
     sica = StabilizedICA(
-        n_components=3, max_iter=2000, resampling=None, n_jobs=1, verbose=0
+        n_components=3, n_runs=10, reorientation=True, resampling=None, n_jobs=1, verbose=0
     )
-    sica.fit(X.T, n_runs=10, reorientation=True)
+    sica.fit(X.T)
 
     assert stats.skew(sica.S_[0, :]) >= 0
     assert stats.skew(sica.S_[1, :]) >= 0
@@ -370,9 +396,9 @@ def test_reorientation():
 def test_normalization():
     X, A, S, rng = create_data_superGauss(add_noise=False, seed=42)
     sica = StabilizedICA(
-        n_components=3, max_iter=2000, resampling=None, n_jobs=1, verbose=0
+        n_components=3, n_runs=10, normalize=True, resampling=None, n_jobs=1, verbose=0
     )
-    sica.fit(X.T, n_runs=10, normalize=True)
+    sica.fit(X.T)
 
     assert_almost_equal(np.std(sica.S_[0, :]), 1)
     assert_almost_equal(np.std(sica.S_[1, :]), 1)

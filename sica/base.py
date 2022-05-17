@@ -21,7 +21,6 @@ from ._whitening import whitening
 
 
 def _check_algorithm(algorithm, fun):
-
     all_algorithms = [
         "fastica_par",
         "fastica_def",
@@ -169,16 +168,16 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
         Resampling could lead to quite heavy computations (whitening at each iteration), depending on the size of the input data. It should be considered with care. The default is None.
 
     algorithm : str {'fastica_par' , 'fastica_def' , 'fastica_picard' , 'infomax' , 'infomax_ext' , 'infomax_orth'}, optional.
-            The algorithm applied for solving the ICA problem at each run. Please see the supplementary explanations for more details.
-            The default is 'fastica_par', i.e. FastICA from sklearn with parallel implementation.
+            The algorithm applied for solving the ICA problem at each run. Please see the supplementary explanations
+            for more details. The default is 'fastica_par', i.e. FastICA from sklearn with parallel implementation.
 
     fun : str {'cube' , 'exp' , 'logcosh' , 'tanh'} or function, optional.
 
-        If ``algorithm`` is in {'fastica_par' , 'fastica_def'}, it represents the functional form of the G function used in
-        the approximation to neg-entropy. Could be either ‘logcosh’, ‘exp’, or ‘cube’.
+        If ``algorithm`` is in {'fastica_par' , 'fastica_def'}, it represents the functional form of the G function
+        used in the approximation to neg-entropy. Could be either ‘logcosh’, ‘exp’, or ‘cube’.
 
-        If ``algorithm`` is in {'fastica_picard' , 'infomax' , 'infomax_ext' , 'infomax_orth'}, it is associated with the choice of
-        a density model for the sources. See supplementary explanations for more details.
+        If ``algorithm`` is in {'fastica_picard' , 'infomax' , 'infomax_ext' , 'infomax_orth'}, it is associated with
+        the choice of a density model for the sources. See supplementary explanations for more details.
 
         The default is 'logcosh'.
 
@@ -318,7 +317,6 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
         self.verbose = verbose
 
         self.S_ = None
-        self.A_ = None
         self.mean_ = None
         self.stability_indexes_ = None
 
@@ -364,13 +362,13 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
             # Pre-processing (whitening)
             if self.whiten:
                 X_w, self.mean_ = whitening(
-                                    X,
-                                    n_components=self.n_components,
-                                    svd_solver=self.pca_solver,
-                                    chunked=self.chunked,
-                                    chunk_size=self.chunk_size,
-                                    zero_center=self.zero_center,
-                                )
+                    X,
+                    n_components=self.n_components,
+                    svd_solver=self.pca_solver,
+                    chunked=self.chunked,
+                    chunk_size=self.chunk_size,
+                    zero_center=self.zero_center,
+                )
             else:
                 X_w = as_float_array(X, copy=False)
                 self.mean_ = None
@@ -463,8 +461,8 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
         # Re-oriente the stabilized ICA components towards positive heaviest tails
         if self.reorientation:
             self.S_ = (
-                np.where(stats.skew(Centrotypes, axis=1) >= 0, 1, -1).reshape(-1, 1)
-            ) * Centrotypes
+                          np.where(stats.skew(Centrotypes, axis=1) >= 0, 1, -1).reshape(-1, 1)
+                      ) * Centrotypes
         else:
             self.S_ = Centrotypes
 
@@ -491,17 +489,19 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
         return self
 
     def _parallel_decomposition(self, parallel, func, kwargs):
-        """ Compute in parallel the n_runs runs of the ICA solver. If the solver comes from sklearn.FastICA, some potential convergence errors ar handled through 
-        multiple retryings.
+        """ Compute in parallel the n_runs runs of the ICA solver. If the solver comes from sklearn.FastICA,
+        some potential convergence errors ar handled through multiple retryings.
         
         Parameters
         ----------
         parallel : joblib.Parallel
-            Object to use workers to compute in parallel the n_runs application of the function func to solve the ICA problem.
+            Object to use workers to compute in parallel the n_runs application of the function func to solve the ICA
+            problem.
             
         func : callable
-            Function to perform the ICA decomposition for a single run. It should return an array of ICA components of shape (n_components , n_observations)
-            
+            Function to perform the ICA decomposition for a single run. It should return an array of ICA components of
+            shape (n_components , n_observations)
+
         kwargs : dict
             A dictionnary of arguments to pass to the function func.
 
@@ -561,8 +561,8 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
         return S
 
     def _ICA_decomposition_bootstrap(self, X, whitening_params):
-        """ Draw a bootstrap sample from the original data matrix X, whiten it and apply FastICA or infomax (picard package) algorithm 
-        to solve the ICA problem.
+        """ Draw a bootstrap sample from the original data matrix X, whiten it and apply FastICA or infomax
+        (picard package) algorithm to solve the ICA problem.
         
         Parameters
         ----------
@@ -575,8 +575,8 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
         Returns
         -------
         S : 2D array, shape (n_components , n_observations)
-            Array of sources obtained from a single run of an ICA solver and a bootstrap sample of the original matrix X.
-            Each line corresponds to an ICA component.
+            Array of sources obtained from a single run of an ICA solver and a bootstrap sample of the original matrix
+            X. Each line corresponds to an ICA component.
         """
 
         n_mixtures = X.shape[1]
@@ -597,8 +597,8 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
         return S
 
     def _ICA_decomposition_fast_bootstrap(self, U, SVt):
-        """ Draw a boostrap whitened sample from the original matrix X (svd decomposition of X = USVt) [1], and apply FastICA or infomax (picard package) algorithm 
-        to solve the ICA problem.
+        """ Draw a boostrap whitened sample from the original matrix X (svd decomposition of X = USVt) [1], and apply
+        FastICA or infomax (picard package) algorithm to solve the ICA problem.
         
         Parameters
         ----------
@@ -609,8 +609,8 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
         Returns
         -------
         S : 2D array, shape (n_components , n_observations)
-            Array of sources obtained from a single run of an ICA solver and a bootstrap sample of the original matrix X.
-            Each line corresponds to an ICA component.
+            Array of sources obtained from a single run of an ICA solver and a bootstrap sample of the original matrix
+            X. Each line corresponds to an ICA component.
             
         References
         ----------
@@ -647,6 +647,8 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
         Returns
         -------
         A : 2D array, shape (n_mixtures, n_components)
+            Mixing matrix which maps the independent sources to the data (i.e. X.T = AS)
+
         """
         check_array(X, dtype=FLOAT_DTYPES, accept_sparse=True)
         check_is_fitted(self)
@@ -704,18 +706,18 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
         return
 
 
-def MSTD(X, 
-         m, 
-         M, 
-         step, 
+def MSTD(X,
+         m,
+         M,
+         step,
          n_runs,
-         fun="logcosh", 
-         algorithm="fastica_par", 
-         whiten=True, 
-         max_iter=2000, 
-         n_jobs=-1, 
+         fun="logcosh",
+         algorithm="fastica_par",
+         whiten=True,
+         max_iter=2000,
+         n_jobs=-1,
          ax=None
-):
+         ):
     """Plot "MSTD graphs" to help choose an optimal dimension for ICA decomposition.
         
     Run stabilized ICA algorithm for several dimensions in [m , M] and compute the
@@ -743,12 +745,12 @@ def MSTD(X,
         The default is 'logcosh'. See the fit method of StabilizedICA for more details.
         
     algorithm : str {'fastica_par' , 'fastica_def' , 'fastica_picard' , 'infomax' , 'infomax_ext' , 'infomax_orth'}, optional.
-        The algorithm applied for solving the ICA problem at each run. Please the supplementary explanations for more details.
-        The default is 'fastica_par', i.e. FastICA from sklearn with parallel implementation.
+        The algorithm applied for solving the ICA problem at each run. Please the supplementary explanations for more
+        details. The default is 'fastica_par', i.e. FastICA from sklearn with parallel implementation.
         
     whiten : bool, optional
-        It True, X is whitened only once as an initial step, with an SVD solver and M components. If False, X must be already
-        whitened, with M components. The default is True.
+        It True, X is whitened only once as an initial step, with an SVD solver and M components. If False, X must be
+        already whitened, with M components. The default is True.
               
     max_iter : int, optional
         Parameter for _ICA_decomposition. The default is 2000.
@@ -783,13 +785,15 @@ def MSTD(X,
             ax = ax.flatten()
         except AttributeError:
             warnings.warn(
-                "ax should be a numpy array containing at least two matplotlib.axes.Axes objects. It was redefined by default."
+                "ax should be a numpy array containing at least two matplotlib.axes.Axes objects. It was redefined by "
+                "default. "
             )
             fig, ax = plt.subplots(1, 2, figsize=(20, 7))
         else:
             if len(ax) < 2:
                 warnings.warn(
-                    "ax is not of the right shape. It should contain at least two matplotlib.axes.Axes objects. It was redefined by default."
+                    "ax is not of the right shape. It should contain at least two matplotlib.axes.Axes objects. It "
+                    "was redefined by default. "
                 )
                 fig, ax = plt.subplots(1, 2, figsize=(20, 7))
 

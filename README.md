@@ -19,7 +19,7 @@ We also propose an implementation of the Mutual Nearest Neighbors method as well
 
 Finally, we propose an adaptation of our algorithm for the special case of [AnnData](https://anndata.readthedocs.io/en/latest/anndata.AnnData.html) format. Our module sica.singlecell is modeled after the [scanpy package](https://scanpy.readthedocs.io/en/stable/) that deals with single-cell gene expression data.
 
-**Note :** This project was originally developped to provide a reproducible an biologically meaningful python algorithm for the deconvolution of "omics" data. Several modules like sica.singlecell or sica.annotate are specifically dedicated to this task. However, the sica.base module which contains the main computations for the stabilization of ICA or the sica.mutualknn module which draws a mutual k-nearest neighbors graph to assess the reproducibility of the ICA components could work perfectly with any other data type.   
+**Note :** This project was originally developped to provide a reproducible and biologically meaningful python algorithm for the deconvolution of "omics" data. Several modules like sica.singlecell or sica.annotate are specifically dedicated to this task. However, the sica.base module which contains the main computations for the stabilization of ICA or the sica.mutualknn module which draws a mutual k-nearest neighbors graph to assess the reproducibility of the ICA components could work perfectly with any other data type.   
 
 ### Documentation
 
@@ -61,8 +61,8 @@ from sica.base import StabilizedICA
 
 df = pd.read_csv("data.csv" , index_col = 0).transpose()
 
-sICA = StabilizedICA(n_components = 45 , max_iter = 2000 , n_jobs = -1)
-sICA.fit(df , n_runs = 30 , plot = True , normalize = True)
+sICA = StabilizedICA(n_components=45, n_runs=30 ,plot=True, n_jobs = -1)
+sICA.fit(df)
 
 Metagenes = pd.DataFrame(sICA.S_ , columns = df.index , index = ['metagene ' + str(i) for i in range(sICA.S_.shape[0])])
 Metagenes.head()

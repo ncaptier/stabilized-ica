@@ -396,6 +396,8 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
                 "zero_center": self.zero_center,
             }
 
+            self.mean_ = np.mean(X, axis=0)
+
             # Compute the n_components*n_runs ICA components
             decomposition = self._parallel_decomposition(
                 parallel=parallel,
@@ -581,7 +583,7 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
 
         n_mixtures = X.shape[1]
         Xb = X[:, np.random.choice(range(n_mixtures), size=n_mixtures)]
-        Xb_w = whitening(Xb, n_components=self.n_components, **whitening_params)
+        Xb_w, _ = whitening(Xb, n_components=self.n_components, **whitening_params)
 
         if self._method == "picard":
             _, _, S = picard(

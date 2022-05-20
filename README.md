@@ -59,7 +59,7 @@ For the jupyter notebooks ["Stability of ICA components accross several NSCLC co
 import pandas as pd
 from sica.base import StabilizedICA
 
-df = pd.read_csv("data.csv" , index_col = 0).transpose()
+df = pd.read_csv("data.csv" , index_col = 0)
 
 sICA = StabilizedICA(n_components=45, n_runs=30 ,plot=True, n_jobs = -1)
 sICA.fit(df)

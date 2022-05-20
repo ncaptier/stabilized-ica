@@ -19,8 +19,10 @@ import warnings
 from picard import picard
 from ._whitening import whitening
 
+from typing import NoReturn, Optional, Tuple, Callable, List, Union, Any
 
-def _check_algorithm(algorithm, fun):
+
+def _check_algorithm(algorithm: str, fun: str) -> Tuple[str, dict]:
     all_algorithms = [
         "fastica_par",
         "fastica_def",
@@ -87,7 +89,7 @@ def _check_algorithm(algorithm, fun):
         return "picard", {"ortho": True, "extended": False, "fun": fun}
 
 
-def _centrotype(X, Sim, cluster_labels):
+def _centrotype(X: np.ndarray, Sim: np.ndarray, cluster_labels: list) -> np.ndarray:
     """Compute the centrotype of the cluster of ICA components defined by cluster_labels
     
        centrotype : component of the cluster which is the most similar to the other components
@@ -113,7 +115,7 @@ def _centrotype(X, Sim, cluster_labels):
     return X[cluster_labels[temp], :]
 
 
-def _stability_index(Sim, cluster_labels):
+def _stability_index(Sim: np.ndarray, cluster_labels: list) -> float:
     """Compute the stability index for the cluster of ICA components defined by cluster_labels.
         
     Please refer to https://bmcgenomics.biomedcentral.com/track/pdf/10.1186/s12864-017-4112-9
@@ -281,23 +283,23 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
 
     def __init__(
             self,
-            n_components,
-            n_runs,
-            resampling=None,
-            algorithm="fastica_par",
-            fun="logcosh",
-            whiten=True,
-            max_iter=2000,
-            plot=False,
-            normalize=True,
-            reorientation=True,
-            pca_solver="auto",
-            chunked=False,
-            chunk_size=None,
-            zero_center=True,
-            n_jobs=1,
-            verbose=0,
-    ):
+            n_components: int,
+            n_runs: int,
+            resampling: Optional[Union[str, None]] = None,
+            algorithm: Optional[str] = "fastica_par",
+            fun: Optional[str] = "logcosh",
+            whiten: Optional[bool] = True,
+            max_iter: Optional[int] = 2000,
+            plot: Optional[bool] = False,
+            normalize: Optional[bool] = True,
+            reorientation: Optional[bool] = True,
+            pca_solver: Optional[str] = "auto",
+            chunked: Optional[bool] = False,
+            chunk_size: Optional[Union[int, None]] = None,
+            zero_center: Optional[bool] = True,
+            n_jobs: Optional[int] = 1,
+            verbose: Optional[int] = 0,
+    ) -> NoReturn:
         super().__init__()
         self.n_components = n_components
         self.n_runs = n_runs
@@ -320,7 +322,7 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
         self.mean_ = None
         self.stability_indexes_ = None
 
-    def fit(self, X, y=None):
+    def fit(self, X: np.ndarray, y: Optional[Any] = None) -> object:
         """ Fit the ICA model with X (use stabilization).
         
         1. Compute the ICA components of X ``n_runs`` times.
@@ -410,7 +412,7 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
             if not self.whiten:
                 raise ValueError(
                     "The matrix X should not be pre-whitened when resampling = 'fast_bootstrap'. The whitening step "
-                    "is performed consecutively to each resampling (with SVD decomposition). "
+                    "is performed consecutively to each resampling (with SVD decomposition)."
                 )
 
             elif issparse(X):
@@ -490,7 +492,11 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
 
         return self
 
-    def _parallel_decomposition(self, parallel, func, kwargs):
+    def _parallel_decomposition(self,
+                                parallel: Parallel,
+                                func: Callable[..., np.ndarray],
+                                kwargs: dict
+                                ) -> List[np.ndarray]:
         """ Compute in parallel the n_runs runs of the ICA solver. If the solver comes from sklearn.FastICA,
         some potential convergence errors ar handled through multiple retryings.
         
@@ -515,27 +521,25 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
 
         if self.algorithm in ["fastica_par", "fastica_def"]:
             maxtrials = 10
-            for i in range(maxtrials):
+            attempt = 1
+            success = False
+            decomposition = None
+            while (attempt <= maxtrials) and (not success):
                 try:
-                    decomposition = parallel(
-                        delayed(func)(**kwargs) for _ in range(self.n_runs)
-                    )
+                    decomposition = parallel(delayed(func)(**kwargs) for _ in range(self.n_runs))
+                    success = True
                 except ValueError:
-                    if i < maxtrials - 1:
-                        print(
-                            "FastICA from sklearn did not converge due to numerical instabilities - Retrying..."
-                        )
-                        continue
-                    else:
-                        print("Too many attempts : FastICA did not converge !")
-                        raise
-                break
+                    print("FastICA from sklearn did not converge due to numerical instabilities - Retrying...")
+                attempt += 1
+            if not success:
+                raise ValueError("Too many attempts: FastICA did not converge !")
+
         else:
             decomposition = parallel(delayed(func)(**kwargs) for _ in range(self.n_runs))
 
         return decomposition
 
-    def _ICA_decomposition(self, X_w):
+    def _ICA_decomposition(self, X_w: np.ndarray) -> np.ndarray:
         """ Apply FastICA or infomax (picard package) algorithm to the whitened matrix X_w to solve the ICA problem.
         
         Parameters
@@ -562,7 +566,7 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
             S = ica.fit_transform(X_w).T
         return S
 
-    def _ICA_decomposition_bootstrap(self, X, whitening_params):
+    def _ICA_decomposition_bootstrap(self, X: np.ndarray, whitening_params: dict) -> np.ndarray:
         """ Draw a bootstrap sample from the original data matrix X, whiten it and apply FastICA or infomax
         (picard package) algorithm to solve the ICA problem.
         
@@ -598,7 +602,7 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
             S = ica.fit_transform(Xb_w).T
         return S
 
-    def _ICA_decomposition_fast_bootstrap(self, U, SVt):
+    def _ICA_decomposition_fast_bootstrap(self, U: np.ndarray, SVt: np.ndarray) -> np.ndarray:
         """ Draw a boostrap whitened sample from the original matrix X (svd decomposition of X = USVt) [1], and apply
         FastICA or infomax (picard package) algorithm to solve the ICA problem.
         
@@ -639,28 +643,56 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
             S = ica.fit_transform(Xb_w).T
         return S
 
-    def transform(self, X):
-        """ Apply dimensionality reduction to X.
+    def transform(self, X: np.ndarray, copy: Optional[bool] = True) -> np.ndarray:
+        """ Apply dimensionality reduction to X (i.e. recover the unmixing matrix applying the pseudo-inverse
+        of the sources).
 
         Parameters
         ----------
         X : 2D array-like, shape (n_observations , n_mixtures)
 
+        copy: bool, optional
+            If False, data passed to fit are overwritten. The default is True.
+
         Returns
         -------
         A : 2D array, shape (n_mixtures, n_components)
-            Mixing matrix which maps the independent sources to the data (i.e. X.T = AS)
+            Unmixing matrix which maps the independent sources to the data (i.e. X.T = AS)
 
         """
-        check_array(X, dtype=FLOAT_DTYPES, accept_sparse=True)
+        X = check_array(X, dtype=FLOAT_DTYPES, accept_sparse=True, copy=copy)
         check_is_fitted(self)
 
         if self.mean_ is not None:
-            X = X - self.mean_
+            X -= self.mean_
         A = X.T.dot(np.linalg.pinv(self.S_))
         return A
 
-    def projection(self, method="mds", ax=None):
+    def inverse_transform(self, X: np.ndarray, copy: Optional[bool] = True) -> np.ndarray:
+        """ Transform the unmixing matrix back to the mixed data (applying the sources).
+
+        Parameters
+        ----------
+        X: 2D array-like, shape (n_mixtures , n_components)
+
+        copy: bool, optional
+            If False, data passed to fit are overwritten. The default is True.
+
+        Returns
+        -------
+        X_new: 2D array, shape (n_observations, n_mixtures)
+        """
+        check_is_fitted(self)
+        X_new = np.dot(X, self.S_).T
+        if self.mean_ is not None:
+            X_new += self.mean_
+        return X_new
+
+    def projection(
+            self,
+            method: Optional[str] = "mds",
+            ax: Optional[Union[matplotlib.axes.Axes, None]] = None
+    ) -> None:
         """Plot the ``n_components*n_runs`` ICA components computed during fit() in 2D.
         Approximate the original dissimilarities between components by Euclidean distance.
         Each cluster is represented with a different color.
@@ -701,6 +733,8 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
             )
         elif method == "umap":
             embedding = umap.UMAP(n_components=2, metric="precomputed")
+        else:
+            raise ValueError("method parameter value can only be 'tsne', 'mds' or 'umap'")
 
         P = embedding.fit_transform(np.sqrt(1 - self._Sim))
 
@@ -708,18 +742,18 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
         return
 
 
-def MSTD(X,
-         m,
-         M,
-         step,
-         n_runs,
-         fun="logcosh",
-         algorithm="fastica_par",
-         whiten=True,
-         max_iter=2000,
-         n_jobs=-1,
-         ax=None
-         ):
+def MSTD(X: np.ndarray,
+         m: int,
+         M: int,
+         step: int,
+         n_runs: int,
+         fun: Optional[str] = "logcosh",
+         algorithm: Optional[str] = "fastica_par",
+         whiten: Optional[bool] = True,
+         max_iter: Optional[int] = 2000,
+         n_jobs: Optional[int] = -1,
+         ax: Optional[Union[matplotlib.axes.Axes, None]] = None
+         ) -> None:
     """Plot "MSTD graphs" to help choose an optimal dimension for ICA decomposition.
         
     Run stabilized ICA algorithm for several dimensions in [m , M] and compute the

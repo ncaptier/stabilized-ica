@@ -1,0 +1,5 @@
+.pytest_cache
+examples/.ipynb_checkpoints
+sica/.ipynb_checkpoints
+**.xml
+examples/data/*

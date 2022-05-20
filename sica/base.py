@@ -817,8 +817,8 @@ def MSTD(X: np.ndarray,
     --------
     >>> import pandas as pd
     >>> from sica.base import MSTD
-    >>> df = pd.read_csv("data.csv" , index_col = 0).transpose()  
-    >>> MSTD(df.values , m = 5 , M = 100 , step = 2 , n_runs = 20 , max_iter = 2000)
+    >>> df = pd.read_csv("data.csv" , index_col = 0)
+    >>> MSTD(df.values , m = 5 , M = 100 , step = 2 , n_runs = 20)
     """
     if ax is None:
         fig, ax = plt.subplots(1, 2, figsize=(20, 7))
@@ -845,10 +845,10 @@ def MSTD(X: np.ndarray,
     mean = []
 
     if whiten:
-        X_w = whitening(
+        X_w, _ = whitening(
             X,
             n_components=M,
-            svd_solver="full",
+            svd_solver="auto",
             chunked=False,
             chunk_size=None,
             zero_center=True,
@@ -860,7 +860,7 @@ def MSTD(X: np.ndarray,
     for i in tqdm(range(m, M + step, step)):
         s = StabilizedICA(n_components=i, n_runs=n_runs, algorithm=algorithm, fun=fun, whiten=False,
                           max_iter=max_iter, n_jobs=n_jobs)
-        s.fit(X_w[:, :i])
+        s.fit(X_w[:, :i].T)
         mean.append(np.mean(s.stability_indexes_))
         ax[0].plot(range(1, len(s.stability_indexes_) + 1), s.stability_indexes_, "k")
 

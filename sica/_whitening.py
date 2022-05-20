@@ -54,7 +54,7 @@ def whitening(
     
     Parameters
     ----------
-    X : 2D ndarray or spmatrix, shape (n_observations , n_variables)
+    X : 2D ndarray or spmatrix, shape (n_samples , n_features)
         
     n_components : int
         number of pricipal components to compute. If None, n_components = min(X.shape)
@@ -80,9 +80,9 @@ def whitening(
 
     Returns
     -------
-    X_w : 2D ndarray, shape (n_observations , n_components)
+    X_w : 2D ndarray, shape (n_samples , n_components)
 
-    mean : 1D array, shape (n_variables,)
+    mean : 1D array, shape (n_features,)
     """
     random_state = check_random_state(random_state)
 
@@ -140,7 +140,7 @@ def _pca_with_sparse(
     
     Parameters
     ----------
-    X : spmatrix, shape (n_observations , n_variables)
+    X : spmatrix, shape (n_samples, n_features)
 
     npcs : int
         number of PCA componnents.
@@ -157,9 +157,9 @@ def _pca_with_sparse(
 
     Returns
     -------
-    X_pca : 2D ndarray, shape (n_observations , n_components)
+    X_pca : 2D ndarray, shape (n_samples , n_components)
 
-    mu : 1D array, shape (n_variables,)
+    mu : 1D array, shape (n_features,)
     """
 
     random_state = check_random_state(random_state)

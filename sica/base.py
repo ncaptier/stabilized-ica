@@ -150,12 +150,15 @@ def _stability_index(Sim: np.ndarray, cluster_labels: list) -> float:
 
 
 class StabilizedICA(BaseEstimator, TransformerMixin):
-    """ Implement a stabilized version of the Independent Component Analysis algorithm
-    
+    """ Implement a stabilized version of the Independent Component Analysis algorithm.
+
+    It fits the matrix factorization model X = AS, where A is the unmixing matrix (n_mixtures, n_sources), S is the
+    source matrix (n_sources, n_observations) and X is the observed mixed data (n_mixtures, n_observations).
+
     Parameters
     ----------
     n_components : int
-        Number of ICA components.
+        Number of ICA components/sources.
 
     n_runs : int
             Number of times we run the FastICA algorithm
@@ -188,7 +191,7 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
         If True the matrix X is whitened, i.e. centered then projected in the space defined by its
         first ``n_components`` PCA components and reduced to unit variance along each of these axes.
 
-        If False the input X matrix must be already whitened (the columns must be centered, scaled to unit
+        If False the input X matrix must be already whitened (the rows must be centered, scaled to unit
         variance and uncorrelated.)
 
         The default is True.
@@ -274,7 +277,7 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
     --------
     >>> import pandas as pd
     >>> from sica.base import StabilizedICA   
-    >>> df = pd.read_csv("data.csv" , index_col = 0).transpose()  
+    >>> df = pd.read_csv("data.csv" , index_col = 0)
     >>> sICA = StabilizedICA(n_components = 45 , n_runs = 30, plot = True, n_jobs = -1)
     >>> sICA.fit(df)
     >>> Sources = pd.DataFrame(sICA.S_ , columns = df.index , index = ['source ' + str(i) for i in range(sICA.S_.shape[0])])
@@ -335,7 +338,7 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
                  
         Parameters
         ----------
-        X : 2D array-like, shape (n_observations , n_mixtures) or (n_observations , n_components) if whiten is False.
+        X : 2D array-like, shape (n_mixtures, n_observations) or (n_components, n_observations) if whiten is False.
             Training data 
 
         y : Ignored
@@ -348,12 +351,15 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
         """
         #### 0. Initialisation
 
+        # Here we consider the transpose of X so that the rest of the code is in line with sklearn.decomposition.FastICA
+        # which considers observations (or components for pre-whitened matrices) in rows and mixtures in columns.
+        X = check_array(X, dtype=FLOAT_DTYPES, accept_sparse=True, copy=self.whiten).T
+
         n_observations, n_mixtures = X.shape
         Centrotypes = np.zeros((self.n_components, n_observations))
         Index = np.zeros(self.n_components)
 
         self._method, self._solver_params = _check_algorithm(self.algorithm, self.fun)
-        X = check_array(X, dtype=FLOAT_DTYPES, accept_sparse=True, copy=self.whiten)
 
         parallel = Parallel(n_jobs=self.n_jobs, verbose=self.verbose)
 
@@ -649,7 +655,7 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
 
         Parameters
         ----------
-        X : 2D array-like, shape (n_observations , n_mixtures)
+        X : 2D array-like, shape (n_mixtures, n_observations)
 
         copy: bool, optional
             If False, data passed to fit are overwritten. The default is True.
@@ -660,7 +666,7 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
             Unmixing matrix which maps the independent sources to the data (i.e. X.T = AS)
 
         """
-        X = check_array(X, dtype=FLOAT_DTYPES, accept_sparse=True, copy=copy)
+        X = check_array(X, dtype=FLOAT_DTYPES, accept_sparse=True, copy=copy).T
         check_is_fitted(self)
 
         if self.mean_ is not None:
@@ -680,12 +686,12 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
 
         Returns
         -------
-        X_new: 2D array, shape (n_observations, n_mixtures)
+        X_new: 2D array, shape (n_mixtures, n_observations)
         """
         check_is_fitted(self)
-        X_new = np.dot(X, self.S_).T
+        X_new = np.dot(X, self.S_)
         if self.mean_ is not None:
-            X_new += self.mean_
+            X_new += self.mean_.reshape(1, -1)
         return X_new
 
     def projection(
@@ -761,7 +767,7 @@ def MSTD(X: np.ndarray,
        
     Parameters
     ----------
-    X : 2D array, shape (n_observations , n_mixtures) 
+    X : 2D array, shape (n_mixtures, n_observations)
         Training data
         
     m : int
@@ -833,6 +839,9 @@ def MSTD(X: np.ndarray,
                 )
                 fig, ax = plt.subplots(1, 2, figsize=(20, 7))
 
+    # Here we consider the transpose of X so that the rest of the code is in line with sklearn.decomposition.FastICA
+    # which considers observations (or components for pre-whitened matrices) in rows and mixtures in columns.
+    X = check_array(X, dtype=FLOAT_DTYPES, accept_sparse=True).T
     mean = []
 
     if whiten:

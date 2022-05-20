@@ -184,7 +184,7 @@ def ica(
     # Apply stabilized ICA to discover independent metagenes
     if observations == "genes":
 
-        sica.fit(X.T)
+        sica.fit(X)
 
     # Apply stabilized ICA to discover independent metasamples
     elif observations == "cells":
@@ -204,13 +204,13 @@ def ica(
                     "of components (i.e n_components). "
                 )
 
-                sica.fit(X)
+                sica.fit(X.T)
 
             else:
                 sica.set_params(whiten=False)
-                sica.fit(adata.obsm["X_pca"][:, :n_components])
+                sica.fit(adata.obsm["X_pca"][:, :n_components].T)
         else:
-            sica.fit(X)
+            sica.fit(X.T)
 
     #### 2. Plot 2D projection (optional)
 
@@ -220,11 +220,11 @@ def ica(
     #### 3. Return data
 
     if observations == "genes":
-        metasamples = sica.transform(X.T)
+        metasamples = sica.transform(X)
         metagenes = sica.S_
     elif observations == "cells":
         metasamples = sica.S_.T
-        metagenes = sica.transform(X).T
+        metagenes = sica.transform(X.T).T
     stability_indexes = sica.stability_indexes_
 
     if data_is_AnnData:

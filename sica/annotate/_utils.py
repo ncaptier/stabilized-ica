@@ -3,6 +3,8 @@ import mygene
 import pandas as pd
 import scipy.stats as stats
 
+from typing import Tuple, Union, List, Any
+
 
 # def _convert_geneID(genes_list, input_type, output_type):
 #    """ Call mygene querymany() function to convert gene IDs
@@ -45,7 +47,7 @@ import scipy.stats as stats
 #    ]  # remove potential duplicates
 
 
-def convert_to_entrez(genes_list):
+def convert_to_entrez(genes_list: List[str]) -> Tuple[List[str], List[str], pd.DataFrame]:
     """ Convert input gene IDs to Entrez gene IDs with mygene conversion tools (see _convert_geneID function).
     
     Parameters
@@ -88,7 +90,11 @@ def convert_to_entrez(genes_list):
     return entrez, notfound, df
 
 
-def get_top_genes(metagene, threshold, method, tail):
+def get_top_genes(metagene: pd.Series,
+                  threshold: Union[
+                      int, float, np.ndarray, List[Union[float, int]], Tuple[Union[float, int], Union[float, int]]],
+                  method: str,
+                  tail: str) -> List[str]:
     """ Select the extreme expressed genes for a given metagene.
     
     Parameters
@@ -124,6 +130,8 @@ def get_top_genes(metagene, threshold, method, tail):
         mu, std = metagene.mean(), metagene.std()
         t_left = mu - threshold[0] * std
         t_right = mu + threshold[1] * std
+    else:
+        raise ValueError("method parameter should either be 'quantile' or 'std'")
 
     S_l = metagene[metagene <= t_left].sort_values(ascending=False)
     S_r = metagene[metagene >= t_right].sort_values(ascending=False)
@@ -139,12 +147,13 @@ def get_top_genes(metagene, threshold, method, tail):
             top_genes = list(S_r.index)
         else:
             top_genes = list(S_l.index)
+    else:
+        raise ValueError("tail parameter can only be set to 'left, 'right', 'both' or 'heaviest'")
 
     return top_genes
 
 
-def check_data(data, pre_selected):
-
+def check_data(data: Any, pre_selected: bool) -> Union[pd.Series, pd.DataFrame]:
     if pre_selected:
         if not isinstance(data, pd.Series):
             raise ValueError(
@@ -159,14 +168,13 @@ def check_data(data, pre_selected):
                 "When pre_selected is False, data parameter must be a pandas.Series of shape (n_genes) or a "
                 "pandas.DataFrame of shape (n_metagenes , n_genes) "
             )
-    return
+    return data
 
 
-def check_params(threshold, method, tail):
-
+def check_params(threshold: Union[int, float, tuple, list, np.ndarray], method: str, tail: str) -> np.ndarray:
     if isinstance(threshold, (int, float)):
         threshold = np.array([threshold] * 2)
-    elif not isinstance(threshold, (tuple, list, np.array)) or len(threshold) != 2:
+    elif not isinstance(threshold, (tuple, list, np.ndarray)) or len(threshold) != 2:
         raise ValueError(
             "threshold must be either a numeric or an array-like of two numerics"
         )

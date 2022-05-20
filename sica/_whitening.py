@@ -1,10 +1,12 @@
 import numpy as np
 from sklearn.decomposition import PCA, IncrementalPCA, TruncatedSVD
-from scipy.sparse import issparse
+from scipy.sparse import issparse, spmatrix
 from scipy.sparse.linalg import LinearOperator, svds
 from sklearn.utils import check_array, check_random_state
 from sklearn.utils.extmath import svd_flip
 import warnings
+
+from typing import Optional, Tuple, Union
 
 """The following code is inspired by the scanpy.tl.pca module (
 https://scanpy.readthedocs.io/en/stable/api/scanpy.tl.pca.html). 
@@ -39,8 +41,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."""
 
 
 def whitening(
-        X, n_components, svd_solver, chunked, chunk_size, zero_center, random_state=None
-):
+        X: Union[np.ndarray, spmatrix],
+        n_components: int,
+        svd_solver: str,
+        chunked: bool,
+        chunk_size: Union[int, None],
+        zero_center: bool,
+        random_state: Optional[Union[int, np.random.RandomState]] = None
+) -> Tuple[np.ndarray, np.ndarray]:
     """ Whiten data (i.e. transform variables into a set of new uncorrelated and unit-variance variables) and reduce
     dimension trhough a PCA-like approach. This function handles array-like formats as well as sparse matrices.
     
@@ -122,7 +130,12 @@ def whitening(
     return X_w, mean
 
 
-def _pca_with_sparse(X, npcs, solver="arpack", mu=None, random_state=None):
+def _pca_with_sparse(
+        X: spmatrix,
+        npcs: int,
+        solver: Optional[str] = "arpack",
+        mu=None,
+        random_state: Optional[Union[int, np.random.RandomState]] = None) -> Tuple[np.ndarray, np.ndarray]:
     """ Compute PCA decomposition with initial centering for sparse input.
     
     Parameters
@@ -146,7 +159,7 @@ def _pca_with_sparse(X, npcs, solver="arpack", mu=None, random_state=None):
     -------
     X_pca : 2D ndarray, shape (n_observations , n_components)
 
-    mu : 1D arrat, shape (n_variables,)
+    mu : 1D array, shape (n_variables,)
     """
 
     random_state = check_random_state(random_state)

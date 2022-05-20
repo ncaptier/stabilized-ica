@@ -1,26 +1,29 @@
+import numpy as np
 from anndata import AnnData
 from .base import StabilizedICA
 import warnings
 
+from typing import Optional, Union
+
 
 def ica(
-    data,
-    observations,
-    n_components,
-    n_runs,
-    resampling=None,
-    return_info=False,
-    copy=False,
-    plot_projection=None,
-    fun="logcosh",
-    algorithm="fastica_par",
-    normalize=True,
-    reorientation=True,
-    whiten=True,
-    pca_solver="auto",
-    chunked=False,
-    chunk_size=None,
-    zero_center=True,
+        data: Union[np.ndarray, AnnData,],
+        observations: str,
+        n_components: int,
+        n_runs: int,
+        resampling: Optional[str] = None,
+        return_info: Optional[bool] = False,
+        copy: Optional[bool] = False,
+        plot_projection: Optional[str] = None,
+        fun: Optional[str] = "logcosh",
+        algorithm: Optional[str] = "fastica_par",
+        normalize: Optional[bool] = True,
+        reorientation: Optional[bool] = True,
+        whiten: Optional[bool] = True,
+        pca_solver: Optional[str] = "auto",
+        chunked: Optional[bool] = False,
+        chunk_size: Optional[int] = None,
+        zero_center: Optional[bool] = True,
 ):
     """ Compute stabilized ICA decomposition for AnnData formats. Use the implementation of stabilized ICA in
     the same package (see module sica.base.py)
@@ -204,7 +207,7 @@ def ica(
                 sica.fit(X)
 
             else:
-                sica.set_params({"whiten": False})
+                sica.set_params(whiten=False)
                 sica.fit(adata.obsm["X_pca"][:, :n_components])
         else:
             sica.fit(X)

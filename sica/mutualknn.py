@@ -1,9 +1,12 @@
+import matplotlib.axes
 import numpy as np
 import pandas as pd
 import networkx as nx
 import matplotlib.pyplot as plt
 from scipy.spatial.distance import cdist
 import json
+
+from typing import Optional, NoReturn, List, Union
 
 """
 This python code provides an implementation for the Mutual Nearest Neighbors method as well as
@@ -38,7 +41,13 @@ class MNN(object):
     
     """
 
-    def __init__(self, k, metric, X, Y=None):
+    def __init__(
+            self,
+            k: int,
+            metric: str,
+            X: Union[np.ndarray, pd.DataFrame],
+            Y: Optional[Union[np.ndarray, pd.DataFrame]] = None
+    ) -> NoReturn:
         self.X = X
         self.Y = Y
         self.k = k
@@ -49,7 +58,11 @@ class MNN(object):
             self.distance = self.compute_distance(self.X, self.Y, self.metric)
 
     @staticmethod
-    def compute_distance(X, Y, metric):
+    def compute_distance(
+            X: Union[np.ndarray, pd.DataFrame],
+            Y: Union[np.ndarray, pd.DataFrame],
+            metric: str
+    ) -> np.ndarray:
         """Compute the distance between each pair of rows of X and Y
         
         Parameters
@@ -67,11 +80,13 @@ class MNN(object):
         """
         # Consider only the common columns of dataframes X and Y
         if isinstance(Y, pd.DataFrame):
-            common_features = set(X.columns) & set(Y.columns)
-            X = X[common_features]
-            Y = Y[common_features]
+            if isinstance(X, pd.DataFrame):
+                common_features = set(X.columns) & set(Y.columns)
+                X = X[common_features]
+                Y = Y[common_features]
+            else:
+                X = pd.DataFrame(X)
         else:
-            X = pd.DataFrame(X)
             Y = pd.DataFrame(Y)
 
         if metric in ["pearson", "spearman", "kendall"]:
@@ -80,7 +95,7 @@ class MNN(object):
         else:
             return cdist(X, Y, metric=metric)
 
-    def adjacency_matrix(self, weighted):
+    def adjacency_matrix(self, weighted: bool) -> np.ndarray:
         """Compute the undirected adjacency matrix with the Mutual Nearest Neighbors method (``k`` neighbors)
 
         Parameters
@@ -111,7 +126,7 @@ class MNN(object):
 ########################################################################################################################
 
 
-def _pairs(items):
+def _pairs(items: list) -> List[tuple]:
     """Return a list with all the pairs formed by two different elements of a list "items"
     
     Note : This function is a useful tool for the building of the MNN graph.
@@ -171,14 +186,21 @@ class MNNgraph(object):
    
     """
 
-    def __init__(self, data, names, k, metric="pearson", weighted=True):
+    def __init__(
+            self,
+            data: List[np.ndarray],
+            names: List[str],
+            k: int,
+            metric: Optional[str] = "pearson",
+            weighted: Optional[bool] = True
+    ) -> NoReturn:
         self.data = data
         self.names = names
         self.n_sets = len(names)
         self.graph_ = self.create_graph(self.data, self.names, k, metric, weighted)
 
     @staticmethod
-    def create_graph(data, names, k, metric, weighted):
+    def create_graph(data: List[np.ndarray], names: List[str], k: int, metric: str, weighted: bool) -> nx.Graph:
         """Create the MNN graph associated to the list of data sets. Two situations are 
         distinguished : one with only two data sets and another with more than two data sets.
                 
@@ -263,7 +285,13 @@ class MNNgraph(object):
                             G.add_edge(n1, n2, weight=h[u, v])
         return G
 
-    def draw(self, bipartite_graph=False, ax=None, colors=None, spacing=1):
+    def draw(
+            self,
+            bipartite_graph: Optional[bool] = False,
+            ax: Optional[matplotlib.axes.Axes] = None,
+            colors: Optional[list] = None,
+            spacing: Optional[float] = 1
+    ) -> None:
         """Draw the MNN graph.
         
         Parameters
@@ -384,7 +412,7 @@ class MNNgraph(object):
             ax.set_title("MNN graph")
         return
 
-    def export_json(self, file_name):
+    def export_json(self, file_name: str) -> None:
         """Save the graph in a json file adapted to cytoscape format
         
         Parameters

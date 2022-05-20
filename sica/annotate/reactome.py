@@ -5,6 +5,8 @@ import warnings
 import webbrowser
 from ._utils import convert_to_entrez, get_top_genes, check_data, check_params
 
+from typing import Union, Optional, NoReturn, List, Tuple
+
 
 class ReactomeAnalysis(object):
     """ Provide tools for running reactome enrichment analysis for different metagenes.
@@ -58,23 +60,24 @@ class ReactomeAnalysis(object):
 
     def __init__(
             self,
-            data,
-            convert_ids=True,
-            pre_selected=False,
-            threshold=3,
-            method="std",
-            tail="heaviest",
-    ):
+            data: Union[pd.DataFrame, pd.Series],
+            convert_ids: Optional[bool] = True,
+            pre_selected: Optional[bool] = False,
+            threshold: Optional[Union[
+                int, float, np.ndarray, List[Union[float, int]], Tuple[Union[float, int], Union[float, int]]]] = 3,
+            method: Optional[str] = "std",
+            tail: Optional[str] = "heaviest",
+    ) -> NoReturn:
 
         # Check data
-        check_data(data, pre_selected)
+        data = check_data(data, pre_selected)
 
         self.convert_ids = convert_ids
         if not self.convert_ids:
             warnings.warn(
                 "If convert_ids is False ReactomeAnalysis will assume that the inputs are valid gene ids for "
-                "Reactome analysis ((e.g HUGO gene symbols, EntrezGene , Uniprot ...). No conversion will be performed. "
-                "See https://reactome.org/userguide/analysis for more details. "
+                "Reactome analysis ((e.g HUGO gene symbols, EntrezGene , Uniprot ...). No conversion will be "
+                "performed. See https://reactome.org/userguide/analysis for more details."
             )
 
         # Initialization of selt.top_genes_ attribute
@@ -93,7 +96,7 @@ class ReactomeAnalysis(object):
         # to avoid repeating the whole analysis when calling get_analysis or open_analysis a second time.
         self.tokens = {ind: None for ind in data.index}
 
-    def convert_metagenes(self, idx):
+    def convert_metagenes(self, idx: Union[str, list, object]) -> None:
         """ Convert the IDs of the most expressed genes contained in ``top_genes_``.
         
         Parameters
@@ -147,7 +150,7 @@ class ReactomeAnalysis(object):
 
         return
 
-    def open_full_analysis(self, metagene):
+    def open_full_analysis(self, metagene: object):
         """ Browse the analysis for the given metagene in reactome web portal.
         
         Parameters
@@ -176,14 +179,14 @@ class ReactomeAnalysis(object):
 
     def get_analysis(
             self,
-            metagene,
-            species="Homo sapiens",
-            sort_by="Entities FDR",
-            ascending=True,
-            p_value=0.05,
-            min_entities=10,
-            max_entities=500,
-    ):
+            metagene: object,
+            species: Optional[str] = "Homo sapiens",
+            sort_by: Optional[str] = "Entities FDR",
+            ascending: Optional[bool] = True,
+            p_value: Optional[float] = 0.05,
+            min_entities: Optional[int] = 10,
+            max_entities: Optional[int] = 500,
+    ) -> pd.DataFrame:
         """ Return the reactome enrichment analysis of a given metagene.
         
         Parameters
@@ -244,7 +247,7 @@ class ReactomeAnalysis(object):
             return df[mask]
 
 
-def _get_token(ids):
+def _get_token(ids: list) -> str:
     """ Return the token associated with the reactome enrichment analysis.
 
     Parameters

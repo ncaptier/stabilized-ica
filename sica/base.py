@@ -27,9 +27,9 @@ def _check_algorithm(algorithm: str, fun: str) -> Tuple[str, dict]:
         "fastica_par",
         "fastica_def",
         "fastica_picard",
-        "infomax",
-        "infomax_ext",
-        "infomax_orth",
+        "picard",
+        "picard_ext",
+        "picard_orth",
     ]
     if algorithm not in all_algorithms:
         raise ValueError(
@@ -53,22 +53,22 @@ def _check_algorithm(algorithm: str, fun: str) -> Tuple[str, dict]:
 
     if fun == "logcosh" and algorithm in [
         "fastica_picard",
-        "infomax",
-        "infomax_ext",
-        "infomax_orth",
+        "picard",
+        "picard_ext",
+        "picard_orth",
     ]:
         warnings.warn(
             "'logcosh' is not available for picard. By default, we assumed 'tanh' was the desired function"
         )
         fun = "tanh"
 
-    if fun != "tanh" and algorithm in ["fastica_picard", "infomax_ext"]:
+    if fun != "tanh" and algorithm in ["fastica_picard", "picard_ext"]:
         warnings.warn(
             "Using a different density than `'tanh'` may lead to erratic behavior of the picard algorithm"
             " when extended=True (see picard package for more explanations)"
         )
 
-    if fun == "exp" and algorithm == "infomax":
+    if fun == "exp" and algorithm == "picard":
         warnings.warn(
             "Using the exponential density model may lead to a FloatingPointError. To solve this problem you may try "
             "to scale the non-linearity changing the alpha parameter in the exp density "
@@ -81,11 +81,11 @@ def _check_algorithm(algorithm: str, fun: str) -> Tuple[str, dict]:
         return "fastica", {"algorithm": "deflation", "fun": fun}
     elif algorithm == "fastica_picard":
         return "picard", {"ortho": True, "extended": True, "fun": fun}
-    elif algorithm == "infomax":
+    elif algorithm == "picard":
         return "picard", {"ortho": False, "extended": False, "fun": fun}
-    elif algorithm == "infomax_ext":
+    elif algorithm == "picard_ext":
         return "picard", {"ortho": False, "extended": True, "fun": fun}
-    elif algorithm == "infomax_orth":
+    elif algorithm == "picard_orth":
         return "picard", {"ortho": True, "extended": False, "fun": fun}
 
 
@@ -172,7 +172,7 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
 
         Resampling could lead to quite heavy computations (whitening at each iteration), depending on the size of the input data. It should be considered with care. The default is None.
 
-    algorithm : str {'fastica_par' , 'fastica_def' , 'fastica_picard' , 'infomax' , 'infomax_ext' , 'infomax_orth'}, optional.
+    algorithm : str {'fastica_par' , 'fastica_def' , 'fastica_picard' , 'picard' , 'picard_ext' , 'picard_orth'}, optional.
             The algorithm applied for solving the ICA problem at each run. Please see the supplementary explanations
             for more details. The default is 'fastica_par', i.e. FastICA from sklearn with parallel implementation.
 
@@ -181,7 +181,7 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
         If ``algorithm`` is in {'fastica_par' , 'fastica_def'}, it represents the functional form of the G function
         used in the approximation to neg-entropy. Could be either ‘logcosh’, ‘exp’, or ‘cube’.
 
-        If ``algorithm`` is in {'fastica_picard' , 'infomax' , 'infomax_ext' , 'infomax_orth'}, it is associated with
+        If ``algorithm`` is in {'fastica_picard' , 'picard' , 'picard_ext' , 'picard_orth'}, it is associated with
         the choice of a density model for the sources. See supplementary explanations for more details.
 
         The default is 'logcosh'.
@@ -546,7 +546,7 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
         return decomposition
 
     def _ICA_decomposition(self, X_w: np.ndarray) -> np.ndarray:
-        """ Apply FastICA or infomax (picard package) algorithm to the whitened matrix X_w to solve the ICA problem.
+        """ Apply FastICA or picard (picard package) algorithm to the whitened matrix X_w to solve the ICA problem.
         
         Parameters
         ----------
@@ -573,7 +573,7 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
         return S
 
     def _ICA_decomposition_bootstrap(self, X: np.ndarray, whitening_params: dict) -> np.ndarray:
-        """ Draw a bootstrap sample from the original data matrix X, whiten it and apply FastICA or infomax
+        """ Draw a bootstrap sample from the original data matrix X, whiten it and apply FastICA or picard
         (picard package) algorithm to solve the ICA problem.
         
         Parameters
@@ -610,7 +610,7 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
 
     def _ICA_decomposition_fast_bootstrap(self, U: np.ndarray, SVt: np.ndarray) -> np.ndarray:
         """ Draw a boostrap whitened sample from the original matrix X (svd decomposition of X = USVt) [1], and apply
-        FastICA or infomax (picard package) algorithm to solve the ICA problem.
+        FastICA or picard (picard package) algorithm to solve the ICA problem.
         
         Parameters
         ----------
@@ -786,7 +786,7 @@ def MSTD(X: np.ndarray,
     fun : str {'cube' , 'exp' , 'logcosh' , 'tanh'} or function, optional.
         The default is 'logcosh'. See the fit method of StabilizedICA for more details.
         
-    algorithm : str {'fastica_par' , 'fastica_def' , 'fastica_picard' , 'infomax' , 'infomax_ext' , 'infomax_orth'}, optional.
+    algorithm : str {'fastica_par' , 'fastica_def' , 'fastica_picard' , 'picard' , 'picard_ext' , 'picard_orth'}, optional.
         The algorithm applied for solving the ICA problem at each run. Please the supplementary explanations for more
         details. The default is 'fastica_par', i.e. FastICA from sklearn with parallel implementation.
         

@@ -9,17 +9,15 @@
     <img src="https://github.com/ncaptier/stabilized-ica/blob/master/docs/source/images/full_logo.png" width="400" height="400" />
 </p>
 
-This repository proposes a python implementation for stabilized ICA decomposition algorithm. Most of the technical details can be found in the references [1], [2] and [3].    
+This repository proposes a python implementation for stabilized ICA decomposition algorithm. Most of the technical
+details can be found in the references [1], [2],[3] and [4].
 
 Our algorithm integrates two well-known methods to solve the ICA problem :
+
 * FastICA (implemented in scikit-learn)
-* Infomax and extensions (implemented in [picard package](https://pierreablin.github.io/picard/))     
-   
+* Preconditioned ICA for Real Data - Picard (implemented in [picard package](https://pierreablin.github.io/picard/))
+
 We also propose an implementation of the Mutual Nearest Neighbors method as well as a visualization tool to draw the associated network. It is used to study the stability of the ICA components through different datasets.   
-
-Finally, we propose an adaptation of our algorithm for the special case of [AnnData](https://anndata.readthedocs.io/en/latest/anndata.AnnData.html) format. Our module sica.singlecell is modeled after the [scanpy package](https://scanpy.readthedocs.io/en/stable/) that deals with single-cell gene expression data.
-
-**Note :** This project was originally developped to provide a reproducible and biologically meaningful python algorithm for the deconvolution of "omics" data. Several modules like sica.singlecell or sica.annotate are specifically dedicated to this task. However, the sica.base module which contains the main computations for the stabilization of ICA or the sica.mutualknn module which draws a mutual k-nearest neighbors graph to assess the reproducibility of the ICA components could work perfectly with any other data type.   
 
 ### Documentation
 
@@ -97,6 +95,9 @@ This package was created as a part of the PhD project of Nicolas Captier in the 
 
 ## References
 
-[1] "Determining the optimal number of independent components for reproducible transcriptomic data analysis" - Kairov et al. 2017   
+[1] "Determining the optimal number of independent components for reproducible transcriptomic data analysis" - Kairov et
+al. 2017   
 [2] "Assessing reproducibility of matrix factorization methods in independent transcriptomes" - Cantini et al. 2019    
-[3] "Icasso: software for investigating the reliability of ICA estimates by clustering and visualization" - Himberg et al. 2003
+[3] "Icasso: software for investigating the reliability of ICA estimates by clustering and visualization" - Himberg et
+al. 2003
+[4] "Faster independent component analysis by preconditioning with Hessian approximations" - Ablin et al. 2018

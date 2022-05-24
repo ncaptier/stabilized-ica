@@ -261,7 +261,7 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
     
     References
     ----------
-    Fast bootstrap algorithm :
+    Fast bootstrap algorithm:
         Fisher A, Caffo B, Schwartz B, Zipunnikov V. Fast, Exact Bootstrap Principal Component Analysis for p > 1 million.
         J Am Stat Assoc. 2016;111(514):846-860. doi: 10.1080/01621459.2015.1062383. Epub 2016 Aug 18. PMID: 27616801; PMCID: PMC5014451.
         
@@ -269,8 +269,16 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
         J. Himberg and A. Hyvarinen, "Icasso: software for investigating the reliability of ICA estimates by clustering and visualization," 
         2003 IEEE XIII Workshop on Neural Networks for Signal Processing (IEEE Cat. No.03TH8718), 2003, pp. 259-268, doi: 10.1109/NNSP.2003.1318025
         (see https://www.cs.helsinki.fi/u/ahyvarin/papers/Himberg03.pdf). 
-    
-    UMAP :
+
+    Picard algorithm and extensions:
+        Pierre Ablin, Jean-Francois Cardoso, Alexandre Gramfort, "Faster independent component analysis by
+        preconditioning with Hessian approximations" IEEE Transactions on Signal Processing, 2018
+        (see https://arxiv.org/abs/1706.08171).
+
+        Pierre Ablin, Jean-François Cardoso, Alexandre Gramfort "Faster ICA under orthogonal constraint" ICASSP, 2018
+        (see https://arxiv.org/abs/1711.10873)
+
+    UMAP:
         For more details about the UMAP (Uniform Manifold Approximation and Projection), see https://pypi.org/project/umap-learn/.
     
     Examples

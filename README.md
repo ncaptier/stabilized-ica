@@ -38,18 +38,46 @@ pip install git+https://github.com/ncaptier/stabilized-ica
 We provide three jupyter notebooks for an illustration with transcriptomic data :
 * [ICA decomposition with stabilized ICA](https://github.com/ncaptier/stabilized-ica/blob/master/examples/transcriptomic_ICA.ipynb)
 * [Stability of ICA components accross several NSCLC cohorts](https://github.com/ncaptier/stabilized-ica/blob/master/examples/stability_study.ipynb)
-* [Stabilized ICA for single-cell expression data (cell cycle)](https://github.com/ncaptier/stabilized-ica/blob/master/examples/cell_cycle_ICA.ipynb)   
+* [Stabilized ICA for single-cell expression data (cell cycle)](https://github.com/ncaptier/stabilized-ica/blob/master/examples/cell_cycle_ICA.ipynb)
 
 We provide one jupyter notebook for an illustration with EEG/MEG data :
+
 * [Detecting artifacts and biological phenomena on MEG data with stabilized-ica](https://github.com/ncaptier/stabilized-ica/blob/master/examples/sica_MEG.ipynb)
 
 ## Data
 
-The data set which goes with the jupyter notebook ["ICA decomposition with stabilized ICA"](https://github.com/ncaptier/stabilized-ica/blob/master/examples/transcriptomic_ICA.ipynb) can be found in the .zip file [data.zip](https://github.com/ncaptier/stabilized-ica/blob/master/examples/data.zip). Please extract locally the data set before running the notebook.   
+The data set which goes with the jupyter
+notebook ["ICA decomposition with stabilized ICA"](https://github.com/ncaptier/stabilized-ica/blob/master/examples/transcriptomic_ICA.ipynb)
+can be found in the .zip file [data.zip](https://github.com/ncaptier/stabilized-ica/blob/master/examples/data.zip).
+Please extract locally the data set before running the notebook.
 
-For the jupyter notebooks ["Stability of ICA components accross several NSCLC cohorts"](https://github.com/ncaptier/stabilized-ica/blob/master/examples/stability_study.ipynb) and ["Stabilized ICA for single-cell expression data (cell cycle)"](https://github.com/ncaptier/stabilized-ica/blob/master/examples/cell_cycle_ICA.ipynb) please note that you will have to load the data yourself in order to run them (all the necessary links are reported on the notebooks).   
+For the jupyter
+notebooks ["Stability of ICA components accross several NSCLC cohorts"](https://github.com/ncaptier/stabilized-ica/blob/master/examples/stability_study.ipynb)
+and ["Stabilized ICA for single-cell expression data (cell cycle)"](https://github.com/ncaptier/stabilized-ica/blob/master/examples/cell_cycle_ICA.ipynb)
+please note that you will have to load the data yourself in order to run them (all the necessary links are reported on
+the notebooks).
 
-## Examples 
+## Stabilized ICA for omics data
+
+stabilized-ica was originally developped to deconvolute omics data into reproducible biological sources. We provide two
+additional computational tools to use stabilized-ica with omics data and interpret the extacted stable sources:
+
+* [sica-omics](https://github.com/ncaptier/sica-omics) is a Python toolbox which complements stabilized-ica for the
+  analysis of omics data. In particular, it proposes annotation functions to decipher the biological meaning of the
+  extracted ica sources, as well as a wrapper to adapt stabilized-ica base code to the special case
+  of [Anndata](https://anndata.readthedocs.io/en/latest/) format which is popular for dealing with single-cell gene
+  expression data.
+* [BIODICA](https://sysbio-curie.github.io/biodica-environment/) is a computational environment for application of
+  independent component analysis (ICA) to bulk and single-cell molecular profiles, interpretation of the results in
+  terms of biological functions and correlation with metadata. It uses the stabilized-ica package as its computational
+  core. In particular, it comes with Graphical User interface providing a no-code access to all of its functionnalities.
+    ```
+  If you use BIODICA in a scientific publication, we would appreciate citation to the following paper:
+  
+    Nicolas Captier, Jane Merlevede, Askhat Molkenov, Ainur Seisenova, Altynbek Zhubanchaliyev, Petr V Nazarov, Emmanuel Barillot, Ulykbek Kairov, Andrei Zinovyev, BIODICA: a computational environment for Independent Component Analysis of omics data, Bioinformatics, Volume 38, Issue 10, 15 May 2022, Pages 2963–2964, https://doi.org/10.1093/bioinformatics/btac204
+  ```
+
+## Examples
 
 #### Stabilized ICA method
 
@@ -57,7 +85,7 @@ For the jupyter notebooks ["Stability of ICA components accross several NSCLC co
 import pandas as pd
 from sica.base import StabilizedICA
 
-df = pd.read_csv("data.csv" , index_col = 0)
+df = pd.read_csv("data.csv", index_col=0)
 
 sICA = StabilizedICA(n_components=45, n_runs=30 ,plot=True, n_jobs = -1)
 sICA.fit(df)
@@ -99,5 +127,5 @@ This package was created as a part of the PhD project of Nicolas Captier in the 
 al. 2017   
 [2] "Assessing reproducibility of matrix factorization methods in independent transcriptomes" - Cantini et al. 2019    
 [3] "Icasso: software for investigating the reliability of ICA estimates by clustering and visualization" - Himberg et
-al. 2003
+al. 2003   
 [4] "Faster independent component analysis by preconditioning with Hessian approximations" - Ablin et al. 2018

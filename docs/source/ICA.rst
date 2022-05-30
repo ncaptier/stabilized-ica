@@ -122,8 +122,8 @@ Finally, the only question that remains to be adressed is : How can we use the s
 
 **Note :** The implementation of 'fastica_par' in `sklearn.decomposition.FastICA <https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.FastICA.html>`_ involves the inversion of a matrix. Thus some numerical instabilities may lead to some convergence error (we adressed this problem in `sica.base.StabilizedICA` by re-running the algorithm several times in case of failure).
 
-Infomax solver
---------------
+Preconditioned ICA for Real Data (Picard) solver and the Infomax problem
+------------------------------------------------------------------------
 The infomax approach was first developed by Bell and Sejnowski in [1]. Originally, it is presented as an unsupervised strategy to learn a "good" representation of an input :math:`\boldsymbol{x}` with a single-layer feed forward neural network with non-linear activation (cf figure below).
 
 .. math::

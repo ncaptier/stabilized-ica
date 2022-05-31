@@ -25,7 +25,7 @@ We also propose an implementation of the Mutual Nearest Neighbors method as well
 
 ### Install the latest stable version with PyPi
 ```
-pip install stabilized-ica
+pip install stabilized-ica==1.1.0
 ```
 
 ### Install from source

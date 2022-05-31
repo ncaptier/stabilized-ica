@@ -1,4 +1,4 @@
 from . import base
 from . import mutualknn
-from . import singlecell
-from . import annotate
+
+__version__ = "2.0.0a"

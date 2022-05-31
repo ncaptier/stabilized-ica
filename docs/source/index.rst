@@ -12,8 +12,7 @@ A major problem is that independent components are usually not unique. Indeed, m
 that do not necessarily follow the ICA model and whose limited sample size induces statistical errors. These inconsistencies negatively impact the reproductibilty of the conclusions that one may draw from the ICA decomposition. 
 
 In 2003, J. Himberg and A. Hyvarinen [1]_ tackled this problem with a stabilization process. Not only does their method extract more reliable independent components but it also gives a stability argument to assess their significance. The **stabilized-ica** 
-package is built around our own python implementation of their method. It also provides a set of tools to visualize, interpret and assess the significance and reproductibility of the results. Our implementation works for any numerical multivariate data set. 
-However, some tools are specifically dedicated to the application of this stabilized process to the deconvolution of omics data with ICA (ex : bulk or single-cell RNA-seq data).
+package is built around our own python implementation of their method. It also provides a set of tools to visualize, interpret and assess the significance and reproductibility of the results.
 
 .. topic:: References:
 

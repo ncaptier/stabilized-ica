@@ -27,19 +27,16 @@ Dependencies
 =================  =================
    Dependency       Minimum version
 =================  =================
-   anndata              0.7.4
-   joblib               0.17.0
+   joblib               1.1.0
    matplotlib           3.2.2
-   mygene               3.2.2
-   networkx             2.4
+   networkx             2.7.1
    numpy                1.18.5
    pandas               1.0.5
    python-picard        0.4
-   reactome2py          3.0.0
-   scikit-learn         0.23.1
-   scipy                1.5.0
-   tqdm                 4.47.0
-   umap-learn           0.4.6
+   scikit-learn         1.0.2
+   scipy                1.7.3
+   tqdm                 4.64.0
+   umap-learn           0.5.3
 =================  =================
 
 .. warning::

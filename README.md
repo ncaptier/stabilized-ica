@@ -6,7 +6,7 @@
 [![Downloads](https://pepy.tech/badge/stabilized-ica)](https://pepy.tech/project/stabilized-ica)
 
 <p align="center">
-    <img src="https://github.com/ncaptier/stabilized-ica/blob/master/docs/source/images/full_logo.png" width="400" height="400" />
+    <img src="https://github.com/ncaptier/stabilized-ica/blob/feature_sklearn_api/docs/source/images/full_logo.png" width="400" height="400" />
 </p>
 
 This repository proposes a python implementation for stabilized ICA decomposition algorithm. Most of the technical

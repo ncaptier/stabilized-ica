@@ -25,7 +25,7 @@ setuptools.setup(
         "tqdm>=4.64.0",
         "umap-learn>=0.5.3",
     ],
-    extra_requires={"dev": ["pytest"],
+    extras_require={"dev": ["pytest"],
                     "doc": ["sphinx >= 3.2.1", "sphinx-gallery >= 0.9.0", "numpydoc >= 1.1.0", "nbsphinx >= 0.8.7"]},
     classifiers=[
         "Programming Language :: Python :: 3",

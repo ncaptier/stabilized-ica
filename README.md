@@ -1,9 +1,4 @@
-# stabilized-ica
-[![PyPI version](https://badge.fury.io/py/stabilized-ica.svg)](https://badge.fury.io/py/stabilized-ica)
-[![Documentation Status](https://readthedocs.org/projects/stabilized-ica/badge/?version=latest)](https://stabilized-ica.readthedocs.io/en/latest/?badge=latest)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Downloads](https://pepy.tech/badge/stabilized-ica)](https://pepy.tech/project/stabilized-ica)
+# stabilized-ica (in development)
 
 <p align="center">
     <img src="https://github.com/ncaptier/stabilized-ica/blob/feature_sklearn_api/docs/source/images/full_logo.png" width="400" height="400" />
@@ -19,41 +14,40 @@ Our algorithm integrates two well-known methods to solve the ICA problem :
 
 We also propose an implementation of the Mutual Nearest Neighbors method as well as a visualization tool to draw the associated network. It is used to study the stability of the ICA components through different datasets.   
 
-### Documentation
+## Install
 
-<https://stabilized-ica.readthedocs.io/en/latest/>
-
-### Install the latest stable version with PyPi
-```
-pip install stabilized-ica==1.1.0
-```
+**Warning:** This is the development branch of stabilized-ica package which will eventually lead to new major revision
+2.0.0. If you want to install more stable versions please refer to
+the [main branch of this repository](https://github.com/ncaptier/stabilized-ica).
 
 ### Install from source
 ```
-pip install git+https://github.com/ncaptier/stabilized-ica
+pip install git+https://github.com/ncaptier/stabilized-ica.git@feature_sklearn_api
 ```
 
 ## Experiments
 
 We provide three jupyter notebooks for an illustration with transcriptomic data :
-* [ICA decomposition with stabilized ICA](https://github.com/ncaptier/stabilized-ica/blob/master/examples/transcriptomic_ICA.ipynb)
-* [Stability of ICA components accross several NSCLC cohorts](https://github.com/ncaptier/stabilized-ica/blob/master/examples/stability_study.ipynb)
-* [Stabilized ICA for single-cell expression data (cell cycle)](https://github.com/ncaptier/stabilized-ica/blob/master/examples/cell_cycle_ICA.ipynb)
+
+* [ICA decomposition with stabilized ICA](https://github.com/ncaptier/stabilized-ica/blob/feature_sklearn_api/examples/transcriptomic_ICA.ipynb)
+* [Stability of ICA components accross several NSCLC cohorts](https://github.com/ncaptier/stabilized-ica/blob/feature_sklearn_api/examples/stability_study.ipynb)
+* [Stabilized ICA for single-cell expression data (cell cycle)](https://github.com/ncaptier/stabilized-ica/blob/feature_sklearn_api/examples/cell_cycle_ICA.ipynb)
 
 We provide one jupyter notebook for an illustration with EEG/MEG data :
 
-* [Detecting artifacts and biological phenomena on MEG data with stabilized-ica](https://github.com/ncaptier/stabilized-ica/blob/master/examples/sica_MEG.ipynb)
+* [Detecting artifacts and biological phenomena on MEG data with stabilized-ica](https://github.com/ncaptier/stabilized-ica/blob/feature_sklearn_api/examples/sica_MEG.ipynb)
 
 ## Data
 
 The data set which goes with the jupyter
-notebook ["ICA decomposition with stabilized ICA"](https://github.com/ncaptier/stabilized-ica/blob/master/examples/transcriptomic_ICA.ipynb)
-can be found in the .zip file [data.zip](https://github.com/ncaptier/stabilized-ica/blob/master/examples/data.zip).
+notebook ["ICA decomposition with stabilized ICA"](https://github.com/ncaptier/stabilized-ica/blob/feature_sklearn_api/examples/transcriptomic_ICA.ipynb)
+can be found in the .zip
+file [data.zip](https://github.com/ncaptier/stabilized-ica/blob/feature_sklearn_api/examples/data.zip).
 Please extract locally the data set before running the notebook.
 
 For the jupyter
-notebooks ["Stability of ICA components accross several NSCLC cohorts"](https://github.com/ncaptier/stabilized-ica/blob/master/examples/stability_study.ipynb)
-and ["Stabilized ICA for single-cell expression data (cell cycle)"](https://github.com/ncaptier/stabilized-ica/blob/master/examples/cell_cycle_ICA.ipynb)
+notebooks ["Stability of ICA components accross several NSCLC cohorts"](https://github.com/ncaptier/stabilized-ica/blob/feature_sklearn_api/examples/stability_study.ipynb)
+and ["Stabilized ICA for single-cell expression data (cell cycle)"](https://github.com/ncaptier/stabilized-ica/blob/feature_sklearn_api/examples/cell_cycle_ICA.ipynb)
 please note that you will have to load the data yourself in order to run them (all the necessary links are reported on
 the notebooks).
 

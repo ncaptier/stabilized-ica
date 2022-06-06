@@ -677,8 +677,10 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
         X = check_array(X, dtype=FLOAT_DTYPES, accept_sparse=True, copy=copy).T
         check_is_fitted(self)
 
-        if self.mean_ is not None:
-            X -= self.mean_
+        # Warning: problem which needs to be addressed !!
+        # if self.mean_ is not None:
+        #    X -= self.mean_
+
         A = X.T.dot(np.linalg.pinv(self.S_))
         return A
 
@@ -698,8 +700,11 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
         """
         check_is_fitted(self)
         X_new = np.dot(X, self.S_)
-        if self.mean_ is not None:
-            X_new += self.mean_.reshape(1, -1)
+
+        # Warning: problem which needs to be addressed !!
+        # if self.mean_ is not None:
+        #    X_new += self.mean_.reshape(1, -1)
+        
         return X_new
 
     def projection(

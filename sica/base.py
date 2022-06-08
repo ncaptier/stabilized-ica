@@ -658,7 +658,7 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
         return S
 
     def transform(self, X: np.ndarray, copy: Optional[bool] = True) -> np.ndarray:
-        """ Apply dimensionality reduction to X (i.e. recover the unmixing matrix applying the pseudo-inverse
+        """ Apply dimensionality reduction to X (i.e. recover the mixing matrix applying the pseudo-inverse
         of the sources).
 
         Parameters
@@ -685,7 +685,7 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
         return A
 
     def inverse_transform(self, X: np.ndarray, copy: Optional[bool] = True) -> np.ndarray:
-        """ Transform the unmixing matrix back to the mixed data (applying the sources).
+        """ Transform the mixing matrix back to the mixed data (applying the sources).
 
         Parameters
         ----------

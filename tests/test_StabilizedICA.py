@@ -1,14 +1,13 @@
 import itertools
-import pytest
-
-from numpy.testing import assert_almost_equal
+from typing import Optional, Union, Tuple
 
 import numpy as np
+import pytest
+from numpy.testing import assert_almost_equal
 from scipy import stats
 from sklearn.decomposition import PCA
-from sica.base import StabilizedICA
 
-from typing import Optional, Union, Tuple
+from sica.base import StabilizedICA
 
 
 def center_and_norm(x: np.ndarray, axis: Optional[int] = -1) -> None:
@@ -67,9 +66,9 @@ def create_data_superGauss(
 
     if add_noise:
         if M is None:
-            X += 0.1*rng.randn(N, T)
+            X += 0.1 * rng.randn(N, T)
         else:
-            X += 0.1*rng.randn(M, T)
+            X += 0.1 * rng.randn(M, T)
 
     return X, A, S, rng
 
@@ -94,9 +93,9 @@ def create_data_subGauss(
 
     if add_noise:
         if M is None:
-            X += 0.1*rng.randn(N, T)
+            X += 0.1 * rng.randn(N, T)
         else:
-            X += 0.1*rng.randn(M, T)
+            X += 0.1 * rng.randn(M, T)
 
     return X, A, S, rng
 
@@ -124,9 +123,9 @@ def create_data_mix(
 
     if add_noise:
         if M is None:
-            X += 0.1*rng.randn(N, T)
+            X += 0.1 * rng.randn(N, T)
         else:
-            X += 0.1*rng.randn(M, T)
+            X += 0.1 * rng.randn(M, T)
 
     return X, A, S, rng
 
@@ -161,7 +160,7 @@ def base_test_simple(
     normalizing = [True, False]
     reorienting = [True, False]
     for whiten, norm, reorient in itertools.product(
-        whitening, normalizing, reorienting
+            whitening, normalizing, reorienting
     ):
         sica = StabilizedICA(n_components=S.shape[0],
                              n_runs=10,
@@ -310,13 +309,13 @@ def base_test_with_bootstrap(
         ("fastica_par", "logcosh"),
         ("fastica_def", "exp"),
         ("fastica_def", "logcosh"),
-        ("infomax", "tanh"),
-        ("infomax_orth", "exp"),
-        ("infomax_orth", "tanh"),
-        ("fastica_picard", "exp"),
-        ("fastica_picard", "tanh"),
-        ("infomax_ext", "exp"),
-        ("infomax_ext", "tanh"),
+        ("picard", "tanh"),
+        ("picard_orth", "exp"),
+        ("picard_orth", "tanh"),
+        ("picard_fastica", "exp"),
+        ("picard_fastica", "tanh"),
+        ("picard_ext", "exp"),
+        ("picard_ext", "tanh"),
     ],
 )
 def test_StabilizedICA_supGaussian(add_noise: bool, seed: bool, strategy: Tuple[str, str]):
@@ -331,10 +330,10 @@ def test_StabilizedICA_supGaussian(add_noise: bool, seed: bool, strategy: Tuple[
     [
         ("fastica_par", "cube"),
         ("fastica_def", "cube"),
-        ("infomax", "cube"),
-        ("infomax_orth", "cube"),
-        ("fastica_picard", "tanh"),
-        ("infomax_ext", "tanh"),
+        ("picard", "cube"),
+        ("picard_orth", "cube"),
+        ("picard_fastica", "tanh"),
+        ("picard_ext", "tanh"),
     ],
 )
 def test_StabilizedICA_subGaussian(add_noise: bool, seed: bool, strategy: Tuple[str, str]):
@@ -353,8 +352,8 @@ def test_StabilizedICA_subGaussian(add_noise: bool, seed: bool, strategy: Tuple[
         ("fastica_def", "cube"),
         ("fastica_def", "exp"),
         ("fastica_def", "logcosh"),
-        ("fastica_picard", "tanh"),
-        ("infomax_ext", "tanh"),
+        ("picard_fastica", "tanh"),
+        ("picard_ext", "tanh"),
     ],
 )
 def test_StabilizedICA_mix(add_noise: bool, seed: bool, strategy: Tuple[str, str]):
@@ -371,13 +370,13 @@ def test_StabilizedICA_mix(add_noise: bool, seed: bool, strategy: Tuple[str, str
         ("fastica_par", "logcosh"),
         ("fastica_def", "exp"),
         ("fastica_def", "logcosh"),
-        ("infomax", "tanh"),
-        ("infomax_orth", "exp"),
-        ("infomax_orth", "tanh"),
-        ("fastica_picard", "exp"),
-        ("fastica_picard", "tanh"),
-        ("infomax_ext", "exp"),
-        ("infomax_ext", "tanh"),
+        ("picard", "tanh"),
+        ("picard_orth", "exp"),
+        ("picard_orth", "tanh"),
+        ("picard_fastica", "exp"),
+        ("picard_fastica", "tanh"),
+        ("picard_ext", "exp"),
+        ("picard_ext", "tanh"),
     ],
 )
 @pytest.mark.parametrize("resampling", ["bootstrap", "fast_bootstrap"])
@@ -394,10 +393,10 @@ def test_StabilizedICA_bootstrap_supGaussian(add_noise: bool, seed: bool, strate
     [
         ("fastica_par", "cube"),
         ("fastica_def", "cube"),
-        ("infomax", "cube"),
-        ("infomax_orth", "cube"),
-        ("fastica_picard", "tanh"),
-        ("infomax_ext", "tanh"),
+        ("picard", "cube"),
+        ("picard_orth", "cube"),
+        ("picard_fastica", "tanh"),
+        ("picard_ext", "tanh"),
     ],
 )
 @pytest.mark.parametrize("resampling", ["bootstrap", "fast_bootstrap"])
@@ -418,8 +417,8 @@ def test_StabilizedICA_bootstrap_subGaussian(add_noise: bool, seed: bool, strate
         ("fastica_def", "cube"),
         ("fastica_def", "exp"),
         ("fastica_def", "logcosh"),
-        ("fastica_picard", "tanh"),
-        ("infomax_ext", "tanh"),
+        ("picard_fastica", "tanh"),
+        ("picard_ext", "tanh"),
     ],
 )
 @pytest.mark.parametrize("resampling", ["bootstrap", "fast_bootstrap"])

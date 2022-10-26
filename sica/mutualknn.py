@@ -1,12 +1,12 @@
+import json
+from typing import Optional, NoReturn, List, Union
+
 import matplotlib.axes
+import matplotlib.pyplot as plt
+import networkx as nx
 import numpy as np
 import pandas as pd
-import networkx as nx
-import matplotlib.pyplot as plt
 from scipy.spatial.distance import cdist
-import json
-
-from typing import Optional, NoReturn, List, Union
 
 """
 This python code provides an implementation for the Mutual Nearest Neighbors method as well as
@@ -130,29 +130,6 @@ class MNN(object):
         else:
             adjacency = bool_mask * np.ones(bool_mask.shape)
         return adjacency
-
-########################################################################################################################
-
-
-def _pairs(items: list) -> list:
-    """Return a list with all the pairs formed by two different elements of a list "items"
-    
-    Note : This function is a useful tool for the building of the MNN graph.
-    
-    Parameters
-    ----------
-    items : list
-
-    Returns
-    -------
-    List of pairs formed by two different elements of the items
-
-    """
-    return [
-        (items[i], items[j])
-        for i in range(len(items))
-        for j in range(i + 1, len(items))
-    ]
 
 
 class MNNgraph(object):
@@ -482,3 +459,24 @@ class MNNgraph(object):
         with open(file_name, "w") as fp:
             json.dump(dic, fp)
         return
+
+
+def _pairs(items: list) -> list:
+    """Return a list with all the pairs formed by two different elements of a list "items"
+
+    Note : This function is a useful tool for the building of the MNN graph.
+
+    Parameters
+    ----------
+    items : list
+
+    Returns
+    -------
+    List of pairs formed by two different elements of the items
+
+    """
+    return [
+        (items[i], items[j])
+        for i in range(len(items))
+        for j in range(i + 1, len(items))
+    ]

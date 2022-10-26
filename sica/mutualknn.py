@@ -45,7 +45,8 @@ class MNN(object):
     -----  
     - In the case where the distance matrix is not precomputed, we compute the distance between each rows of X and Y.
     
-    - In the case X and Y are dataframes, we consider only the common columns of X and Y. Otherwise, we assume that the columns are the same for X and Y.
+    - In the case X and Y are dataframes, we consider only the common columns of X and Y. Otherwise, we assume that the
+    columns are the same for X and Y.
     
     """
 

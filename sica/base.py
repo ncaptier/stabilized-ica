@@ -1,32 +1,32 @@
+import warnings
+from typing import NoReturn, Optional, Tuple, Callable, List, Union, Any
+
+import matplotlib.axes
+import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats as stats
+import umap
+from joblib import Parallel, delayed
+from picard import picard
 from scipy import linalg
 from scipy.sparse import issparse
-import matplotlib.pyplot as plt
-import matplotlib.axes
+from sklearn import manifold
+from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.decomposition import FastICA
 from sklearn.utils import as_float_array, check_array
-from sklearn.utils.validation import FLOAT_DTYPES, check_is_fitted
 from sklearn.utils.extmath import svd_flip
-from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn import manifold
-import umap
+from sklearn.utils.validation import FLOAT_DTYPES, check_is_fitted
 from tqdm.notebook import tqdm
-from joblib import Parallel, delayed
-import warnings
 
-from picard import picard
 from ._whitening import whitening
-
-from typing import NoReturn, Optional, Tuple, Callable, List, Union, Any
 
 
 def _check_algorithm(algorithm: str, fun: str) -> Tuple[str, dict]:
     all_algorithms = [
         "fastica_par",
         "fastica_def",
-        "fastica_picard",
+        "picard_fastica",
         "picard",
         "picard_ext",
         "picard_orth",
@@ -52,7 +52,7 @@ def _check_algorithm(algorithm: str, fun: str) -> Tuple[str, dict]:
         fun = "logcosh"
 
     if fun == "logcosh" and algorithm in [
-        "fastica_picard",
+        "picard_fastica",
         "picard",
         "picard_ext",
         "picard_orth",
@@ -62,7 +62,7 @@ def _check_algorithm(algorithm: str, fun: str) -> Tuple[str, dict]:
         )
         fun = "tanh"
 
-    if fun != "tanh" and algorithm in ["fastica_picard", "picard_ext"]:
+    if fun != "tanh" and algorithm in ["picard_fastica", "picard_ext"]:
         warnings.warn(
             "Using a different density than `'tanh'` may lead to erratic behavior of the picard algorithm"
             " when extended=True (see picard package for more explanations)"
@@ -79,7 +79,7 @@ def _check_algorithm(algorithm: str, fun: str) -> Tuple[str, dict]:
         return "fastica", {"algorithm": "parallel", "fun": fun}
     elif algorithm == "fastica_def":
         return "fastica", {"algorithm": "deflation", "fun": fun}
-    elif algorithm == "fastica_picard":
+    elif algorithm == "picard_fastica":
         return "picard", {"ortho": True, "extended": True, "fun": fun}
     elif algorithm == "picard":
         return "picard", {"ortho": False, "extended": False, "fun": fun}
@@ -172,7 +172,7 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
 
         Resampling could lead to quite heavy computations (whitening at each iteration), depending on the size of the input data. It should be considered with care. The default is None.
 
-    algorithm : str {'fastica_par' , 'fastica_def' , 'fastica_picard' , 'picard' , 'picard_ext' , 'picard_orth'}, optional.
+    algorithm : str {'fastica_par' , 'fastica_def' , 'picard_fastica' , 'picard' , 'picard_ext' , 'picard_orth'}, optional.
             The algorithm applied for solving the ICA problem at each run. Please see the supplementary explanations
             for more details. The default is 'fastica_par', i.e. FastICA from sklearn with parallel implementation.
 
@@ -181,7 +181,7 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
         If ``algorithm`` is in {'fastica_par' , 'fastica_def'}, it represents the functional form of the G function
         used in the approximation to neg-entropy. Could be either ‘logcosh’, ‘exp’, or ‘cube’.
 
-        If ``algorithm`` is in {'fastica_picard' , 'picard' , 'picard_ext' , 'picard_orth'}, it is associated with
+        If ``algorithm`` is in {'picard_fastica' , 'picard' , 'picard_ext' , 'picard_orth'}, it is associated with
         the choice of a density model for the sources. See supplementary explanations for more details.
 
         The default is 'logcosh'.
@@ -393,7 +393,12 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
             decomposition = self._parallel_decomposition(
                 parallel=parallel,
                 func=self._ICA_decomposition,
-                kwargs={"X_w": X_w},
+                kwargs={
+                    "X_w": X_w,
+                    "method": self._method,
+                    "max_iter": self.max_iter,
+                    "solver_params": self._solver_params
+                },
             )
 
         elif self.resampling == "bootstrap":
@@ -418,7 +423,14 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
             decomposition = self._parallel_decomposition(
                 parallel=parallel,
                 func=self._ICA_decomposition_bootstrap,
-                kwargs={"X": X, "whitening_params": whitening_params},
+                kwargs={
+                    "X": X,
+                    "whitening_params": whitening_params,
+                    "method": self._method,
+                    "max_iter": self.max_iter,
+                    "solver_params": self._solver_params,
+                    "n_components": self.n_components
+                },
             )
 
         elif self.resampling == "fast_bootstrap":
@@ -444,7 +456,14 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
             decomposition = self._parallel_decomposition(
                 parallel=parallel,
                 func=self._ICA_decomposition_fast_bootstrap,
-                kwargs={"U": U, "SVt": SVt},
+                kwargs={
+                    "U": U,
+                    "SVt": SVt,
+                    "method": self._method,
+                    "max_iter": self.max_iter,
+                    "solver_params": self._solver_params,
+                    "n_components": self.n_components
+                },
             )
 
         else:
@@ -553,7 +572,8 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
 
         return decomposition
 
-    def _ICA_decomposition(self, X_w: np.ndarray) -> np.ndarray:
+    @staticmethod
+    def _ICA_decomposition(X_w: np.ndarray, method: str, max_iter: int, solver_params: dict) -> np.ndarray:
         """ Apply FastICA or picard (picard package) algorithm to the whitened matrix X_w to solve the ICA problem.
         
         Parameters
@@ -567,20 +587,27 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
             Array of sources obtained from a single run of an ICA solver. Each line corresponds to an ICA component.
         """
 
-        if self._method == "picard":
+        if method == "picard":
             _, _, S = picard(
                 X_w.T,
-                max_iter=self.max_iter,
+                max_iter=max_iter,
                 whiten=False,
                 centering=False,
-                **self._solver_params
+                **solver_params
             )
         else:
-            ica = FastICA(max_iter=self.max_iter, whiten=False, **self._solver_params)
+            ica = FastICA(max_iter=max_iter, whiten=False, **solver_params)
             S = ica.fit_transform(X_w).T
         return S
 
-    def _ICA_decomposition_bootstrap(self, X: np.ndarray, whitening_params: dict) -> np.ndarray:
+    @staticmethod
+    def _ICA_decomposition_bootstrap(
+            X: np.ndarray,
+            whitening_params: dict,
+            method: str,
+            max_iter: int,
+            solver_params: dict,
+            n_components: int) -> np.ndarray:
         """ Draw a bootstrap sample from the original data matrix X, whiten it and apply FastICA or picard
         (picard package) algorithm to solve the ICA problem.
         
@@ -601,22 +628,29 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
 
         n_mixtures = X.shape[1]
         Xb = X[:, np.random.choice(range(n_mixtures), size=n_mixtures)]
-        Xb_w, _ = whitening(Xb, n_components=self.n_components, **whitening_params)
+        Xb_w, _ = whitening(Xb, n_components=n_components, **whitening_params)
 
-        if self._method == "picard":
+        if method == "picard":
             _, _, S = picard(
                 Xb_w.T,
-                max_iter=self.max_iter,
+                max_iter=max_iter,
                 whiten=False,
                 centering=False,
-                **self._solver_params
+                **solver_params
             )
         else:
-            ica = FastICA(max_iter=self.max_iter, whiten=False, **self._solver_params)
+            ica = FastICA(max_iter=max_iter, whiten=False, **solver_params)
             S = ica.fit_transform(Xb_w).T
         return S
 
-    def _ICA_decomposition_fast_bootstrap(self, U: np.ndarray, SVt: np.ndarray) -> np.ndarray:
+    @staticmethod
+    def _ICA_decomposition_fast_bootstrap(
+            U: np.ndarray,
+            SVt: np.ndarray,
+            method: str,
+            max_iter: int,
+            solver_params: dict,
+            n_components: int) -> np.ndarray:
         """ Draw a boostrap whitened sample from the original matrix X (svd decomposition of X = USVt) [1], and apply
         FastICA or picard (picard package) algorithm to solve the ICA problem.
         
@@ -642,18 +676,18 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
         Ab, Sb, Rbt = linalg.svd(SVt[:, np.random.choice(range(n), size=n)])
         Ub = np.dot(U, Ab)
         Ub, Rbt = svd_flip(Ub, Rbt)
-        Xb_w = Ub[:, : self.n_components] * np.sqrt(p - 1)
+        Xb_w = Ub[:, : n_components] * np.sqrt(p - 1)
 
-        if self._method == "picard":
+        if method == "picard":
             _, _, S = picard(
                 Xb_w.T,
-                max_iter=self.max_iter,
+                max_iter=max_iter,
                 whiten=False,
                 centering=False,
-                **self._solver_params
+                **solver_params
             )
         else:
-            ica = FastICA(max_iter=self.max_iter, whiten=False, **self._solver_params)
+            ica = FastICA(max_iter=max_iter, whiten=False, **solver_params)
             S = ica.fit_transform(Xb_w).T
         return S
 
@@ -704,7 +738,7 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
         # Warning: problem which needs to be addressed !!
         # if self.mean_ is not None:
         #    X_new += self.mean_.reshape(1, -1)
-        
+
         return X_new
 
     def projection(
@@ -799,7 +833,7 @@ def MSTD(X: np.ndarray,
     fun : str {'cube' , 'exp' , 'logcosh' , 'tanh'} or function, optional.
         The default is 'logcosh'. See the fit method of StabilizedICA for more details.
         
-    algorithm : str {'fastica_par' , 'fastica_def' , 'fastica_picard' , 'picard' , 'picard_ext' , 'picard_orth'}, optional.
+    algorithm : str {'fastica_par' , 'fastica_def' , 'picard_fastica' , 'picard' , 'picard_ext' , 'picard_orth'}, optional.
         The algorithm applied for solving the ICA problem at each run. Please the supplementary explanations for more
         details. The default is 'fastica_par', i.e. FastICA from sklearn with parallel implementation.
         

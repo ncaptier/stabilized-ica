@@ -5,7 +5,7 @@
 </p>
 
 This repository proposes a python implementation for stabilized ICA decomposition algorithm. Most of the technical
-details can be found in the references [1], [2],[3] and [4].
+details can be found in the references [1], [2],[3], [4] and [5].
 
 Our algorithm integrates two well-known methods to solve the ICA problem :
 
@@ -122,4 +122,5 @@ al. 2017
 [2] "Assessing reproducibility of matrix factorization methods in independent transcriptomes" - Cantini et al. 2019    
 [3] "Icasso: software for investigating the reliability of ICA estimates by clustering and visualization" - Himberg et
 al. 2003   
-[4] "Faster independent component analysis by preconditioning with Hessian approximations" - Ablin et al. 2018
+[4] "Faster independent component analysis by preconditioning with Hessian approximations" - Ablin et al. 2018   
+[5] "BIODICA: a computational environment for Independent Component Analysis of omics data" - Captier et al. 2022

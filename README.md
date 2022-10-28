@@ -14,6 +14,8 @@ Our algorithm integrates two well-known methods to solve the ICA problem :
 
 We also propose an implementation of the Mutual Nearest Neighbors method as well as a visualization tool to draw the associated network. It is used to study the stability of the ICA components through different datasets.   
 
+Stabilized-ica is now compatible with scikit-learn API, meaning that you can use the base class as a sklearn transformer and include it in complex ML pipelines. 
+
 ## Install
 
 ### Install from source

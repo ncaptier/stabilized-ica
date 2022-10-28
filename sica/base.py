@@ -214,7 +214,7 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
     pca_solver : str {‘auto’, ‘full’, ‘arpack’, ‘randomized’ , 'lobpcg'}, optional
         Solver for the different PCA methods. Please note that some solvers may not be compatible with
         some PCA methods. See _whitening.py for more details.
-        The default is "full" (i.e SVD decomposition)
+        The default is "auto".
 
     chunked : boolean, optional
         Parameter for the whitening step, see _whitening.py for more details.

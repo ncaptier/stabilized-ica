@@ -8,3 +8,4 @@ index_test
     stability_study
     cell_cycle_ICA
     sica_MEG
+    MNIST_classification

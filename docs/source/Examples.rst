@@ -18,3 +18,11 @@ EEG/MEG data analysis
     :name: thumbnail_gallery_MEG
 	
     _examples/sica_MEG
+
+Integration of sica to ML pipelines
+-----------------------------------
+
+.. nbgallery::
+    :name: thumbnail_gallery_ML
+
+    _examples/MNIST_classification

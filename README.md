@@ -1,4 +1,4 @@
-# stabilized-ica (in development)
+# stabilized-ica
 
 <p align="center">
     <img src="https://github.com/ncaptier/stabilized-ica/blob/feature_sklearn_api/docs/source/images/full_logo.png" width="400" height="400" />
@@ -16,13 +16,9 @@ We also propose an implementation of the Mutual Nearest Neighbors method as well
 
 ## Install
 
-**Warning:** This is the development branch of stabilized-ica package which will eventually lead to new major revision
-2.0.0. If you want to install more stable versions please refer to
-the [main branch of this repository](https://github.com/ncaptier/stabilized-ica).
-
 ### Install from source
 ```
-pip install git+https://github.com/ncaptier/stabilized-ica.git@feature_sklearn_api
+pip install git+https://github.com/ncaptier/stabilized-ica.git
 ```
 
 ## Experiments
@@ -36,6 +32,10 @@ We provide three jupyter notebooks for an illustration with transcriptomic data 
 We provide one jupyter notebook for an illustration with EEG/MEG data :
 
 * [Detecting artifacts and biological phenomena on MEG data with stabilized-ica](https://github.com/ncaptier/stabilized-ica/blob/feature_sklearn_api/examples/sica_MEG.ipynb)
+
+We provide one jupyter notebook for an illustration of the integration of stabilized-ica into scikit-learn Machine learning pipelines:   
+
+* [MNIST classification with stabilized-ica and multinomial logistic regression](https://github.com/ncaptier/stabilized-ica/blob/feature_sklearn_api/examples/MNIST_classification.ipynb)
 
 ## Data
 
@@ -97,18 +97,6 @@ cg = MNNgraph(data = [df1 , df2 , df3] , names=['dataframe1' , 'dataframe2' , 'd
 cg.draw(colors = ['r', 'g' , 'b'] , spacing = 2)
 
 cg.export_json("example.json")
-```
-
-#### Application to single-cell data
-
-```python
-import scanpy
-from sica.singlecell import ica
-
-adata = scanpy.read_h5ad('GSE90860_3.h5ad')
-adata.X -= adata.X.mean(axis =0)
-
-ica(adata , observations = 'genes' , n_components = 30 , n_runs = 100)
 ```
 
 ## Acknowledgements

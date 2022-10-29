@@ -27,29 +27,29 @@ pip install git+https://github.com/ncaptier/stabilized-ica.git
 
 We provide three jupyter notebooks for an illustration with transcriptomic data :
 
-* [ICA decomposition with stabilized ICA](https://github.com/ncaptier/stabilized-ica/blob/feature_sklearn_api/examples/transcriptomic_ICA.ipynb)
-* [Stability of ICA components accross several NSCLC cohorts](https://github.com/ncaptier/stabilized-ica/blob/feature_sklearn_api/examples/stability_study.ipynb)
-* [Stabilized ICA for single-cell expression data (cell cycle)](https://github.com/ncaptier/stabilized-ica/blob/feature_sklearn_api/examples/cell_cycle_ICA.ipynb)
+* [ICA decomposition with stabilized ICA](https://github.com/ncaptier/stabilized-ica/blob/master/examples/transcriptomic_ICA.ipynb)
+* [Stability of ICA components accross several NSCLC cohorts](https://github.com/ncaptier/stabilized-ica/blob/master/examples/stability_study.ipynb)
+* [Stabilized ICA for single-cell expression data (cell cycle)](https://github.com/ncaptier/stabilized-ica/blob/master/examples/cell_cycle_ICA.ipynb)
 
 We provide one jupyter notebook for an illustration with EEG/MEG data :
 
-* [Detecting artifacts and biological phenomena on MEG data with stabilized-ica](https://github.com/ncaptier/stabilized-ica/blob/feature_sklearn_api/examples/sica_MEG.ipynb)
+* [Detecting artifacts and biological phenomena on MEG data with stabilized-ica](https://github.com/ncaptier/stabilized-ica/blob/master/examples/sica_MEG.ipynb)
 
 We provide one jupyter notebook for an illustration of the integration of stabilized-ica into scikit-learn Machine learning pipelines:   
 
-* [MNIST classification with stabilized-ica and multinomial logistic regression](https://github.com/ncaptier/stabilized-ica/blob/feature_sklearn_api/examples/MNIST_classification.ipynb)
+* [MNIST classification with stabilized-ica and multinomial logistic regression](https://github.com/ncaptier/stabilized-ica/blob/master/examples/MNIST_classification.ipynb)
 
 ## Data
 
 The data set which goes with the jupyter
-notebook ["ICA decomposition with stabilized ICA"](https://github.com/ncaptier/stabilized-ica/blob/feature_sklearn_api/examples/transcriptomic_ICA.ipynb)
+notebook ["ICA decomposition with stabilized ICA"](https://github.com/ncaptier/stabilized-ica/blob/master/examples/transcriptomic_ICA.ipynb)
 can be found in the .zip
-file [data.zip](https://github.com/ncaptier/stabilized-ica/blob/feature_sklearn_api/examples/data.zip).
+file [data.zip](https://github.com/ncaptier/stabilized-ica/blob/master/examples/data.zip).
 Please extract locally the data set before running the notebook.
 
 For the jupyter
-notebooks ["Stability of ICA components accross several NSCLC cohorts"](https://github.com/ncaptier/stabilized-ica/blob/feature_sklearn_api/examples/stability_study.ipynb)
-and ["Stabilized ICA for single-cell expression data (cell cycle)"](https://github.com/ncaptier/stabilized-ica/blob/feature_sklearn_api/examples/cell_cycle_ICA.ipynb)
+notebooks ["Stability of ICA components accross several NSCLC cohorts"](https://github.com/ncaptier/stabilized-ica/blob/master/examples/stability_study.ipynb)
+and ["Stabilized ICA for single-cell expression data (cell cycle)"](https://github.com/ncaptier/stabilized-ica/blob/master/examples/cell_cycle_ICA.ipynb)
 please note that you will have to load the data yourself in order to run them (all the necessary links are reported on
 the notebooks).
 

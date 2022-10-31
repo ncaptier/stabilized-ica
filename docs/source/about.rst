@@ -25,6 +25,11 @@ Contributors
 Citing stabilized-ica
 ---------------------
 
+stabilized-ica is included into BIODICA, a computational environment for application of independent component analysis (ICA) to bulk and single-cell molecular profiles, interpretation of the results in terms of biological functions and correlation with metadata.
+We would appreciate citation to the following paper:
+
+    Nicolas Captier, Jane Merlevede, Askhat Molkenov, Ainur Seisenova, Altynbek Zhubanchaliyev, Petr V Nazarov, Emmanuel Barillot, Ulykbek Kairov, Andrei Zinovyev, BIODICA: a computational environment for Independent Component Analysis of omics data, Bioinformatics, Volume 38, Issue 10, 15 May 2022, Pages 2963–2964, https://doi.org/10.1093/bioinformatics/btac204
+
 .. _contact_us:
 
 Contact us

@@ -1,8 +1,8 @@
 Omics data analysis
 ===================
-**stabilized-ica** was originally developped to provide a reproducible and biologically meaningful python algorithm for the deconvolution of omics data. Several modules like `sica.singlecell <modules/generated/sica.singlecell.ica.html#sica.singlecell.ica>`_ or `sica.annotate <modules/classes.html#sica-annotate-biological-annotation-of-ica-components>`_ are specifically dedicated to this type of data. However, we paid attention to provide versatile algorithms for the computation of stabilized ICA components and for the mutual k-nearest neighbors method, that can deal with many other data types.
+**stabilized-ica** was originally developped to provide a reproducible and biologically meaningful python algorithm for the deconvolution of omics data. We created a complementary toolbox called `sica-omics <https://github.com/ncaptier/sica-omics>`_ for the specific application of **stabilized-ica** to omics data and the analysis and intepretation of the results.
 
-This section aims at providing the user some insights about the analysis of omics data with **stabilized-ica**. We will explain why ICA is relevant for deciphering the complexity of omics data and describe the tools we implemented in **stabilized-ica** to do so.
+This section aims at providing the user some insights about the analysis of omics data with **stabilized-ica** and `sica-omics <https://github.com/ncaptier/sica-omics>`_. We will explain why ICA is relevant for deciphering the complexity of omics data and describe the tools we implemented to do so.
 
 .. figure:: images/multi_omics.png
    :align: center
@@ -34,7 +34,7 @@ Then, we can make the assumption that each of these biological signals actually 
 
 Enrichment analysis for annotating components
 ---------------------------------------------
-Let us now focus on transcriptomic data (i.e gene expression data) and the tools that **stabilized-ica** provides to biologically annotate the associated ICA components. These tools are gathered in the `sica.annotate <modules/classes.html#sica-annotate-biological-annotation-of-ica-components>`_ module. 
+Let us now focus on transcriptomic data (i.e gene expression data) and the tools that `sica-omics <https://github.com/ncaptier/sica-omics>`_ provides to biologically annotate the associated ICA components. These tools are gathered in the `sicaomics.annotate <https://github.com/ncaptier/sica-omics/tree/main/sicaomics/annotate>`_ module.
 
 Extraction of the top expressed genes
 _____________________________________
@@ -46,7 +46,7 @@ In order to simply describe how it works, let us go back to the example of the p
    :align: center
    :scale: 50 %
 
-The tools `sica.annotate.reactome.ReactomeAnalysis <modules/generated/sica.annotate.reactome.ReactomeAnalysis.html#sica.annotate.reactome.ReactomeAnalysis>`_ and `sica.annotate.toppfun.ToppFunAnalysis <modules/generated/sica.annotate.toppfun.ToppFunAnalysis.html#sica.annotate.toppfun.ToppFunAnalysis>`_ give the user several strategies for selecting the top expressed genes of each ICA component :
+The tools `sicaomics.annotate.reactome.ReactomeAnalysis <https://github.com/ncaptier/sica-omics/blob/main/sicaomics/annotate/reactome.py>`_ and `sicaomics.annotate.toppfun.ToppFunAnalysis <https://github.com/ncaptier/sica-omics/blob/main/sicaomics/annotate/toppfun.py>`_ give the user several strategies for selecting the top expressed genes of each ICA component :
 
    * The `tail` parameter allows the user to choose whether he wants to select the top expressed genes of the positive tail only, of the negative tail only, of both or of the heaviest one only.
    * The `method` parameter allows the user to choose whether he wants to use a threshold based on the quantile of the empirical distribution (i.e select genes above and/or under a certain quantile) or based on its standard deviation (i.e select genes above :math:`\mu + k \sigma` and/or under :math:`\mu - k \sigma`).
@@ -73,11 +73,11 @@ For a given annotation :math:`j`, we denote by :math:`k_j` the number of genes a
 
 **Note 1 :** Both annotation databases provide correction for multiple testing. ToppFun uses `Bonferonni <https://en.wikipedia.org/wiki/Bonferroni_correction>`_, `Benjamini-Hochberg <https://en.wikipedia.org/wiki/False_discovery_rate#Benjamini%E2%80%93Hochberg_procedure>`_ and `Benjamini-Yekutieli <https://en.wikipedia.org/wiki/False_discovery_rate#Benjamini%E2%80%93Yekutieli_procedure>`_ procedures while Reactome only uses Benjamini-Hochberg procedure (Entities FDR).
 
-**Note 2 :** A wide range of analyses could be performed on top of/instead of this simple annotation process to gain more insights about the biological meaning of the extracted ICA components. The strategy implemented in **stabilized-ica** will roughly highlight the components that could be relevant, but this will not be enough to have a deep understanding of your transcriptomic data set. At one point, diving into the list of the top expressed genes of each component will be needed.
+**Note 2 :** A wide range of analyses could be performed on top of/instead of this simple annotation process to gain more insights about the biological meaning of the extracted ICA components. The strategy implemented in `sica-omics <https://github.com/ncaptier/sica-omics>`_ will roughly highlight the components that could be relevant, but this will not be enough to have a deep understanding of your transcriptomic data set. At one point, diving into the list of the top expressed genes of each component will be needed.
 
 Single-cell data
 ----------------
-**stabilized-ica** provides a function `sica.singlecell.ica <modules/generated/sica.singlecell.ica.html#sica.singlecell.ica>`_ to deal with `single-cell gene expression data <https://en.wikipedia.org/wiki/Single_cell_sequencing>`_. In particular, it deals with single-cell gene expression data built with `anndata format <https://anndata.readthedocs.io/en/latest/anndata.AnnData.html>`_ (i.e Annotated data). To do so, sica.singlecell.ica mimics the function `scanpy.pp.pca <https://scanpy.readthedocs.io/en/stable/generated/scanpy.pp.pca.html>`_ from the `scanpy package <https://scanpy.readthedocs.io/en/stable/>`_ which is widely used for analyzing single-cell data.
+`sica-omics <https://github.com/ncaptier/sica-omics>`_ provides a function `sicaomics.singlecell.ica <https://github.com/ncaptier/sica-omics/blob/main/sicaomics/singlecell.py>`_ to deal with `single-cell gene expression data <https://en.wikipedia.org/wiki/Single_cell_sequencing>`_. In particular, it deals with single-cell gene expression data built with `anndata format <https://anndata.readthedocs.io/en/latest/anndata.AnnData.html>`_ (i.e Annotated data). To do so, sica.singlecell.ica mimics the function `scanpy.pp.pca <https://scanpy.readthedocs.io/en/stable/generated/scanpy.pp.pca.html>`_ from the `scanpy package <https://scanpy.readthedocs.io/en/stable/>`_ which is widely used for analyzing single-cell data.
 
 .. figure:: images/anndata.png
    :align: center

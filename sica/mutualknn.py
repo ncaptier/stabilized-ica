@@ -167,8 +167,8 @@ class MNNgraph(object):
         distance (min and max are computed over all the between-nodes distances, including those that are not associated
         to an edge in the graph). For an unweighted graph, it equals 1 every time.
     
-    Note
-    ----   
+    Notes
+    -----
     If the elements of data are not dataframes, we assume that they all share the same features.
     
     Examples

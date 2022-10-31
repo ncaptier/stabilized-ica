@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="stabilized-ica",
-    version="2.0.0a",
+    version="2.0.0",
     author="Nicolas Captier",
     author_email="nicolas.captier@curie.fr",
     description="Stabilized ICA algorithm",
@@ -26,11 +26,11 @@ setuptools.setup(
         "umap-learn>=0.5.3",
     ],
     extras_require={"dev": ["pytest"],
-                    "doc": ["sphinx >= 3.2.1", "sphinx-gallery >= 0.9.0", "numpydoc >= 1.1.0", "nbsphinx >= 0.8.7"]},
+                    "doc": ["sphinx >= 3.2.1", "sphinx-gallery == 0.10.0", "numpydoc >= 1.1.0", "nbsphinx >= 0.8.7"]},
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.6',
+    python_requires='>=3.8',
 )

@@ -4,6 +4,9 @@
     <img src="https://github.com/ncaptier/stabilized-ica/blob/feature_sklearn_api/docs/source/images/full_logo.png" width="400" height="400" />
 </p>
 
+[![Documentation Status](https://readthedocs.org/projects/stabilized-ica/badge/?version=latest)](https://stabilized-ica.readthedocs.io/en/latest/?badge=latest) 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) 
+
 This repository proposes a python implementation for stabilized ICA decomposition algorithm. Most of the technical
 details can be found in the references [1], [2],[3], [4] and [5].
 

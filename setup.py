@@ -26,7 +26,7 @@ setuptools.setup(
         "umap-learn>=0.5.3",
     ],
     extras_require={"dev": ["pytest"],
-                    "doc": ["sphinx >= 3.2.1", "sphinx-gallery == 0.10.0", "numpydoc >= 1.1.0", "nbsphinx >= 0.8.7"]},
+                    "doc": ["sphinx == 3.2.1", "sphinx-gallery == 0.10.0", "numpydoc == 1.1.0", "nbsphinx == 0.8.7"]},
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

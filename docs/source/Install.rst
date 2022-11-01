@@ -41,7 +41,7 @@ Dependencies
 
 .. warning::
 
-   **stabilized-ica** requires at least Python 3.6.
+   **stabilized-ica** requires at least Python 3.8.
 
 .. note::
    

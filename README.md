@@ -22,6 +22,11 @@ Stabilized-ica is now compatible with scikit-learn API, meaning that you can use
 
 ## Install
 
+### Install the latest stable version with PyPi
+```
+pip install stabilized-ica
+```
+
 ### Install from source
 ```
 pip install git+https://github.com/ncaptier/stabilized-ica.git

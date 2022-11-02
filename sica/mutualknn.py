@@ -100,9 +100,11 @@ class MNN(object):
 
         if metric in ["pearson", "spearman", "kendall"]:
             corr = pd.concat([X, Y], keys=["X", "Y"]).T.corr(method=metric)
-            return 1 - np.abs((corr.loc["X", "Y"]).values)
+            distance = 1 - np.abs((corr.loc["X", "Y"]).values)
         else:
-            return cdist(X, Y, metric=metric)
+            distance = cdist(X, Y, metric=metric)
+        # we add a small term to deal with 0 distances
+        return np.where(distance == 0, 10 ** (-5), distance)
 
     def adjacency_matrix(self, weighted: bool) -> Union[np.ndarray, None]:
         """Compute the undirected adjacency matrix with the Mutual Nearest Neighbors method (``k`` neighbors)

@@ -27,13 +27,13 @@ def center_and_norm(x: np.ndarray, axis: Optional[int] = -1) -> None:
 
 
 def create_data_superGauss(
-        add_noise: bool,
-        seed: int,
-        N: Optional[int] = 3,
-        T: Optional[int] = 1000,
-        M: Optional[Union[int, None]] = None
+    add_noise: bool,
+    seed: int,
+    N: Optional[int] = 3,
+    T: Optional[int] = 1000,
+    M: Optional[Union[int, None]] = None,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.random.RandomState]:
-    """ Create a simple data set with superGaussian-distributed sources (Laplace distribution).  
+    """Create a simple data set with superGaussian-distributed sources (Laplace distribution).
     Parameters
     ----------
     add_noise : bool
@@ -74,14 +74,13 @@ def create_data_superGauss(
 
 
 def create_data_subGauss(
-        add_noise: int,
-        seed: int,
-        N: Optional[int] = 3,
-        T: Optional[int] = 1000,
-        M: Optional[Union[int, None]] = None
+    add_noise: int,
+    seed: int,
+    N: Optional[int] = 3,
+    T: Optional[int] = 1000,
+    M: Optional[Union[int, None]] = None,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.random.RandomState]:
-    """ Create a simple data set with subGaussian-distributed sources (uniform distribution).
-    """
+    """Create a simple data set with subGaussian-distributed sources (uniform distribution)."""
     rng = np.random.RandomState(seed)
     S = rng.uniform(low=-1, high=1, size=(N, T))
     center_and_norm(S)
@@ -101,19 +100,19 @@ def create_data_subGauss(
 
 
 def create_data_mix(
-        add_noise: int,
-        seed: int,
-        N: Optional[int] = 3,
-        T: Optional[int] = 1000,
-        M: Optional[Union[int, None]] = None
+    add_noise: int,
+    seed: int,
+    N: Optional[int] = 3,
+    T: Optional[int] = 1000,
+    M: Optional[Union[int, None]] = None,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.random.RandomState]:
-    """ Create a simple data set with a mixture of superGaussian-distributed and 
-    subGaussian-distributed sources (Laplace and uniform distributions). 
+    """Create a simple data set with a mixture of superGaussian-distributed and
+    subGaussian-distributed sources (Laplace and uniform distributions).
     """
     rng = np.random.RandomState(seed)
     S = np.zeros((3, 1000))
     S[: int(N // 2), :] = rng.uniform(low=-1, high=1, size=(int(N // 2), T))
-    S[int(N // 2):, :] = rng.laplace(size=(N - int(N // 2), T))
+    S[int(N // 2) :, :] = rng.laplace(size=(N - int(N // 2), T))
     center_and_norm(S)
     if M is None:
         A = rng.randn(N, N)
@@ -131,18 +130,18 @@ def create_data_mix(
 
 
 def base_test_simple(
-        strategy: Tuple[str, str],
-        data: Tuple[np.ndarray, np.ndarray, np.ndarray, np.random.RandomState],
-        noise: bool
+    strategy: Tuple[str, str],
+    data: Tuple[np.ndarray, np.ndarray, np.ndarray, np.random.RandomState],
+    noise: bool,
 ) -> None:
-    """ Simple test function for stabilized ICA without resampling.
+    """Simple test function for stabilized ICA without resampling.
     Parameters
     ----------
     strategy : (string , string)
         Pair of algorithm and function which characterizes the solver of the ICA problem
         (ex : ('fastica_par' , 'logcosh')).
 
-    data : array X, array A, array S, randomstate 
+    data : array X, array A, array S, randomstate
         Simulated data.
 
     noise : bool
@@ -160,19 +159,20 @@ def base_test_simple(
     normalizing = [True, False]
     reorienting = [True, False]
     for whiten, norm, reorient in itertools.product(
-            whitening, normalizing, reorienting
+        whitening, normalizing, reorienting
     ):
-        sica = StabilizedICA(n_components=S.shape[0],
-                             n_runs=10,
-                             fun=strategy[1],
-                             algorithm=strategy[0],
-                             whiten=whiten,
-                             normalize=norm,
-                             reorientation=reorient,
-                             resampling=None,
-                             n_jobs=1,
-                             verbose=0
-                             )
+        sica = StabilizedICA(
+            n_components=S.shape[0],
+            n_runs=10,
+            fun=strategy[1],
+            algorithm=strategy[0],
+            whiten=whiten,
+            normalize=norm,
+            reorientation=reorient,
+            resampling=None,
+            n_jobs=1,
+            verbose=0,
+        )
         if whiten:
             test_A = sica.fit_transform(X)
         else:
@@ -187,10 +187,14 @@ def base_test_simple(
         if not noise:
             if whiten:
                 assert test_A.shape == A.shape
-                assert_almost_equal(X, np.dot(test_A, sica.S_) + sica.mean_.reshape(-1, 1))
+                assert_almost_equal(
+                    X, np.dot(test_A, sica.S_) + sica.mean_.reshape(-1, 1)
+                )
             else:
                 assert test_Aw.shape == (S.shape[0], S.shape[0])
-                assert_almost_equal(X, pca.inverse_transform(np.dot(test_Aw, sica.S_).T).T)
+                assert_almost_equal(
+                    X, pca.inverse_transform(np.dot(test_Aw, sica.S_).T).T
+                )
 
         center_and_norm(sica.S_)
         s1_, s2_, s3_ = sica.S_
@@ -219,12 +223,12 @@ def base_test_simple(
 
 
 def base_test_with_bootstrap(
-        resampling: str,
-        strategy: Tuple[str, str],
-        data: Tuple[np.ndarray, np.ndarray, np.ndarray, np.random.RandomState],
-        noise: bool
+    resampling: str,
+    strategy: Tuple[str, str],
+    data: Tuple[np.ndarray, np.ndarray, np.ndarray, np.random.RandomState],
+    noise: bool,
 ) -> None:
-    """ Simple test function for  StabilizedICA with resampling.
+    """Simple test function for  StabilizedICA with resampling.
     Parameters
     ----------
     resampling : {'bootstrap' , 'fast_bootstrap'}
@@ -232,7 +236,7 @@ def base_test_with_bootstrap(
     strategy : (string , string)
         Pair of algorithm and function which characterizes the solver of the ICA problem
         (ex : ('fastica_par' , 'logcosh')).
-    data : array X, array A, array S, randomstate 
+    data : array X, array A, array S, randomstate
         Simulated data.
 
     noise : bool
@@ -318,7 +322,9 @@ def base_test_with_bootstrap(
         ("picard_ext", "tanh"),
     ],
 )
-def test_StabilizedICA_supGaussian(add_noise: bool, seed: bool, strategy: Tuple[str, str]):
+def test_StabilizedICA_supGaussian(
+    add_noise: bool, seed: bool, strategy: Tuple[str, str]
+):
     data = create_data_superGauss(add_noise, seed, M=100)
     base_test_simple(strategy=strategy, data=data, noise=add_noise)
 
@@ -336,7 +342,9 @@ def test_StabilizedICA_supGaussian(add_noise: bool, seed: bool, strategy: Tuple[
         ("picard_ext", "tanh"),
     ],
 )
-def test_StabilizedICA_subGaussian(add_noise: bool, seed: bool, strategy: Tuple[str, str]):
+def test_StabilizedICA_subGaussian(
+    add_noise: bool, seed: bool, strategy: Tuple[str, str]
+):
     data = create_data_subGauss(add_noise, seed, M=10)
     base_test_simple(strategy=strategy, data=data, noise=add_noise)
 
@@ -381,9 +389,13 @@ def test_StabilizedICA_mix(add_noise: bool, seed: bool, strategy: Tuple[str, str
 )
 @pytest.mark.parametrize("resampling", ["bootstrap", "fast_bootstrap"])
 @pytest.mark.slow
-def test_StabilizedICA_bootstrap_supGaussian(add_noise: bool, seed: bool, strategy: Tuple[str, str], resampling: str):
+def test_StabilizedICA_bootstrap_supGaussian(
+    add_noise: bool, seed: bool, strategy: Tuple[str, str], resampling: str
+):
     data = create_data_superGauss(add_noise, seed, M=100)
-    base_test_with_bootstrap(resampling=resampling, strategy=strategy, data=data, noise=add_noise)
+    base_test_with_bootstrap(
+        resampling=resampling, strategy=strategy, data=data, noise=add_noise
+    )
 
 
 @pytest.mark.parametrize("add_noise", [True, False])
@@ -401,9 +413,13 @@ def test_StabilizedICA_bootstrap_supGaussian(add_noise: bool, seed: bool, strate
 )
 @pytest.mark.parametrize("resampling", ["bootstrap", "fast_bootstrap"])
 @pytest.mark.slow
-def test_StabilizedICA_bootstrap_subGaussian(add_noise: bool, seed: bool, strategy: Tuple[str, str], resampling: str):
+def test_StabilizedICA_bootstrap_subGaussian(
+    add_noise: bool, seed: bool, strategy: Tuple[str, str], resampling: str
+):
     data = create_data_subGauss(add_noise, seed, M=100)
-    base_test_with_bootstrap(resampling=resampling, strategy=strategy, data=data, noise=add_noise)
+    base_test_with_bootstrap(
+        resampling=resampling, strategy=strategy, data=data, noise=add_noise
+    )
 
 
 @pytest.mark.parametrize("add_noise", [True, False])
@@ -423,15 +439,24 @@ def test_StabilizedICA_bootstrap_subGaussian(add_noise: bool, seed: bool, strate
 )
 @pytest.mark.parametrize("resampling", ["bootstrap", "fast_bootstrap"])
 @pytest.mark.slow
-def test_StabilizedICA_bootstrap_mix(add_noise: bool, seed: bool, strategy: Tuple[str, str], resampling: str):
+def test_StabilizedICA_bootstrap_mix(
+    add_noise: bool, seed: bool, strategy: Tuple[str, str], resampling: str
+):
     data = create_data_mix(add_noise, seed, M=100)
-    base_test_with_bootstrap(resampling=resampling, strategy=strategy, data=data, noise=add_noise)
+    base_test_with_bootstrap(
+        resampling=resampling, strategy=strategy, data=data, noise=add_noise
+    )
 
 
 def test_reorientation():
     X, A, S, rng = create_data_superGauss(add_noise=False, seed=42)
     sica = StabilizedICA(
-        n_components=3, n_runs=10, reorientation=True, resampling=None, n_jobs=1, verbose=0
+        n_components=3,
+        n_runs=10,
+        reorientation=True,
+        resampling=None,
+        n_jobs=1,
+        verbose=0,
     )
     sica.fit(X)
 

@@ -91,17 +91,17 @@ def _check_algorithm(algorithm: str, fun: str) -> Tuple[str, dict]:
 
 def _centrotype(X: np.ndarray, Sim: np.ndarray, cluster_labels: list) -> np.ndarray:
     """Compute the centrotype of the cluster of ICA components defined by cluster_labels
-    
+
        centrotype : component of the cluster which is the most similar to the other components
                    of the cluster
     Parameters
     ----------
     X : 2D array, shape (n_components , n_observations)
         matrix of independent ICA components
-        
+
     Sim : 2D array, shape (n_components , n_components)
         similarity matrix for ICA components (i.e. rows of X)
-        
+
     cluster_labels : list of integers
         indexes of the cluster of components (ex:[0 , 1 , 7] refers to the rows 0, 1 and 7 of X)
 
@@ -117,15 +117,15 @@ def _centrotype(X: np.ndarray, Sim: np.ndarray, cluster_labels: list) -> np.ndar
 
 def _stability_index(Sim: np.ndarray, cluster_labels: list) -> float:
     """Compute the stability index for the cluster of ICA components defined by cluster_labels.
-        
+
     Please refer to https://bmcgenomics.biomedcentral.com/track/pdf/10.1186/s12864-017-4112-9
     (section "Method") for the exact formula of the stability index.
 
     Parameters
     ----------
     Sim : 2D array, shape (n_components , n_components)
-        similarity matrix for ICA components 
-        
+        similarity matrix for ICA components
+
     cluster_labels : list of integers
         indexes of the cluster of components (ex: [0 , 1 , 7] refers to the rows 0, 1 and 7 of X)
 
@@ -150,10 +150,9 @@ def _stability_index(Sim: np.ndarray, cluster_labels: list) -> float:
 
 
 class StabilizedICA(BaseEstimator, TransformerMixin):
-    """ Implement a stabilized version of the Independent Component Analysis algorithm.
-
-    It fits the matrix factorization model X = AS, where A is the unmixing matrix (n_mixtures, n_sources), S is the
-    source matrix (n_sources, n_observations) and X is the observed mixed data (n_mixtures, n_observations).
+    """Implement a stabilized version of the Independent Component Analysis algorithm. It fits the matrix factorization
+    model X = AS, where A is the unmixing matrix (n_mixtures, n_sources), S is the source matrix
+    (n_sources, n_observations) and X is the observed mixed data (n_mixtures, n_observations).
 
     Parameters
     ----------
@@ -167,10 +166,14 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
         Method for resampling the data before each run of the ICA solver.
 
         - If None, no resampling is applied.
-        - If 'bootstrap' the classical bootstrap method is applied to the original data matrix, the resampled matrix is whitened (using the whitening hyperparameters set for the fit method) and the ICA components are extracted.
-        - If 'fast_boostrap' a fast bootstrap algorithm is applied to the original data matrix and the whitening operation is performed simultaneously with SVD decomposition and then the ICA components are extracted (see References).
+        - If 'bootstrap' the classical bootstrap method is applied to the original data matrix, the resampled matrix is
+         whitened (using the whitening hyperparameters set for the fit method) and the ICA components are extracted.
+        - If 'fast_boostrap' a fast bootstrap algorithm is applied to the original data matrix and the whitening
+         operation is performed simultaneously with SVD decomposition and then the ICA components are extracted
+         (see References).
 
-        Resampling could lead to quite heavy computations (whitening at each iteration), depending on the size of the input data. It should be considered with care. The default is None.
+        Resampling could lead to quite heavy computations (whitening at each iteration), depending on the size of the
+        input data. It should be considered with care. The default is None.
 
     algorithm : str {'fastica_par' , 'fastica_def' , 'picard_fastica' , 'picard' , 'picard_ext' , 'picard_orth'}, optional.
             The algorithm applied for solving the ICA problem at each run. Please see the supplementary explanations
@@ -231,15 +234,15 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
     n_jobs : int, optional
         Number of jobs to run in parallel. -1 means using all processors.
         See the joblib package documentation for more explanations. The default is 1.
-    
+
     verbose: int, optional
         Control the verbosity: the higher, the more messages. The default is 0.
-    
+
     Attributes
     ----------
     S_: 2D array, shape (n_components , n_observations)
         Array of sources/metagenes, each line corresponds to a stabilized ICA component (i.e. the centrotype of
-        a cluster of components).  
+        a cluster of components).
 
     stability_indexes_ : 1D array, shape (n_components)
         Stability indexes for the stabilized ICA components.
@@ -255,20 +258,22 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
     correspond to the observations. The user should keep in mind that, at the end, he will obtain `n_components`
     vectors of dimension `n_observations`, independent form each other (as finite samples of latent independent
     distributions). The user guide and the definition of the ICA framework should be helpful.
-    
-    - For a data set of discretized sound signals registered by 10 microphones at 100 time points, if we want to retrieve 5 ICA sources we need to set `n_mixtures = 10`, `n_observations = 100` and `n_components = 5`.
-    - For a gene expression data set with 100 samples and 10000 genes, if we want to retrieve 10 ICA sources **in the gene space** we need to set `n_mixtures = 100`, `n_observations = 10000` and `n_components = 10`.
-    
+
+    - For a data set of discretized sound signals registered by 10 microphones at 100 time points, if we want to
+     retrieve 5 ICA sources we need to set `n_mixtures = 10`, `n_observations = 100` and `n_components = 5`.
+    - For a gene expression data set with 100 samples and 10000 genes, if we want to retrieve 10 ICA sources **in
+     the gene space** we need to set `n_mixtures = 100`, `n_observations = 10000` and `n_components = 10`.
+
     References
     ----------
     Fast bootstrap algorithm:
         Fisher A, Caffo B, Schwartz B, Zipunnikov V. Fast, Exact Bootstrap Principal Component Analysis for p > 1 million.
         J Am Stat Assoc. 2016;111(514):846-860. doi: 10.1080/01621459.2015.1062383. Epub 2016 Aug 18. PMID: 27616801; PMCID: PMC5014451.
-        
+
     ICASSO method :
-        J. Himberg and A. Hyvarinen, "Icasso: software for investigating the reliability of ICA estimates by clustering and visualization," 
+        J. Himberg and A. Hyvarinen, "Icasso: software for investigating the reliability of ICA estimates by clustering and visualization,"
         2003 IEEE XIII Workshop on Neural Networks for Signal Processing (IEEE Cat. No.03TH8718), 2003, pp. 259-268, doi: 10.1109/NNSP.2003.1318025
-        (see https://www.cs.helsinki.fi/u/ahyvarin/papers/Himberg03.pdf). 
+        (see https://www.cs.helsinki.fi/u/ahyvarin/papers/Himberg03.pdf).
 
     Picard algorithm and extensions:
         Pierre Ablin, Jean-Francois Cardoso, Alexandre Gramfort, "Faster independent component analysis by
@@ -280,36 +285,36 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
 
     UMAP:
         For more details about the UMAP (Uniform Manifold Approximation and Projection), see https://pypi.org/project/umap-learn/.
-    
+
     Examples
     --------
     >>> import pandas as pd
-    >>> from sica.base import StabilizedICA   
+    >>> from sica.base import StabilizedICA
     >>> df = pd.read_csv("data.csv" , index_col = 0)
     >>> sICA = StabilizedICA(n_components = 45 , n_runs = 30, plot = True, n_jobs = -1)
     >>> sICA.fit(df)
     >>> Sources = pd.DataFrame(sICA.S_ , columns = df.index , index = ['source ' + str(i) for i in range(sICA.S_.shape[0])])
-    >>> Sources.head()                
+    >>> Sources.head()
     """
 
     def __init__(
-            self,
-            n_components: int,
-            n_runs: int,
-            resampling: Optional[Union[str, None]] = None,
-            algorithm: Optional[str] = "fastica_par",
-            fun: Optional[str] = "logcosh",
-            whiten: Optional[bool] = True,
-            max_iter: Optional[int] = 2000,
-            plot: Optional[bool] = False,
-            normalize: Optional[bool] = True,
-            reorientation: Optional[bool] = True,
-            pca_solver: Optional[str] = "auto",
-            chunked: Optional[bool] = False,
-            chunk_size: Optional[Union[int, None]] = None,
-            zero_center: Optional[bool] = True,
-            n_jobs: Optional[int] = 1,
-            verbose: Optional[int] = 0,
+        self,
+        n_components: int,
+        n_runs: int,
+        resampling: Optional[Union[str, None]] = None,
+        algorithm: Optional[str] = "fastica_par",
+        fun: Optional[str] = "logcosh",
+        whiten: Optional[bool] = True,
+        max_iter: Optional[int] = 2000,
+        plot: Optional[bool] = False,
+        normalize: Optional[bool] = True,
+        reorientation: Optional[bool] = True,
+        pca_solver: Optional[str] = "auto",
+        chunked: Optional[bool] = False,
+        chunk_size: Optional[Union[int, None]] = None,
+        zero_center: Optional[bool] = True,
+        n_jobs: Optional[int] = 1,
+        verbose: Optional[int] = 0,
     ) -> NoReturn:
         super().__init__()
         self.n_components = n_components
@@ -334,26 +339,26 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
         self.stability_indexes_ = None
 
     def fit(self, X: np.ndarray, y: Optional[Any] = None) -> object:
-        """ Fit the ICA model with X (use stabilization).
-        
+        """Fit the ICA model with X (use stabilization).
+
         1. Compute the ICA components of X ``n_runs`` times.
-        
-        2. Cluster all the ``n_components*n_runs`` components with agglomerative 
+
+        2. Cluster all the ``n_components*n_runs`` components with agglomerative
            hierarchical clustering (average linkage) into ``n_components`` clusters.
-           
+
         3. For each cluster compute its stability index and return its centrotype as the
-           final ICA component.              
-                 
+           final ICA component.
+
         Parameters
         ----------
         X : 2D array-like, shape (n_mixtures, n_observations) or (n_components, n_observations) if whiten is False.
-            Training data 
+            Training data
 
         y : Ignored
             Ignored.
 
         Returns
-        -------        
+        -------
         self : object
             Returns the instance itself.
         """
@@ -397,7 +402,7 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
                     "X_w": X_w,
                     "method": self._method,
                     "max_iter": self.max_iter,
-                    "solver_params": self._solver_params
+                    "solver_params": self._solver_params,
                 },
             )
 
@@ -429,7 +434,7 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
                     "method": self._method,
                     "max_iter": self.max_iter,
                     "solver_params": self._solver_params,
-                    "n_components": self.n_components
+                    "n_components": self.n_components,
                 },
             )
 
@@ -462,7 +467,7 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
                     "method": self._method,
                     "max_iter": self.max_iter,
                     "solver_params": self._solver_params,
-                    "n_components": self.n_components
+                    "n_components": self.n_components,
                 },
             )
 
@@ -498,8 +503,8 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
         # Re-oriente the stabilized ICA components towards positive heaviest tails
         if self.reorientation:
             self.S_ = (
-                          np.where(stats.skew(Centrotypes, axis=1) >= 0, 1, -1).reshape(-1, 1)
-                      ) * Centrotypes
+                np.where(stats.skew(Centrotypes, axis=1) >= 0, 1, -1).reshape(-1, 1)
+            ) * Centrotypes
         else:
             self.S_ = Centrotypes
 
@@ -525,20 +530,18 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
 
         return self
 
-    def _parallel_decomposition(self,
-                                parallel: Parallel,
-                                func: Callable[..., np.ndarray],
-                                kwargs: dict
-                                ) -> List[np.ndarray]:
-        """ Compute in parallel the n_runs runs of the ICA solver. If the solver comes from sklearn.FastICA,
+    def _parallel_decomposition(
+        self, parallel: Parallel, func: Callable[..., np.ndarray], kwargs: dict
+    ) -> List[np.ndarray]:
+        """Compute in parallel the n_runs runs of the ICA solver. If the solver comes from sklearn.FastICA,
         some potential convergence errors ar handled through multiple retryings.
-        
+
         Parameters
         ----------
         parallel : joblib.Parallel
             Object to use workers to compute in parallel the n_runs application of the function func to solve the ICA
             problem.
-            
+
         func : callable
             Function to perform the ICA decomposition for a single run. It should return an array of ICA components of
             shape (n_components , n_observations)
@@ -559,23 +562,31 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
             decomposition = None
             while (attempt <= maxtrials) and (not success):
                 try:
-                    decomposition = parallel(delayed(func)(**kwargs) for _ in range(self.n_runs))
+                    decomposition = parallel(
+                        delayed(func)(**kwargs) for _ in range(self.n_runs)
+                    )
                     success = True
                 except ValueError:
-                    print("FastICA from sklearn did not converge due to numerical instabilities - Retrying...")
+                    print(
+                        "FastICA from sklearn did not converge due to numerical instabilities - Retrying..."
+                    )
                 attempt += 1
             if not success:
                 raise ValueError("Too many attempts: FastICA did not converge !")
 
         else:
-            decomposition = parallel(delayed(func)(**kwargs) for _ in range(self.n_runs))
+            decomposition = parallel(
+                delayed(func)(**kwargs) for _ in range(self.n_runs)
+            )
 
         return decomposition
 
     @staticmethod
-    def _ICA_decomposition(X_w: np.ndarray, method: str, max_iter: int, solver_params: dict) -> np.ndarray:
-        """ Apply FastICA or picard (picard package) algorithm to the whitened matrix X_w to solve the ICA problem.
-        
+    def _ICA_decomposition(
+        X_w: np.ndarray, method: str, max_iter: int, solver_params: dict
+    ) -> np.ndarray:
+        """Apply FastICA or picard (picard package) algorithm to the whitened matrix X_w to solve the ICA problem.
+
         Parameters
         ----------
         X_w : 2D array, shape (n_observations , n_components)
@@ -589,11 +600,7 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
 
         if method == "picard":
             _, _, S = picard(
-                X_w.T,
-                max_iter=max_iter,
-                whiten=False,
-                centering=False,
-                **solver_params
+                X_w.T, max_iter=max_iter, whiten=False, centering=False, **solver_params
             )
         else:
             ica = FastICA(max_iter=max_iter, whiten=False, **solver_params)
@@ -602,20 +609,21 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
 
     @staticmethod
     def _ICA_decomposition_bootstrap(
-            X: np.ndarray,
-            whitening_params: dict,
-            method: str,
-            max_iter: int,
-            solver_params: dict,
-            n_components: int) -> np.ndarray:
-        """ Draw a bootstrap sample from the original data matrix X, whiten it and apply FastICA or picard
+        X: np.ndarray,
+        whitening_params: dict,
+        method: str,
+        max_iter: int,
+        solver_params: dict,
+        n_components: int,
+    ) -> np.ndarray:
+        """Draw a bootstrap sample from the original data matrix X, whiten it and apply FastICA or picard
         (picard package) algorithm to solve the ICA problem.
-        
+
         Parameters
         ----------
         X : 2D array, shape (n_observations , n_mixtures)
             Original data matrix.
-            
+
         whitening_params : dict
             A dictionnary containing the arguments to pass to the whitening function to whiten the bootstrap matrix.
 
@@ -645,19 +653,20 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
 
     @staticmethod
     def _ICA_decomposition_fast_bootstrap(
-            U: np.ndarray,
-            SVt: np.ndarray,
-            method: str,
-            max_iter: int,
-            solver_params: dict,
-            n_components: int) -> np.ndarray:
-        """ Draw a boostrap whitened sample from the original matrix X (svd decomposition of X = USVt) [1], and apply
+        U: np.ndarray,
+        SVt: np.ndarray,
+        method: str,
+        max_iter: int,
+        solver_params: dict,
+        n_components: int,
+    ) -> np.ndarray:
+        """Draw a boostrap whitened sample from the original matrix X (svd decomposition of X = USVt) [1], and apply
         FastICA or picard (picard package) algorithm to solve the ICA problem.
-        
+
         Parameters
         ----------
         U : 2D array, shape (n_observations , n_mixtures)
-            
+
         SVt : 2D array, shape (n_mixtures , n_mixtures)
 
         Returns
@@ -665,7 +674,7 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
         S : 2D array, shape (n_components , n_observations)
             Array of sources obtained from a single run of an ICA solver and a bootstrap sample of the original matrix
             X. Each line corresponds to an ICA component.
-            
+
         References
         ----------
         [1] : Fisher A, Caffo B, Schwartz B, Zipunnikov V. Fast, Exact Bootstrap Principal Component Analysis for p > 1 million.
@@ -676,7 +685,7 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
         Ab, Sb, Rbt = linalg.svd(SVt[:, np.random.choice(range(n), size=n)])
         Ub = np.dot(U, Ab)
         Ub, Rbt = svd_flip(Ub, Rbt)
-        Xb_w = Ub[:, : n_components] * np.sqrt(p - 1)
+        Xb_w = Ub[:, :n_components] * np.sqrt(p - 1)
 
         if method == "picard":
             _, _, S = picard(
@@ -692,7 +701,7 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
         return S
 
     def transform(self, X: np.ndarray, copy: Optional[bool] = True) -> np.ndarray:
-        """ Apply dimensionality reduction to X (i.e. recover the mixing matrix applying the pseudo-inverse
+        """Apply dimensionality reduction to X (i.e. recover the mixing matrix applying the pseudo-inverse
         of the sources).
 
         Parameters
@@ -718,8 +727,10 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
         A = X.T.dot(np.linalg.pinv(self.S_))
         return A
 
-    def inverse_transform(self, X: np.ndarray, copy: Optional[bool] = True) -> np.ndarray:
-        """ Transform the mixing matrix back to the mixed data (applying the sources).
+    def inverse_transform(
+        self, X: np.ndarray, copy: Optional[bool] = True
+    ) -> np.ndarray:
+        """Transform the mixing matrix back to the mixed data (applying the sources).
 
         Parameters
         ----------
@@ -742,31 +753,31 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
         return X_new
 
     def projection(
-            self,
-            method: Optional[str] = "mds",
-            ax: Optional[Union[matplotlib.axes.Axes, None]] = None
+        self,
+        method: Optional[str] = "mds",
+        ax: Optional[Union[matplotlib.axes.Axes, None]] = None,
     ) -> None:
         """Plot the ``n_components*n_runs`` ICA components computed during fit() in 2D.
         Approximate the original dissimilarities between components by Euclidean distance.
         Each cluster is represented with a different color.
-           
+
         Parameters
-        ----------        
+        ----------
         method : string, optional
             Name of the dimensionality reduction method (e.g "tsne" , "mds" or "umap")
             The default is "umap".
-            
+
         ax : matplotlib.axes, optional
             The default is None.
-            
+
         Returns
         -------
         None.
-        
+
         Notes
         -----
         - We use the dissimilarity measure ``sqrt(1 - |rho_ij|)`` (rho the Pearson correlation) instead of ``1 - |rho_ij|`` to reduce overlapping.
-        
+
         - Please note that multidimensional scaling (MDS) is more computationally demanding than t-SNE or UMAP. However, it takes into account the global structures of the data set while the others don't. For t-SNE or UMAP one cannot really interpret the inter-cluster distances.
         """
 
@@ -787,7 +798,9 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
         elif method == "umap":
             embedding = umap.UMAP(n_components=2, metric="precomputed")
         else:
-            raise ValueError("method parameter value can only be 'tsne', 'mds' or 'umap'")
+            raise ValueError(
+                "method parameter value can only be 'tsne', 'mds' or 'umap'"
+            )
 
         P = embedding.fit_transform(np.sqrt(1 - self._Sim))
 
@@ -795,71 +808,72 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
         return
 
 
-def MSTD(X: np.ndarray,
-         m: int,
-         M: int,
-         step: int,
-         n_runs: int,
-         fun: Optional[str] = "logcosh",
-         algorithm: Optional[str] = "fastica_par",
-         whiten: Optional[bool] = True,
-         max_iter: Optional[int] = 2000,
-         n_jobs: Optional[int] = -1,
-         ax: Optional[Union[matplotlib.axes.Axes, None]] = None
-         ) -> None:
+def MSTD(
+    X: np.ndarray,
+    m: int,
+    M: int,
+    step: int,
+    n_runs: int,
+    fun: Optional[str] = "logcosh",
+    algorithm: Optional[str] = "fastica_par",
+    whiten: Optional[bool] = True,
+    max_iter: Optional[int] = 2000,
+    n_jobs: Optional[int] = -1,
+    ax: Optional[Union[matplotlib.axes.Axes, None]] = None,
+) -> None:
     """Plot "MSTD graphs" to help choose an optimal dimension for ICA decomposition.
-        
+
     Run stabilized ICA algorithm for several dimensions in [m , M] and compute the
     stability distribution of the components each time.
-       
+
     Parameters
     ----------
     X : 2D array, shape (n_mixtures, n_observations)
         Training data
-        
+
     m : int
         Minimal dimension for ICA decomposition.
-        
+
     M : int > m
         Maximal dimension for ICA decomposition.
-        
+
     step : int > 0
         Step between two dimensions (ex: if ``step = 2`` the function will test the dimensions
         m, m+2, m+4, ... , M).
-        
+
     n_runs : int
         Number of times we run the FastICA algorithm (see fit method of class Stabilized_ICA)
-    
+
     fun : str {'cube' , 'exp' , 'logcosh' , 'tanh'} or function, optional.
         The default is 'logcosh'. See the fit method of StabilizedICA for more details.
-        
+
     algorithm : str {'fastica_par' , 'fastica_def' , 'picard_fastica' , 'picard' , 'picard_ext' , 'picard_orth'}, optional.
         The algorithm applied for solving the ICA problem at each run. Please the supplementary explanations for more
         details. The default is 'fastica_par', i.e. FastICA from sklearn with parallel implementation.
-        
+
     whiten : bool, optional
         It True, X is whitened only once as an initial step, with an SVD solver and M components. If False, X must be
         already whitened, with M components. The default is True.
-              
+
     max_iter : int, optional
         Parameter for _ICA_decomposition. The default is 2000.
-    
+
     n_jobs : int
         Number of jobs to run in parallel for each stabilized ICA step. Default is -1
-    
+
     ax : array of matplotlib.axes objects, optional
         The default is None.
-            
+
     Returns
     -------
     None.
-    
+
     References
     ----------
     Kairov U, Cantini L, Greco A, Molkenov A, Czerwinska U, Barillot E, Zinovyev A. Determining the optimal number of independent components for reproducible transcriptomic data analysis.
     BMC Genomics. 2017 Sep 11;18(1):712. doi: 10.1186/s12864-017-4112-9. PMID: 28893186; PMCID: PMC5594474.
     (see https://bmcgenomics.biomedcentral.com/track/pdf/10.1186/s12864-017-4112-9 ).
-    
+
     Examples
     --------
     >>> import pandas as pd
@@ -905,8 +919,15 @@ def MSTD(X: np.ndarray,
 
     # for i in range(m , M+step , step): #uncomment if you don't want to use tqdm (and comment the line below !)
     for i in tqdm(range(m, M + step, step)):
-        s = StabilizedICA(n_components=i, n_runs=n_runs, algorithm=algorithm, fun=fun, whiten=False,
-                          max_iter=max_iter, n_jobs=n_jobs)
+        s = StabilizedICA(
+            n_components=i,
+            n_runs=n_runs,
+            algorithm=algorithm,
+            fun=fun,
+            whiten=False,
+            max_iter=max_iter,
+            n_jobs=n_jobs,
+        )
         s.fit(X_w[:, :i].T)
         mean.append(np.mean(s.stability_indexes_))
         ax[0].plot(range(1, len(s.stability_indexes_) + 1), s.stability_indexes_, "k")

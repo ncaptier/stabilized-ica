@@ -17,20 +17,20 @@ a Networkx tool to display the associated graph.
 class MNN(object):
     """Given two arrays X and Y or a precomputed distance matrix computes the undirected adjacency matrix
     using the Mutual Nearest Neighbors method.
-    
+
     Parameters
     ----------
     X : 2D array of shape (n_components_1 , n_features_1), 2D array of shape (n_components_1 , n_components_2)
         if metric = "precomputed".
-    
+
     Y : 2D array of shape (n_components_2 , n_features_2), optional
         The default is None.
-        
+
     k : int > 0
         Parameter for the Mutual Nearest Neighbor method (i.e. number of neighbors that we consider).
-        
+
     metric : string
-        Metric for the computation of the adjacency matrix (e.g "pearson" , "spearman" 
+        Metric for the computation of the adjacency matrix (e.g "pearson" , "spearman"
         or any metric accepted by ``scipy.spatial.distance.cdsit``).
 
     Attributes
@@ -42,20 +42,20 @@ class MNN(object):
         maximal non-null distance between two different components.
 
     Notes
-    -----  
+    -----
     - In the case where the distance matrix is not precomputed, we compute the distance between each rows of X and Y.
-    
+
     - In the case X and Y are dataframes, we consider only the common columns of X and Y. Otherwise, we assume that the
     columns are the same for X and Y.
-    
+
     """
 
     def __init__(
-            self,
-            k: int,
-            metric: str,
-            X: Union[np.ndarray, pd.DataFrame],
-            Y: Optional[Union[np.ndarray, pd.DataFrame]] = None
+        self,
+        k: int,
+        metric: str,
+        X: Union[np.ndarray, pd.DataFrame],
+        Y: Optional[Union[np.ndarray, pd.DataFrame]] = None,
     ) -> NoReturn:
         self.X = X
         self.Y = Y
@@ -70,12 +70,12 @@ class MNN(object):
 
     @staticmethod
     def compute_distance(
-            X: Union[np.ndarray, pd.DataFrame],
-            Y: Union[np.ndarray, pd.DataFrame],
-            metric: str
+        X: Union[np.ndarray, pd.DataFrame],
+        Y: Union[np.ndarray, pd.DataFrame],
+        metric: str,
     ) -> np.ndarray:
         """Compute the distance between each pair of rows of X and Y
-        
+
         Parameters
         ----------
         X : 2D array of shape (n_components_1 , n_features_1)
@@ -119,12 +119,12 @@ class MNN(object):
 
         """
         bool_mask = (
-                            self.distance
-                            <= np.sort(self.distance, axis=1)[:, self.k - 1].reshape(-1, 1)
-                    ) * (
-                            self.distance
-                            <= np.sort(self.distance, axis=0)[self.k - 1, :].reshape(1, -1)
-                    )
+            self.distance
+            <= np.sort(self.distance, axis=1)[:, self.k - 1].reshape(-1, 1)
+        ) * (
+            self.distance
+            <= np.sort(self.distance, axis=0)[self.k - 1, :].reshape(1, -1)
+        )
 
         if weighted:
             adjacency = bool_mask * self.distance
@@ -134,28 +134,28 @@ class MNN(object):
 
 
 class MNNgraph(object):
-    """ Given a list of data sets, draws the MNN graph with a networkx object (compatible with the software Cytoscape)
-    
+    """Given a list of data sets, draws the MNN graph with a networkx object (compatible with the software Cytoscape)
+
     Parameters
-    ----------   
+    ----------
     data : list of 2D data sets of shape (n_components_i , n_features_i)
-        
+
     names : list of strings
         Names of the data sets.
-    
+
     k : int > 0
         Parameter for the Mutual Nearest Neighbors method.
-    
+
     metric : string, optional
         Metric for the computation of the adjacency matrices.
         The default is "pearson".
-        
+
     weighted : bool
         If True each coefficient of the adjacency matrix is weighted by the associated ``distance``,
          otherwise the coefficients are 0 or 1.
 
     Attributes
-    ----------   
+    ----------
     graph_ : networkx object
 
         Each edge of the graph is associated with the following attributes:
@@ -166,27 +166,27 @@ class MNNgraph(object):
         corresponds to the correlation coefficient itself while for other metrics it corresponds to 1 - minmax scaled
         distance (min and max are computed over all the between-nodes distances, including those that are not associated
         to an edge in the graph). For an unweighted graph, it equals 1 every time.
-    
+
     Notes
     -----
     If the elements of data are not dataframes, we assume that they all share the same features.
-    
+
     Examples
     --------
     >>> from sica.mutualknn import MNNgraph
     >>> cg = MNNgraph(data = [df1 , df2 , df3] , names=['dataframe1' , 'dataframe2' , 'dataframe3'] , k=1)
-    >>> cg.draw(colors = ['r', 'g' , 'b'] , spacing = 2)    
+    >>> cg.draw(colors = ['r', 'g' , 'b'] , spacing = 2)
     >>> cg.export_json("example.json")
-   
+
     """
 
     def __init__(
-            self,
-            data: List[np.ndarray],
-            names: List[str],
-            k: int,
-            metric: Optional[str] = "pearson",
-            weighted: Optional[bool] = True
+        self,
+        data: List[np.ndarray],
+        names: List[str],
+        k: int,
+        metric: Optional[str] = "pearson",
+        weighted: Optional[bool] = True,
     ) -> NoReturn:
         self.data = data
         self.names = names
@@ -196,28 +196,28 @@ class MNNgraph(object):
 
     @staticmethod
     def create_graph(
-            data: Union[np.array, List[np.ndarray]],
-            names: List[str],
-            k: int,
-            metric: str,
-            weighted: bool
+        data: Union[np.array, List[np.ndarray]],
+        names: List[str],
+        k: int,
+        metric: str,
+        weighted: bool,
     ) -> nx.Graph:
-        """Create the MNN graph associated to the list of data sets. Two situations are 
+        """Create the MNN graph associated to the list of data sets. Two situations are
         distinguished : one with only two data sets and another with more than two data sets.
-                
+
         Parameters
         ----------
-        data : list of 2D arrays of shape (n_components_i , n_features_i) 
-            
+        data : list of 2D arrays of shape (n_components_i , n_features_i)
+
         names : list of strings
             Names of the data sets.
-        
+
         k : integer >= 1
             Parameter for the Mutual Nearest Neighbors Method.
-        
+
         metric : string
             Metric for the computation of the adjacency matrices.
-        
+
         weighted : bool
             If True each coefficient of the adjacency matrix is weighted by the associated ``distance``,
             otherwise the coefficients are 0 or 1.
@@ -244,7 +244,10 @@ class MNNgraph(object):
             for u in range(h_w.shape[0]):
                 for v in range(h_w.shape[1]):
                     if h_w[u, v] > 0:
-                        n1, n2 = (names[0] + " " + str(u + 1), names[1] + " " + str(v + 1),)
+                        n1, n2 = (
+                            names[0] + " " + str(u + 1),
+                            names[1] + " " + str(v + 1),
+                        )
                         G.add_node(
                             n1,
                             weight=1,
@@ -263,17 +266,27 @@ class MNNgraph(object):
                         count += -5
 
             if weighted:
-                if metric in ["pearson", "spearman", "kendall", "correlation", "cosine"]:
-                    update = {e[:2]: {"weight": 1 - e[2],
-                                      "label": str(np.round(1 - e[2], 2))
-                                      }
-                              for e in G.edges.data("distance")
-                              }
+                if metric in [
+                    "pearson",
+                    "spearman",
+                    "kendall",
+                    "correlation",
+                    "cosine",
+                ]:
+                    update = {
+                        e[:2]: {"weight": 1 - e[2], "label": str(np.round(1 - e[2], 2))}
+                        for e in G.edges.data("distance")
+                    }
                 else:
                     update = {}
                     for e in G.edges.data("distance"):
-                        temp = 1 - (e[2] - mutualnn.min_dist_) / (mutualnn.max_dist_ - mutualnn.min_dist_)
-                        update[e[:2]] = {"weight": temp, "label": str(np.round(temp, 2))}
+                        temp = 1 - (e[2] - mutualnn.min_dist_) / (
+                            mutualnn.max_dist_ - mutualnn.min_dist_
+                        )
+                        update[e[:2]] = {
+                            "weight": temp,
+                            "label": str(np.round(temp, 2)),
+                        }
                 nx.set_edge_attributes(G, update)
 
         else:
@@ -292,44 +305,57 @@ class MNNgraph(object):
                 for u in range(h_w.shape[0]):
                     for v in range(h_w.shape[1]):
                         if h_w[u, v] > 0:
-                            n1, n2 = (L[i][0] + " " + str(u + 1), L[i][1] + " " + str(v + 1))
+                            n1, n2 = (
+                                L[i][0] + " " + str(u + 1),
+                                L[i][1] + " " + str(v + 1),
+                            )
                             G.add_node(n1, weight=1, data_set=L[i][0])
                             G.add_node(n2, weight=1, data_set=L[i][1])
                             G.add_edge(n1, n2, distance=h_w[u, v], weight=h_w[u, v])
 
             if weighted:
-                if metric in ["pearson", "spearman", "kendall", "correlation", "cosine"]:
-                    update = {e[:2]: {"weight": 1 - e[2]} for e in G.edges.data("distance")}
+                if metric in [
+                    "pearson",
+                    "spearman",
+                    "kendall",
+                    "correlation",
+                    "cosine",
+                ]:
+                    update = {
+                        e[:2]: {"weight": 1 - e[2]} for e in G.edges.data("distance")
+                    }
                 else:
                     maxweight = max(collect_max)
                     minweight = min(collect_min)
                     update = {}
                     for e in G.edges.data("distance"):
-                        update[e[:2]] = {"weight": 1 - (e[2] - minweight) / (maxweight - minweight)}
+                        update[e[:2]] = {
+                            "weight": 1 - (e[2] - minweight) / (maxweight - minweight)
+                        }
                 nx.set_edge_attributes(G, update)
 
         return G
 
     def draw(
-            self,
-            bipartite_graph: Optional[bool] = False,
-            ax: Optional[matplotlib.axes.Axes] = None,
-            colors: Optional[list] = None,
-            spacing: Optional[float] = 1
+        self,
+        bipartite_graph: Optional[bool] = False,
+        ax: Optional[matplotlib.axes.Axes] = None,
+        colors: Optional[list] = None,
+        spacing: Optional[float] = 1,
     ) -> None:
         """Draw the MNN graph.
-        
+
         Parameters
-        ----------        
+        ----------
         bipartite_graph : boolean, optional
             If True a custom bipartite layout is used (only with two data sets). The default is False
-            
+
         ax : matplotlib.axes, optional
             The default is None.
-            
+
         colors : list of matplotlib.colors, optional
             List of colors you want each data set to be associated with. The default is None.
-            
+
         spacing : float >= 1, optional
             Deal with the space between nodes. Increase this value to move nodes farther apart.
 
@@ -445,16 +471,16 @@ class MNNgraph(object):
 
     def export_json(self, file_name: str) -> None:
         """Save the graph in a json file adapted to cytoscape format
-        
+
         Parameters
         ----------
         file_name : string
             Name of the json file.
-    
+
         Returns
         -------
         None.
-    
+
         """
         dic = nx.readwrite.json_graph.cytoscape_data(self.graph_)
         with open(file_name, "w") as fp:

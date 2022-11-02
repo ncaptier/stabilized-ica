@@ -9,32 +9,37 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath('../..'))
+sys.path.insert(0, os.path.abspath("../.."))
 sys.path.insert(0, os.path.abspath("sphinxext"))
 
 
 # -- Project information -----------------------------------------------------
 
-project = 'stabilized-ica'
-copyright = 'Copyright 2022, Nicolas Captier (built with a theme provided by the scikit-learn developers (BSD License))'
-author = 'Nicolas Captier'
-release = '2.0.0'
+project = "stabilized-ica"
+copyright = "Copyright 2022, Nicolas Captier (built with a theme provided by the scikit-learn developers (BSD License))"
+author = "Nicolas Captier"
+release = "2.0.0"
 
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.autodoc',
-              'sphinx.ext.autosummary',
-              'sphinx.ext.coverage',
-              'numpydoc',
-              'sphinx.ext.linkcode',
-              'sphinx.ext.autosectionlabel',
-              'sphinx_gallery.load_style',
-              'nbsphinx',
-              'add_toctree_functions']
+extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.coverage",
+    "numpydoc",
+    "sphinx.ext.linkcode",
+    "sphinx.ext.autosectionlabel",
+    "sphinx_gallery.load_style",
+    "nbsphinx",
+    "add_toctree_functions",
+]
 
+autodoc_typehints = "none"
+
+autodoc_default_options = {"members": True, "inherited-members": True}
 
 autosectionlabel_prefix_document = True
 
@@ -50,10 +55,8 @@ else:
     extensions.append("sphinx.ext.mathjax")
     mathjax_path = "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
 
-autodoc_default_options = {"members": True, "inherited-members": True}
-
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # generate autosummary even if no references
 autosummary_generate = True
@@ -63,7 +66,7 @@ source_suffix = ".rst"
 
 # The main toctree document.
 main_doc = "contents"
-master_doc = 'index'
+master_doc = "index"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -78,7 +81,7 @@ default_role = "literal"
 add_function_parentheses = False
 
 # The name of the Pygments (syntax highlighting) style to use.
-#pygments_style = "sphinx"
+pygments_style = "sphinx"
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -111,20 +114,21 @@ def linkcode_resolve(domain, info):
     def find_source():
         # try to find the file and line number, based on code from numpy:
         # https://github.com/numpy/numpy/blob/master/doc/source/conf.py#L286
-        obj = sys.modules[info['module']]
-        for part in info['fullname'].split('.'):
+        obj = sys.modules[info["module"]]
+        for part in info["fullname"].split("."):
             obj = getattr(obj, part)
         import inspect
         import os
+
         fn = inspect.getsourcefile(obj)
         fn = os.path.relpath(fn, start=os.path.dirname(sica.__file__))
         source, lineno = inspect.getsourcelines(obj)
         return fn, lineno, lineno + len(source) - 1
 
-    if domain != 'py' or not info['module']:
+    if domain != "py" or not info["module"]:
         return None
     try:
-        filename = 'sica/%s#L%d-L%d' % find_source()
+        filename = "sica/%s#L%d-L%d" % find_source()
     except Exception:
-        filename = info['module'].replace('.', '/') + '.py'
+        filename = info["module"].replace(".", "/") + ".py"
     return "https://github.com/ncaptier/stabilized-ica/blob/master/%s" % filename

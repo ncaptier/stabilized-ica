@@ -174,20 +174,20 @@ In [7]_ and [8]_, Pierre Ablin *et al.* developed a very promising second-order 
 
 In the `picard <https://pierreablin.github.io/picard/>`_ package, several variants of the algorithm are implemented. They are accessible through the `algorithm` parameter of the fit method of `sica.base.StabilizedICA <modules/generated/sica.base.StabilizedICA.html#sica.base.StabilizedICA>`_.
 
-    * `algorithm = 'infomax'` refers to the basic implementation of infomax through maximum-likelihood using Pierre Ablin's algorithm [7].
-    * `algorithm = 'infomax_ext'` refers to an extension of the infomax approach that can deal with a mixture of super-Gaussian and sub-Gaussian sources [9]_. 
-    * `algorithm = 'infomax_orth'` refers to a constrained version of the original picard algorithm that forces the sources to be uncorrelated [8].
-    * `algorithm = 'fastica_picard'` refers to a mix of 'infomax_ext' and 'infomax_orth' that was shown to converge towards the fixed points of the well-known FastICA algorithm (it is claimed to be faster than FastICA on real data [6]).
+    * `algorithm = 'picard'` refers to the original picard algorithm [7].
+    * `algorithm = 'picard_ext'` refers to an extension of the picard approach that can deal with a mixture of super-Gaussian and sub-Gaussian sources [9]_.
+    * `algorithm = 'picard_orth'` refers to a constrained version of the original picard algorithm that forces the sources to be uncorrelated [8].
+    * `algorithm = 'picard_fastica'` refers to a mix of 'picard_ext' and 'picard_orth' that was shown to converge towards the fixed points of the well-known FastICA algorithm (it is claimed to be faster than FastICA on real data [6]).
 
 
 .. topic:: References:
 
-    .. [1] : Anthony J. Bell and Terrence J. Sejnowski. An information-maximization approach to blind separationand blind deconvolution.Neural Comput., 7(6):1129–1159, November 1995 
+    .. [1] : Anthony J. Bell and Terrence J. Sejnowski. An information-maximization approach to blind separationand blind deconvolution. Neural Comput., 7(6):1129–1159, November 1995
     .. [2] : Pierre Comon, Independent component analysis, A new concept?,Signal Processing, Volume 36, Issue 3, 1994, Pages 287-314, ISSN 0165-1684, https://doi.org/10.1016/0165-1684(94)90029-9.  
     .. [3] : A. Hyvärinen and E. Oja. Independent Component Analysis: Algorithms and Applications. Neural Networks, 13(4-5):411-430, 2000. 
-    .. [4] : A. Hyvärinen. New Approximations of Differential Entropy for Independent Component Analysis and Projection Pursuit.  In Advances in Neural Information Processing Systems 10 (NIPS*97), pp. 273-279, MIT Press, 1998
+    .. [4] : A. Hyvärinen. New Approximations of Differential Entropy for Independent Component Analysis and Projection Pursuit. In Advances in Neural Information Processing Systems 10 (NIPS*97), pp. 273-279, MIT Press, 1998
     .. [5] : A. Hyvärinen. Fast and Robust Fixed-Point Algorithms for Independent Component Analysis. IEEE Transactions on Neural Networks 10(3):626-634, 1999.
     .. [6] : J. F. Cardoso. Infomax and maximum likelihood for blind source separation.IEEE Signal ProcessingLetters, 4(4):112–114, 1997.
-    .. [7] : P. Ablin, J. Cardoso, and A. Gramfort. Faster independent component analysis by preconditioning withhessian approximations.IEEE Transactions on Signal Processing, 66(15):4040–4049, 2018.
+    .. [7] : P. Ablin, J. Cardoso, and A. Gramfort. Faster independent component analysis by preconditioning with hessian approximations.IEEE Transactions on Signal Processing, 66(15):4040–4049, 2018.
     .. [8] : P. Ablin, J. Cardoso, and A. Gramfort. Faster ica under orthogonal constraint. In2018 IEEE InternationalConference on Acoustics, Speech and Signal Processing (ICASSP), pages 4464–4468, 2018.
-    .. [9] : Te-Won Lee, Mark Girolami, and Terrence Sejnowski. Independent component analysis using an extended infomax algorithm for mixed sub-gaussian and super-gaussian sources.Neural Computation, 11:417–441,02 1999.
+    .. [9] : Te-Won Lee, Mark Girolami, and Terrence Sejnowski. Independent component analysis using an extended infomax algorithm for mixed sub-gaussian and super-gaussian sources. Neural Computation, 11:417–441,02 1999.

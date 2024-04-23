@@ -21,7 +21,7 @@ setuptools.setup(
         "networkx>=2.7.1",
         "pandas>=1.4.2",
         "python-picard>=0.7",
-        "scikit-learn>=1.0.2",
+        "scikit-learn>=1.2.0",
         "tqdm>=4.64.0",
         "umap-learn>=0.5.3",
     ],

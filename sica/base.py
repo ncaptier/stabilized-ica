@@ -485,7 +485,7 @@ class StabilizedICA(BaseEstimator, TransformerMixin):
 
         # Cluster the components with hierarchical clustering
         clustering = AgglomerativeClustering(
-            n_clusters=self.n_components, affinity="precomputed", linkage="average"
+            n_clusters=self.n_components, metric="precomputed", linkage="average"
         ).fit(1 - self._Sim)
         self._clusters = clustering.labels_
 

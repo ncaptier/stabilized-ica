@@ -109,7 +109,7 @@ cg.export_json("example.json")
 
 ## Citing stabilized-ica
 
-If you use stabilized-ica in a scientific publication, we would appreciate citation to the following paper:
+If you use stabilized-ica in a scientific publication, we would appreciate citation to the [following paper](https://doi.org/10.1093/bioinformatics/btac204):
 
 ```
 Nicolas Captier, Jane Merlevede, Askhat Molkenov, Ainur Seisenova, Altynbek Zhubanchaliyev, Petr V Nazarov, Emmanuel Barillot, Ulykbek Kairov, Andrei Zinovyev, BIODICA: a computational environment for Independent Component Analysis of omics data, Bioinformatics, Volume 38, Issue 10, 15 May 2022, Pages 2963–2964, https://doi.org/10.1093/bioinformatics/btac204

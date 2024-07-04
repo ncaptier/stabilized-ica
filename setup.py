@@ -5,9 +5,9 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="stabilized-ica",
-    version="2.0.0",
+    version="2.0.1a",
     author="Nicolas Captier",
-    author_email="nicolas.captier@curie.fr",
+    author_email="nicolas.captier@polytechnique.org",
     description="Stabilized ICA algorithm",
     long_description=long_description,
     long_description_content_type="text/markdown",

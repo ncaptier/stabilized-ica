@@ -78,11 +78,6 @@ additional computational tools to use stabilized-ica with omics data and interpr
   independent component analysis (ICA) to bulk and single-cell molecular profiles, interpretation of the results in
   terms of biological functions and correlation with metadata. It uses the stabilized-ica package as its computational
   core. In particular, it comes with Graphical User interface providing a no-code access to all of its functionnalities.
-    ```
-  If you use BIODICA in a scientific publication, we would appreciate citation to the following paper:
-  
-    Nicolas Captier, Jane Merlevede, Askhat Molkenov, Ainur Seisenova, Altynbek Zhubanchaliyev, Petr V Nazarov, Emmanuel Barillot, Ulykbek Kairov, Andrei Zinovyev, BIODICA: a computational environment for Independent Component Analysis of omics data, Bioinformatics, Volume 38, Issue 10, 15 May 2022, Pages 2963–2964, https://doi.org/10.1093/bioinformatics/btac204
-  ```
 
 ## Examples
 
@@ -112,9 +107,16 @@ cg.draw(colors = ['r', 'g' , 'b'] , spacing = 2)
 cg.export_json("example.json")
 ```
 
+## Citing stabilized-ica
+
+If you use stabilized-ica in a scientific publication, we would appreciate citation to the following paper:
+
+```
+Nicolas Captier, Jane Merlevede, Askhat Molkenov, Ainur Seisenova, Altynbek Zhubanchaliyev, Petr V Nazarov, Emmanuel Barillot, Ulykbek Kairov, Andrei Zinovyev, BIODICA: a computational environment for Independent Component Analysis of omics data, Bioinformatics, Volume 38, Issue 10, 15 May 2022, Pages 2963–2964, https://doi.org/10.1093/bioinformatics/btac204
+```
 ## Acknowledgements
 
-This package was created as a part of the PhD project of Nicolas Captier in the [Computational Systems Biology of Cancer group](http://sysbio.curie.fr) of Institut Curie.
+This package was created as a part of the PhD project of Nicolas Captier in the [Computational Systems Biology of Cancer group](https://institut-curie.org/team/barillot) of Institut Curie.
 
 ## References
 

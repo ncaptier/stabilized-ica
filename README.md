@@ -116,7 +116,8 @@ Nicolas Captier, Jane Merlevede, Askhat Molkenov, Ainur Seisenova, Altynbek Zhub
 ```
 ## Acknowledgements
 
-This package was created as a part of the PhD project of Nicolas Captier in the [Computational Systems Biology of Cancer group](https://institut-curie.org/team/barillot) of Institut Curie.
+This package was created as a part of the PhD project of [Nicolas Captier](
+https://ncaptier.github.io/) in the [Computational Systems Biology of Cancer group](https://institut-curie.org/team/barillot) of Institut Curie.
 
 ## References
 
